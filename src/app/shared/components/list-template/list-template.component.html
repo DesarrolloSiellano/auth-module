@@ -1,0 +1,105 @@
+<br>
+<p-toast [style]="{marginTop: '80px'}" position="top-right" key="tl"></p-toast>
+<div class="card">
+
+  <p-table #dt [scrollable]="true" filter="true" filterDelay="500"
+    [columns]="cols" [value]="data" [lazy]="lazy"
+    (onLazyLoad)="loadDataLazy($event)" [paginator]="true" [rows]="rowsNumber"
+    [totalRecords]="totalRecords" [loading]="loading"
+    [showCurrentPageReport]="true"
+    scrollHeight="300px" scrollWidth="500px" selectionMode="single"
+    [(contextMenuSelection)]="selected" [contextMenu]="cm"
+    (contextMenuSelectionChange)="onContextMenuSelect()"
+    [(selection)]="selected" (onRowSelect)="onRowSelect()"
+    currentPageReportTemplate="Vista {first} a {last} de {totalRecords} registros"
+    [rowsPerPageOptions]="[100,150,200]"
+    [globalFilterFields]="['nombres','apellidos','email']" [tableStyle]="{ 'min-width': '50rem' }"
+    [resizableColumns]="true"  [rowHover]="true"
+    >
+
+    <ng-template #caption pTemplate="caption">
+      @if (filtersGlobal === true) {
+        <div class="flex items-center justify-between">
+          @if (showTitle) {
+            <div class="titleHeader">
+              <h4 >{{title}}</h4>
+            </div>
+          }
+
+          <div class="flex justify-between items-center">
+            <div class="search-container p-xs">
+              <span class="p-input-icon-left">
+                <input pInputText type="text"
+                  (input)="dt.filterGlobal($any($event.target).value || '', 'contains')"
+                  placeholder="Buscar..."
+                  [ngClass]="{'show': inputVisible, 'hide': !inputVisible}"
+                  (focus)="inputVisible = true"
+                  (blur)="inputVisible = false" />
+                <i class="pi pi-search search-icon" (click)="toggleInput()"></i>
+              </span>
+            </div>
+            <p-button label="Recargar" severity="secondary" icon="pi pi-refresh" class="p-xs" (click)="recharge()" ></p-button>
+            <p-button label="Exportar" icon="pi pi-download" severity="primary" class="p-xs" (click)="exportAsXLSX()" ></p-button>
+          </div>
+        </div>
+      }
+    </ng-template>
+
+    <ng-template #colgroup pTemplate="colgroup" let-columns>
+      <colgroup>
+        @for (col of columns; track col) {
+          <col style="width:250px" />
+        }
+      </colgroup>
+    </ng-template>
+
+    <ng-template #header pTemplate="header" let-columns>
+      <tr>
+        @for (col of columns; track col) {
+          <th id="col-{{col.field}}" [pSortableColumn]="col.field">
+            {{col.header}}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </th>
+        }
+        @if (options) {
+          <th id="options" style="width:200px" pSortableColumn="estado">Opciones</th>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #body pTemplate="body" let-rowData let-columns="columns">
+      <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData">
+        @for (col of columns; track col) {
+          <td>
+            {{ rowData[col.field] }}
+          </td>
+        }
+        @if (options) {
+          <td style="width:200px;">
+            <div class="flex justify-start">
+              <p-button icon="pi pi-pencil" severity="primary" outlined class="mr-xs" pTooltip="Editar" (click)="onUpdate(rowData)" />
+              <p-button icon="pi pi-trash" severity="danger" outlined pTooltip="Eliminar"  (click)="onDelete(rowData)" />
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+
+    <ng-template #empty pTemplate="emptymessage">
+      <tr>
+        <td colspan="12">Registros no encontrados.</td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+  @if(items.length > 0) {
+  }
+  <p-contextMenu #cm [model]="items"></p-contextMenu>
+
+  <p-confirmDialog header="Confirmación" icon="pi pi-exclamation-triangle"
+    acceptLabel="Si" header="Confirmación"
+    icon="pi pi-info-circle"></p-confirmDialog>
+</div>
+
