@@ -1,0 +1,219 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 16rem; /* dejar espacio para sidebar */
+  height: 64px;
+  width: calc(100vw - 16rem); /* ancho menos sidebar */
+  padding: 0 7rem;
+  background: var(--backgraund-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  z-index: 110; /* más alto que sidebar */
+  transition: left 0.5s ease, width 0.5s ease;
+  overflow-x: hidden;
+
+
+
+  @media (max-width: 1200px) {
+    padding: 0 2rem; /* menos padding en móvil */
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 1rem; /* menos padding en móvil */
+  }
+}
+
+.navbar.scrolled {
+  background-color: #e0e7f5b7; /* fondo blanco semi-transparente, ajusta colores */
+  backdrop-filter: blur(10px); /* efecto blur */
+  -webkit-backdrop-filter: blur(10px); /* para Safari */
+  box-shadow: var(--elevation-2);
+  transition: background-color 0.3s ease, backdrop-filter 0.3s ease, left 0.5s ease, width 0.5s ease;
+}
+
+.nabvar-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .pi {
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 1.5rem; /* tamaño icono */
+    transition: transform 0.8s ease, opacity 0.3s ease;
+  }
+
+  .pi-times {
+    transform: rotate(180deg);
+  }
+
+  .pi-bars {
+    transform: rotate(0deg);
+  }
+
+  .navbar-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--color-primary);
+
+    @media (max-width: 768px) {
+      font-size: 1rem; /* texto más pequeño en móvil */
+      white-space: nowrap; /* evita que baje */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+      /* limita ancho */
+    }
+  }
+
+  @media (max-width: 512px) {
+    .navbar-title {
+      display: none;
+    }
+  }
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    gap: 8px; /* menos espacio entre iconos en móvil */
+  }
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+
+  input {
+    width: 0px;
+    transition: width 0.4s ease-in-out, padding-right 0.4s ease-in-out;
+    padding-left: 40px;
+    padding-right: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    cursor: pointer;
+
+    &.show {
+      width: 250px;
+      padding-right: 30px;
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      &.show {
+        width: 160px; /* más estrecho en móvil */
+      }
+
+      padding-left: 35px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    @media (max-width: 400px) {
+      &.show {
+        width: 120px; /* ancho muy pequeño para smartphone */
+      }
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: left 0.4s ease-in-out;
+
+    &:hover {
+      color: var(--color-primary-light);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1.3rem; /* icono más pequeño en móvil */
+
+    }
+
+
+  }
+
+  input.show + .search-icon {
+    left: calc(100% - 35px);
+  }
+
+  @media (max-width: 768px) {
+    input.show + .search-icon {
+      left: calc(100% - 28px);
+    }
+  }
+}
+
+.navbar-notification {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+
+  i.pi-bell {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    transition: color 0.18s;
+    font-weight: bold;
+    cursor: pointer;
+    display: block;
+
+    @media (max-width: 768px) {
+      font-size: 1.3rem; /* icono más pequeño en móvil */
+    }
+  }
+
+  &:hover i.pi-bell {
+    color: var(--color-primary-dark);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 3px;
+    right: -2px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 10px;
+    width: 17px;
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(36, 50, 93, 0.15);
+    border: 2px solid var(--color-white);
+
+    @media (max-width: 768px) {
+      width: 14px;
+      height: 14px;
+      font-size: 0.6rem;
+      top: 2px;
+      right: -1px;
+    }
+  }
+}
+
+.avatar {
+  padding: 0;
+  cursor: pointer;
+}
+
+

@@ -1,0 +1,149 @@
+// importa los iconos de PrimeIcons
+
+.sidebar {
+  width: 16rem;
+  background: var(--bg-sidenav); /* Cambia el color de fondo a verde */
+  box-shadow: 0 24px 30px 14px rgba(72, 60, 138, 0.247);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: sticky; // para quedar fijo al hacer scroll
+  top: 0;
+  height: 100vh; /* <-- Crucial: sidebar siempre mide la ventana */
+  flex-shrink: 0;
+  z-index: 200;
+  transition: width 0.5s ease;
+  overflow: auto;
+
+  .sidebar-logo {
+    display: flex;
+    flex-direction: column; /* Cambia a column si deseas logo arriba y texto debajo; usa row si es horizontal */
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Ajusta el espacio entre logo e texto según necesidad */
+    padding: 5px 0;
+    background-color: var(--bg-surface-contrast);
+    width: 100%;
+    box-sizing: border-box;
+    height: 64px;
+    border-bottom: 4px solid var(--bg-surface-contrast);
+
+    .sidebar-logo-img {
+      width: 70px; /* Un poco más grande si quieres más presencia */
+      height: 50px;
+      object-fit: contain;
+      background-color: var(--color-white);
+      border-radius: 8px; /* Sutil redondeo si tu logo lo permite */
+    }
+
+    .sidebar-logo-text {
+      font-weight: 700;
+      font-size: 1.2rem; /* Ligeramente más grande para destacar */
+      color: var(--color-white);
+      text-align: center;
+      user-select: none;
+      letter-spacing: 0px; /* Separación de letras para efecto más actual */
+    }
+  }
+
+  nav {
+    width: 100%;
+    padding:  1rem;
+
+    .sidebar-menu {
+      list-style: none;
+      text-decoration: none;
+      padding: 10px;
+      margin: 0;
+      color: var(--color-white);
+      width: 100%;
+      background-color: var(--bg-surface-contrast);
+      border-radius: 10px;
+      transition: height 0.5s ease;
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      a {
+        display: flex;
+        color: rgba(255, 255, 255, 0.4);
+        border-radius: 10px;
+        transition: background 0.2s;
+        text-decoration: none;
+        padding: 12px;
+
+        &.active,
+        &:hover {
+          color: var(--color-white);
+          transition: background 0.5s ease-in-out;
+          i.pi {
+            color: rgb(198, 194, 194);
+          }
+        }
+
+        i.pi {
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.4);
+          font-weight: 700;
+          display: block;
+          padding-right: 8px;
+        }
+
+        .icon-change {
+          cursor: pointer;
+          font-size: 12px;
+        }
+      }
+
+      .submenu {
+        max-height: 600px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 1s ease, max-height 0.3s ease;
+
+        li {
+          margin-bottom: 5px;
+        }
+
+        a {
+          display: flex;
+          color: rgba(255, 255, 255, 0.4);
+          border-radius: 10px;
+          transition: background 0.2s;
+          text-decoration: none;
+          padding: 12px;
+
+          &.active,
+          &:hover {
+            color: var(--color-white);
+            background-color: var(--bg-surface-contrast);
+            transition: background 0.5s ease-in-out;
+            i.pi {
+              color: rgb(198, 194, 194);
+            }
+          }
+
+          i.pi {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 700;
+            display: block;
+            padding-right: 8px;
+          }
+        }
+      }
+
+      .submenu.hidden-submenu {
+        opacity: 0;
+        transition: opacity 1s ease, max-height 0.3s ease;
+        max-height: 0;
+        overflow: hidden;
+      }
+    }
+  }
+}

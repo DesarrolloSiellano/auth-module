@@ -1,0 +1,29 @@
+<div class="container">
+  <section class="login-content">
+    <p-card>
+      <p class="title-card">Inicio de Sesión</p>
+      <div class="icon-container">
+        <div class="no-image"><i class="pi pi-user"></i></div>
+      </div>
+
+      <div class="message">
+        @if (showMessageError()) {
+          <p-message [life]="3000" severity="error">{{ errorStatus() }} {{ errorMessage()}}</p-message>
+        }
+      </div>
+
+      <app-form-template [form]="loginForm"
+        [colClass]="'col-12'"></app-form-template>
+
+      <ng-template #footer>
+        <div class="flex justify-center m-md">
+          <p-button severity="primary" class="w-full"
+            [outlined]="true" styleClass="w-full" (click)="login()"
+            [disabled]="formComponent?.formGroup?.invalid">
+            Entrar <i class="pi pi-sign-in"></i></p-button>
+        </div>
+      </ng-template>
+
+    </p-card>
+  </section>
+</div>

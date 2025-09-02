@@ -1,0 +1,66 @@
+::ng-deep body {
+  background: var(--backgraund-surface);
+}
+
+.login-content {
+  margin-top: 8rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  .icon-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 12px;
+
+    .no-image {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 5px solid #dde6f4;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      cursor: pointer;
+
+      i {
+        padding-top: 25px;
+        font-size: 3rem;
+        text-align: center;
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+
+
+  .title-card {
+    margin: 1rem;
+    text-align: center;
+  }
+
+  .subtitle-card {
+    margin: 1rem;
+    text-align: center;
+  }
+
+  .message {
+    margin: 1rem;
+  }
+
+  .accpet-items {
+    margin: 1rem;
+    text-align: center;
+
+    a {
+      margin-left: 0.5rem;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}

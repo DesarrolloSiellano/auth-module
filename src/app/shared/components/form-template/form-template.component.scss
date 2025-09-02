@@ -1,0 +1,27 @@
+.p-dialog{
+  width: 50vm;
+}
+
+::ng-deep .p-password-input{
+  width: 100% !important;
+}
+
+
+.message-validation{
+  padding: auto;
+  span {
+    color: var(--color-danger);
+    font-size: 10px;
+  }
+}
+
+input {
+  width: 100% !important;
+}
+
+
+/* @media (max-width: 592px) {
+  .p-dialog {
+    width: 80vm;
+  }
+} */

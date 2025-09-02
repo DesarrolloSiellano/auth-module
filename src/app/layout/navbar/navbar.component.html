@@ -1,0 +1,18 @@
+
+<header class="navbar">
+  <div class="nabvar-title-wrapper">
+    <div class="btn btn-link btn-sm" (click)="toggleSidebar()">
+      <i class="pi" [ngClass]="isSidebarOpen ? 'pi-bars' : 'pi-times'"></i>
+    </div>
+    <span class="navbar-title">{{ moduleConfig.description }}</span>
+  </div>
+  <div class="navbar-right">
+    <div class="search-container">
+      <input type="text" placeholder="Buscar..."
+        [ngClass]="{'show': inputVisible, 'hide': !inputVisible}">
+      <i class="pi pi-search search-icon" (click)="toggleInput()"></i>
+    </div>
+  </div>
+</header>
+
+

@@ -1,0 +1,41 @@
+<aside id="layoutSidenav_nav" class="sidebar">
+  <div class="sidebar-logo">
+    <!-- <img class="sidebar-logo-img" src="images/logo.png" alt="Logo" /> -->
+     <p class="sidebar-logo-text">{{ title }}</p>
+  </div>
+  <nav>
+    <ul class="sidebar-menu mt-md">
+      @for (route of routes; track route) {
+        <li >
+          <div class="item" (click)="toggleSubmenu()" >
+            @if(route.isActive) {
+              <a [routerLink]="route.initPath" [routerLinkActive]="'active'" [title]="route.name">
+                <i [ngClass]="'pi pi-' + (route.icon || 'folder')"></i>
+                <span class="route-name"> {{ route.name }}</span>
+              </a>
+              <a >
+                @if ( route.children?.length !== 0 ) {
+                      <i class="pi icon-change" [ngClass]="isChangeIcon ? 'pi-angle-down' : 'pi-angle-up'"></i>
+                }
+              </a>
+            }
+          </div>
+          @if ( route.children?.length !== 0 ) {
+            <ul class="submenu">
+              @for (child of route.children; track child) {
+                @if(child.isActive) {
+                  <li>
+                    <a [routerLink]="route.path + '/' + child.path" [routerLinkActive]="'active'" [title]="child.name">
+                      <i [ngClass]="'pi pi-' + (child.icon || 'file')"></i>
+                      <span class="route-name"> {{ child.name }}</span>
+                    </a>
+                  </li>
+                }
+              }
+            </ul>
+          }
+        </li>
+      }
+    </ul>
+  </nav>
+</aside>

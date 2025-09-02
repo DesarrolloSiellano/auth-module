@@ -1,0 +1,152 @@
+/* =========== FONDOS ======================= */
+
+.bg-primary           { background-color: var(--color-primary) !important; }
+.bg-primary-light     { background-color: var(--color-primary-light) !important; }
+.bg-primary-dark      { background-color: var(--color-primary-dark) !important; }
+
+.bg-secondary         { background-color: var(--color-secondary) !important; }
+.bg-secondary-light   { background-color: var(--color-secondary-light) !important; }
+.bg-secondary-dark    { background-color: var(--color-secondary-dark) !important; }
+
+.bg-tertiary          { background-color: var(--color-tertiary) !important; }
+.bg-tertiary-light    { background-color: var(--color-tertiary-light) !important; }
+.bg-tertiary-dark     { background-color: var(--color-tertiary-dark) !important; }
+
+.bg-success           { background-color: var(--color-success) !important; }
+.bg-success-light     { background-color: var(--color-success-light) !important; }
+.bg-success-dark      { background-color: var(--color-success-dark) !important; }
+
+.bg-warning           { background-color: var(--color-warning) !important; }
+.bg-warning-light     { background-color: var(--color-warning-light) !important; }
+.bg-warning-dark      { background-color: var(--color-warning-dark) !important; }
+
+.bg-danger            { background-color: var(--color-danger) !important; }
+.bg-danger-light      { background-color: var(--color-danger-light) !important; }
+.bg-danger-dark       { background-color: var(--color-danger-dark) !important; }
+
+.bg-info              { background-color: var(--color-info) !important; }
+.bg-info-light        { background-color: var(--color-info-light) !important; }
+.bg-info-dark         { background-color: var(--color-info-dark) !important; }
+
+.bg-white             { background-color: var(--color-white) !important; }
+.bg-black             { background-color: var(--color-black) !important; }
+
+/* ESCALA DE GRISES FONDOS */
+.bg-gray-50   { background-color: var(--color-gray-50) !important; }
+.bg-gray-100  { background-color: var(--color-gray-100) !important; }
+.bg-gray-200  { background-color: var(--color-gray-200) !important; }
+.bg-gray-300  { background-color: var(--color-gray-300) !important; }
+.bg-gray-400  { background-color: var(--color-gray-400) !important; }
+.bg-gray-500  { background-color: var(--color-gray-500) !important; }
+.bg-gray-600  { background-color: var(--color-gray-600) !important; }
+.bg-gray-700  { background-color: var(--color-gray-700) !important; }
+.bg-gray-800  { background-color: var(--color-gray-800) !important; }
+.bg-gray-900  { background-color: var(--color-gray-900) !important; }
+
+/* Overlay/Sólidos */
+.bg-overlay         { background-color: var(--color-overlay) !important; }
+.bg-overlay-dark    { background-color: var(--color-overlay-dark) !important; }
+.bg-glass           { background-color: var(--color-glass) !important; }
+.bg-glass-dark      { background-color: var(--color-glass-dark) !important; }
+.bg-modal-backdrop  { background-color: var(--color-modal-backdrop) !important; }
+
+
+/* =========== TEXTO ======================== */
+
+.text-primary           { color: var(--color-primary) !important; }
+.text-primary-light     { color: var(--color-primary-light) !important; }
+.text-primary-dark      { color: var(--color-primary-dark) !important; }
+
+.text-secondary         { color: var(--color-secondary) !important; }
+.text-secondary-light   { color: var(--color-secondary-light) !important; }
+.text-secondary-dark    { color: var(--color-secondary-dark) !important; }
+
+.text-tertiary          { color: var(--color-tertiary) !important; }
+.text-tertiary-light    { color: var(--color-tertiary-light) !important; }
+.text-tertiary-dark     { color: var(--color-tertiary-dark) !important; }
+
+.text-success           { color: var(--color-success) !important; }
+.text-success-light     { color: var(--color-success-light) !important; }
+.text-success-dark      { color: var(--color-success-dark) !important; }
+
+.text-warning           { color: var(--color-warning) !important; }
+.text-warning-light     { color: var(--color-warning-light) !important; }
+.text-warning-dark      { color: var(--color-warning-dark) !important; }
+
+.text-danger            { color: var(--color-danger) !important; }
+.text-danger-light      { color: var(--color-danger-light) !important; }
+.text-danger-dark       { color: var(--color-danger-dark) !important; }
+
+.text-info              { color: var(--color-info) !important; }
+.text-info-light        { color: var(--color-info-light) !important; }
+.text-info-dark         { color: var(--color-info-dark) !important; }
+
+.text-white             { color: var(--color-white) !important; }
+.text-black             { color: var(--color-black) !important; }
+
+/* ESCALA DE GRISES TEXTO */
+.text-gray-50   { color: var(--color-gray-50) !important; }
+.text-gray-100  { color: var(--color-gray-100) !important; }
+.text-gray-200  { color: var(--color-gray-200) !important; }
+.text-gray-300  { color: var(--color-gray-300) !important; }
+.text-gray-400  { color: var(--color-gray-400) !important; }
+.text-gray-500  { color: var(--color-gray-500) !important; }
+.text-gray-600  { color: var(--color-gray-600) !important; }
+.text-gray-700  { color: var(--color-gray-700) !important; }
+.text-gray-800  { color: var(--color-gray-800) !important; }
+.text-gray-900  { color: var(--color-gray-900) !important; }
+
+
+/* =========== BORDES ======================== */
+
+.border-primary           { border-color: var(--color-primary) !important; }
+.border-primary-light     { border-color: var(--color-primary-light) !important; }
+.border-primary-dark      { border-color: var(--color-primary-dark) !important; }
+
+.border-secondary         { border-color: var(--color-secondary) !important; }
+.border-secondary-light   { border-color: var(--color-secondary-light) !important; }
+.border-secondary-dark    { border-color: var(--color-secondary-dark) !important; }
+
+.border-tertiary          { border-color: var(--color-tertiary) !important; }
+.border-tertiary-light    { border-color: var(--color-tertiary-light) !important; }
+.border-tertiary-dark     { border-color: var(--color-tertiary-dark) !important; }
+
+.border-success           { border-color: var(--color-success) !important; }
+.border-success-light     { border-color: var(--color-success-light) !important; }
+.border-success-dark      { border-color: var(--color-success-dark) !important; }
+
+.border-warning           { border-color: var(--color-warning) !important; }
+.border-warning-light     { border-color: var(--color-warning-light) !important; }
+.border-warning-dark      { border-color: var(--color-warning-dark) !important; }
+
+.border-danger            { border-color: var(--color-danger) !important; }
+.border-danger-light      { border-color: var(--color-danger-light) !important; }
+.border-danger-dark       { border-color: var(--color-danger-dark) !important; }
+
+.border-info              { border-color: var(--color-info) !important; }
+.border-info-light        { border-color: var(--color-info-light) !important; }
+.border-info-dark         { border-color: var(--color-info-dark) !important; }
+
+.border-white             { border-color: var(--color-white) !important; }
+.border-black             { border-color: var(--color-black) !important; }
+
+/* ESCALA DE GRISES BORDES */
+.border-gray-50   { border-color: var(--color-gray-50) !important; }
+.border-gray-100  { border-color: var(--color-gray-100) !important; }
+.border-gray-200  { border-color: var(--color-gray-200) !important; }
+.border-gray-300  { border-color: var(--color-gray-300) !important; }
+.border-gray-400  { border-color: var(--color-gray-400) !important; }
+.border-gray-500  { border-color: var(--color-gray-500) !important; }
+.border-gray-600  { border-color: var(--color-gray-600) !important; }
+.border-gray-700  { border-color: var(--color-gray-700) !important; }
+.border-gray-800  { border-color: var(--color-gray-800) !important; }
+.border-gray-900  { border-color: var(--color-gray-900) !important; }
+
+
+/* =========== CLASES DE OVERLAY / GLASSMORPHISM =========== */
+
+.bg-overlay         { background-color: var(--color-overlay) !important; }
+.bg-overlay-dark    { background-color: var(--color-overlay-dark) !important; }
+.bg-glass           { background-color: var(--color-glass) !important; backdrop-filter: blur(12px); }
+.bg-glass-dark      { background-color: var(--color-glass-dark) !important; backdrop-filter: blur(12px); }
+.bg-modal-backdrop  { background-color: var(--color-modal-backdrop) !important; opacity: 0.85; }

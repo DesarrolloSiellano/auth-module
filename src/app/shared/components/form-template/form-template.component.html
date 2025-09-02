@@ -1,0 +1,225 @@
+<div class="flex justify-center">
+  <form [formGroup]="formGroup">
+    <div class="row">
+      @for(item of form; track item) {
+      <div class="{{colClass}} w-full">
+        @if (item.type === 'text') {
+        <div class="p-md w-full">
+          <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
+            <input type="{{item.type}}" pInputText id="{{item.name}}"
+              max="{{item.maxLength}}" min="{{item.minLength}}"
+              autocomplete="off"
+              required="{{item.required}}" class="w-full"
+              [pKeyFilter]="item.pKeyFilter" formControlName="{{item.name}}" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'email') {
+        <div class="p-md">
+          <p-floatlabel variant="on" class="p-float-label p-fluid email-field ">
+            <input id="{{item.name}}" type="{{item.type}}" pInputText
+              autocomplete="off"
+              max="{{item.maxLength}}" min="{{item.minLength}}"
+              formControlName="{{item.name}}"
+              class="w-full"
+              [pKeyFilter]="item.pKeyFilter" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'password') {
+        <div class="p-md w-full">
+          <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
+            <p-password id="{{item.name}}" placeholder="{{item.placeholder}}"
+              [toggleMask]="true"
+              promptLabel="Ingrese la contraseña"
+              weakLabel="Devil"
+              [feedback]="item.feedback"
+              mediumLabel="Medio"
+              class="w-full"
+              strongLabel="Fuerte"
+              formControlName="{{item.name}}"
+              autocomplete="off"
+              [disabled]="isEdit"
+              [pKeyFilter]="item.pKeyFilter">
+              <ng-template pTemplate="footer">
+                <p-divider />
+                <ul class="pl-2 ml-2 mt-0 message-validation"
+                  style="line-height: 1.5">
+                  <span><li>Ingrese mayusculas</li></span>
+                  <span><li>Ingrese minusculas</li></span>
+                  <span><li>Ingrese números</li></span>
+                  <span><li>Ingrese caracteres especiales</li></span>
+                </ul>
+              </ng-template>
+            </p-password>
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'textarea') {
+        <div class="p-md">
+          <span class="p-float-label p-fluid textarea-field ">
+            <textarea
+              rows="5" cols="30" autocomplete="off"
+              pInputTextarea id="{{item.name}}" formControlName="{{item.name}}"
+              placeholder="{{item.placeholder}}" required="{{item.required}}"
+              [pKeyFilter]="item.pKeyFilter">
+                  </textarea>
+            <label for="{{item.name}}">{{item.label}}</label>
+          </span>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'mask') {
+        <div class="p-md">
+          <p-floatlabel variant="on">
+            <p-inputmask id="{{item.name}}"
+              class="w-full"
+              mask="{{item.mask}}"
+              autocomplete="off"
+              slotChar="{{item.slotChar}}"
+              required="{{item.required}}"
+              formControlName="{{item.name}}"
+              [disabled]="item.disabled"
+              [pKeyFilter]="item.pKeyFilter" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'select') {
+        <div class="p-md w-full">
+          <p-floatlabel variant="on">
+            <p-select id="{{item.name}}" class="w-full"
+              formControlName="{{item.name}}"
+              [options]="item.options"
+              optionLabel="{{item.optionName}}"
+              optionValue="{{item.optionValue}}" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'checkbox') {
+        <div class="p-md ">
+          <div class="flex items-center gap-2">
+            <p-checkbox inputId="{{item.name}}" formControlName="{{item.name}}"
+              [binary]="true" />
+            <label for="{{item.name}}" class>{{item.label}}</label>
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'colorpicker') {
+        <div class="p-md">
+          <div class="flex items-center gap-2">
+            <p-colorpicker formControlName="{{item.name}}" />
+            <label for="{{item.name}}" class>{{item.label}}
+              {{formGroup.get(item.name)?.value}}</label>
+            <div class="message-validation">
+              @if (formGroup.get(item.name)?.invalid &&
+              formGroup.get(item.name)?.touched) {
+              <span>{{getErrorMessage(item.name) }}</span>
+              }
+            </div>
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'datepicker') {
+        <div class="p-md ">
+          <p-floatlabel variant="on">
+            <p-datepicker id="{{item.name}}" class="w-full"
+              [dateFormat]="item.dateFormat" formControlName="{{item.name}}"
+              required="{{item.required}}" locale="es" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </p-floatlabel>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+        @if (item.type === 'timeonly') {
+        <div class="p-md ">
+          <span class="p-float-label p-fluid input-field ">
+            <!--  <p-calendar id="{{item.name}}" [timeOnly]="true" formControlName="{{item.name}}" placeholder="{{item.placeholder}}" required="{{item.required}}" /> -->
+            <label for="{{item.name}}">{{item.label}}</label>
+          </span>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        @if (item.type === 'multiselect') {
+        <div class="p-md ">
+          <span class="p-float-label p-fluid input-field ">
+            <p-multiselect id="{{item.name}}"
+              [options]="item.options"
+              optionLabel="{{item.optionName}}"
+              optionValue="{{item.optionValue}}"
+              formControlName="{{item.name}}"
+              placeholder="{{item.placeholder}}"
+              [selectedItemsLabel]="getMultiSelectLabel(item.name)" />
+            <label for="{{item.name}}">{{item.label}}</label>
+          </span>
+          <div class="message-validation">
+            @if (formGroup.get(item.name)?.invalid &&
+            formGroup.get(item.name)?.touched) {
+            <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </form>
+</div>

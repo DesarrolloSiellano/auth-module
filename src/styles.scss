@@ -1,1 +1,143 @@
-/* You can add global styles to this file, and also import other style files */
+
+// importa las variables de color y tipografía
+@use "main" as *;
+
+@import "primeicons/primeicons.css";
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
+
+body {
+  font-family: 'Figtree', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+.dashboard-root {
+  display: flex;
+}
+
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.dashboard-content {
+  flex: 1;                 /* que tome todo espacio disponible */
+  padding: 5rem 7rem;
+  background: var(--backgraund-surface);
+  overflow-y: auto;
+  min-height: 0;
+  overflow-x: hidden;
+
+  @media (max-width: 1200px) {
+    padding: 0 2rem; /* menos padding en móvil */
+  }
+  @media (max-width: 768px) {
+    padding: 0 1rem; /* menos padding en móvil */
+  }
+}
+
+
+.card {
+    background-color: var(--card-background);
+    box-shadow: var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);
+    border-radius: var(--radius-2xl);
+    padding: calc(var(--spacing) * 4);
+    width: 100%;          /* que ocupe el ancho del contenedor padre */
+    max-width: 100%;      /* no exceda el ancho máximo posible */
+
+}
+
+.divider {
+  border-color: 1px solid var(--color-gray-300);
+  margin: 2rem 0;
+}
+
+.color-custom-title-alert {
+  color: var(--p-surface-800) !important;
+}
+
+
+/* .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+    width: 0;
+    overflow: hidden;
+    background: var(--bg-sidenav);
+
+
+}
+
+.sb-sidenav-toggled #layoutNavbar #layoutSidenav_content {
+  left: 0 !important;
+  width: 100vw !important;
+} */
+
+.sidebar.collapsed {
+  width: 0 !important;
+  overflow: hidden ;
+}
+
+.navbar.sidebar-expanded {
+  left: 16rem;
+  width: calc(100vw - 16rem);
+}
+
+.navbar.sidebar-collapsed {
+  left: 0 !important;
+  width: 100vw !important;
+}
+
+
+
+
+/* @media (min-width: 992px) {
+  #layoutSidenav #layoutSidenav_nav {
+    transform: translateX(0);
+  }
+  #layoutSidenav #layoutSidenav_content {
+    margin-left: 0;
+    transition: margin 0.15s ease-in-out;
+  }
+
+  .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+    transform: translateX(-225px);
+  }
+  .sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+    margin-left: -225px;
+  }
+  .sb-sidenav-toggled #layoutSidenav #layoutSidenav_content:before {
+    display: none;
+  }
+} */
+
+
+/* Para navegadores WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px;       /* ancho vertical */
+  height: 6px;      /* alto horizontal */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* o color claro */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-400);
+  border-radius: 3px;
+  border: 1px solid transparent; /* para que esté separado un poco */
+}
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin;      /* scrollbar delgada */
+  scrollbar-color: var(--color-gray-400) transparent;  /* color thumb y track */
+}
+
+
+
+

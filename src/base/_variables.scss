@@ -1,0 +1,508 @@
+:root {
+  /* ----------------------------------------------------------------------------
+    PALETA DE COLORES BÁSICOS Y ESTADOS
+  ---------------------------------------------------------------------------- */
+  --color-primary: #2d3a74;
+  --color-primary-light: #bcc5ed;
+  --color-primary-dark: #19204a;
+  --color-secondary: #4a5678;
+  --color-secondary-light: #6e7ca1;
+  --color-secondary-dark: #313749;
+  --color-tertiary: #ffb300;
+  --color-tertiary-light: #ffe082;
+  --color-tertiary-dark: #b27e00;
+  --color-success: #3bb273;
+  --color-success-light: #b6e5c9;
+  --color-success-dark: #247150;
+  --color-warning: #ff9800;
+  --color-warning-light: #ffd19a;
+  --color-warning-dark: #b26a00;
+  --color-danger: #e74c3c;
+  --color-danger-light: #ffc6c2;
+  --color-danger-dark: #b2221c;
+  --color-info: #198eea;
+  --color-info-light: #c7e2fa;
+  --color-info-dark: #075091;
+  --color-white: #fff;
+  --color-black: #000;
+
+
+  /* ----------------------------------------------------------------------------
+    background;
+  ---------------------------------------------------------------------------- */
+
+  --backgraund-surface: #e0e7f5; /* Fondo general */
+  --backgraund-surface-green: #e0e7f5; /* Fondo general */
+
+  --bg-surface-contrast: #e0e7f514;      /* azul oscuro */
+  --accent: #ffb703;       /* naranja */
+  --success: #06d6a0;      /* verde jade */
+  --error: #ef476f;        /* rojo coral */
+  --secondary: #f7fafc;    /* gris ultraclaro */
+  --text-strong: #212121;  /* negro suave */
+  --hover: #8ecae6;
+  --blue: #4e73df;
+  --dark: #34495e;
+
+
+
+
+
+
+  /* ----------------------------------------------------------------------------
+    GRADIENTES DE SUPERFICIES
+  ---------------------------------------------------------------------------- */
+
+  /* Azul (original) */
+--bg-primary-gradiant: linear-gradient(
+  180deg,
+  var(--color-primary) 90% 60%,
+  rgba(32, 58, 106, 0.03) 110%
+);
+  /* Azul (original) */
+  --bg-surface-blue: linear-gradient(
+    180deg,
+    #e0e7f5 0%,
+    rgba(137, 171, 235, 0.06) 111.26%
+  );
+
+  /* Verde suave */
+  --bg-surface-green: linear-gradient(
+    180deg,
+    #e7f5e8 0%,
+    rgba(170, 239, 195, 0.06) 111.26%
+  );
+
+  /* Amarillo cálido */
+  --bg-surface-yellow: linear-gradient(
+    180deg,
+    #fdf6e7 0%,
+    rgba(239, 224, 170, 0.06) 111.26%
+  );
+
+  /* Naranja suave */
+  --bg-surface-orange: linear-gradient(
+    180deg,
+    #fbeee3 0%,
+    rgba(239, 195, 170, 0.06) 111.26%
+  );
+
+  /* Rosa claro */
+  --bg-surface-pink: linear-gradient(
+    180deg,
+    #f7e7f5 0%,
+    rgba(239, 170, 222, 0.06) 111.26%
+  );
+
+  /* Púrpura suave */
+  --bg-surface-purple: linear-gradient(
+    180deg,
+    #ece7f5 0%,
+    rgba(199, 170, 239, 0.06) 111.26%
+  );
+
+  /* Gris neutro */
+  --bg-surface-gray: linear-gradient(
+    180deg,
+    #e4e8ed 0%,
+    rgba(200, 202, 220, 0.06) 111.26%
+  );
+
+  /* ----------------------------------------------------------------------------
+    ESCALA DE GRISES DEL 50 AL 900
+  ---------------------------------------------------------------------------- */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f5f7fa;
+  --color-gray-200: #ececec;
+  --color-gray-300: #e3e6ee;
+  --color-gray-400: #d0d9e2;
+  --color-gray-500: #adb5bd;
+  --color-gray-600: #767c8c;
+  --color-gray-700: #495057;
+  --color-gray-800: #343a40;
+  --color-gray-900: #181b22;
+  --color-gray-bg: var(--color-gray-100);
+  --color-gray: var(--color-gray-300);
+  --color-gray-light: var(--color-gray-200);
+  --color-gray-thumb: var(--color-gray-400);
+
+  /* ----------------------------------------------------------------------------
+    SÓLIDOS Y OVERLAYS
+  ---------------------------------------------------------------------------- */
+  --color-overlay: rgba(36, 50, 93, 0.6); /* Overlay general */
+  --color-overlay-dark: rgba(30, 41, 59, 0.75);
+  --color-glass: rgba(255, 255, 255, 0.35);
+  --color-glass-dark: rgba(45, 58, 116, 0.38);
+  --color-modal-backdrop: rgba(40, 48, 80, 0.5);
+
+  /* ----------------------------------------------------------------------------
+    Z-INDEX SYSTEM (para overlays, popups, banners, tooltips, etc)
+  ---------------------------------------------------------------------------- */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-navbar: 300;
+  --z-sidebar: 400;
+  --z-fixed: 500;
+  --z-modal-backdrop: 600;
+  --z-modal: 700;
+  --z-popover: 800;
+  --z-toast: 900;
+  --z-tooltip: 1000;
+  --z-max: 1100;
+
+  /* ----------------------------------------------------------------------------
+    OPACIDAD
+  ---------------------------------------------------------------------------- */
+  --opacity-0: 0;
+  --opacity-40: 0.4;
+  --opacity-60: 0.6;
+  --opacity-80: 0.8;
+  --opacity-100: 1;
+
+  /* ----------------------------------------------------------------------------
+    SOMBRAS (ELEVACIÓN)
+  ---------------------------------------------------------------------------- */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px 0 rgba(36, 50, 93, 0.08);
+  --elevation-2: 0 2px 8px 0 rgba(36, 50, 93, 0.12);
+  --elevation-3: 0 4px 16px 0 rgba(36, 50, 93, 0.14);
+  --elevation-4: 0 5px 24px 2px rgba(36, 50, 93, 0.1);
+  --shadow-inset: inset 0 1px 2px 0 rgba(36, 50, 93, 0.06);
+
+  /* ----------------------------------------------------------------------------
+    TRANSICIONES Y ANIMACIONES
+  ---------------------------------------------------------------------------- */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-shake: shake 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ----------------------------------------------------------------------------
+    TIPOGRAFÍA
+  ---------------------------------------------------------------------------- */
+  --font-family-base: "Segoe UI", "Inter", Arial, sans-serif;
+  --font-family-heading: "Segoe UI", "Inter", Arial, sans-serif;
+  --font-family-mono: "JetBrains Mono", Menlo, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-xs: 1.1;
+  --line-height-sm: 1.25;
+  --line-height-md: 1.5;
+  --line-height-lg: 1.7;
+  --letter-spacing: 0.01em;
+
+  /* ----------------------------------------------------------------------------
+    TEXTO
+  ---------------------------------------------------------------------------- */
+  --text-primary: var(--color-primary);
+  --text-secondary: var(--color-secondary);
+  --text-tertiary: var(--color-tertiary);
+  --text-success: var(--color-success);
+  --text-danger: var(--color-danger);
+  --text-warning: var(--color-warning);
+  --text-info: var(--color-info);
+  --text-dark: var(--color-black);
+  --text-light: var(--color-gray-600);
+  --text-footer: var(--color-gray-600);
+  --text-muted: var(--color-gray-500);
+
+  /* ----------------------------------------------------------------------------
+    ESPACIADOS
+  ---------------------------------------------------------------------------- */
+  --spacing-xxs: 0.12rem; /* ~2px */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem; /* 8px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 3rem; /* 48px */
+  --spacing-3xl: 4rem; /* 64px */
+
+  /* ----------------------------------------------------------------------------
+    RADIOS, BORDES Y UI
+  ---------------------------------------------------------------------------- */
+  --border-radius-xs: 4px;
+  --border-radius-sm: 6px;
+  --border-radius: 8px;
+  --border-radius-lg: 14px;
+  --border-radius-pill: 999px;
+
+      --radius-sm: .25rem;
+    --radius-md: .375rem;
+    --radius-lg: .5rem;
+    --radius-xl: .75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+
+  --border: 1px solid var(--color-gray);
+  --outline-blue: 0 0 0 3px rgba(45, 58, 173, 0.18);
+
+  /* ----------------------------------------------------------------------------
+    AVATAR SIZES & BADGES
+  ---------------------------------------------------------------------------- */
+  --avatar-xs: 24px;
+  --avatar-sm: 32px;
+  --avatar-md: 40px;
+  --avatar-lg: 64px;
+  --avatar-xl: 80px;
+
+  --badge-size: 16px;
+  --badge-size-sm: 12px;
+  --badge-size-lg: 24px;
+
+  /* ----------------------------------------------------------------------------
+    DIMENSIONES Y CONTENEDORES
+  ---------------------------------------------------------------------------- */
+  --container-sm: 540px;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1140px;
+
+  --container-fw: 100vw;
+
+   /* === 📐 Spacing System  === */
+  --container-spacing-xxs: 0.125rem; /* 2px */
+  --container-spacing-xs: 0.25rem; /* 4px */
+  --container-spacing-sm: 0.5rem; /* 8px */
+  --container-spacing-md: 1rem; /* 16px */
+  --container-spacing-lg: 1.5rem; /* 24px */
+  --container-spacing-xl: 2rem; /* 32px */
+  --container-spacing-2xl: 3rem; /* 48px */
+  --container-spacing-3xl: 4rem; /* 64px */
+  --container-spacing-4xl: 6rem; /* 96px */
+  --container-spacing-5xl: 8rem; /* 128px */
+
+  --max-width-xs: 320px;
+  --max-width-sm: 480px;
+  --max-width-md: 660px;
+  --max-width-lg: 960px;
+  --max-width-xl: 1300px;
+
+  --sidebar-width: 72px;
+  --navbar-height: 64px;
+  --footer-height: 48px;
+
+  /* ----------------------------------------------------------------------------
+    BREAKPOINTS RESPONSIVOS (mismo nombre que Bootstrap/Tailwind)
+  ---------------------------------------------------------------------------- */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 540px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ----------------------------------------------------------------------------
+    CURSORES Y MISC
+  ---------------------------------------------------------------------------- */
+  --cursor-pointer: pointer;
+  --cursor-default: default;
+
+  /* ----------------------------------------------------------------------------
+    DURACIONES Y DELAYS ÚTILES
+  ---------------------------------------------------------------------------- */
+  --delay-fast: 0.1s;
+  --delay-normal: 0.2s;
+  --delay-slow: 0.4s;
+
+  /* ----------------------------------------------------------------------------
+    EXTRA: OPACIDADES Y GLASSMORPHISM
+  ---------------------------------------------------------------------------- */
+  --glass-blur: 12px;
+  --glass-opacity: 0.42;
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-dark-bg: rgba(36, 50, 93, 0.25);
+
+  /* ----------------------------------------------------------------------------
+    OTROS (AGREGA MÁS SEGÚN NECESIDAD)
+  ---------------------------------------------------------------------------- */
+  --danger-glow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+  --success-glow: 0 0 0 2px rgba(59, 178, 115, 0.17);
+  --focus-glow: 0 0 0 2px rgba(45, 58, 173, 0.18);
+  --spacing: .25rem;
+
+  --surface-card: rgba(255, 255, 255, .64);
+  --card-background: #ffffff;
+
+
+
+
+
+
+}
+
+:root {
+    --sidebar-width: 250px;
+    --navbar-height: 60px;
+    --footer-height: 40px;
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --text-color: #ecf0f1;
+    --background-color: #ecf0f1;
+}
+
+
+
+
+:root {
+    --bg-sidenav: var(--color-gray-900);
+    --p-transition-duration: 0.2s;
+    --p-disabled-opacity: 0.6;
+    --p-icon-size: 1rem;
+    --p-anchor-gutter: 2px;
+    --p-overlay-navigation-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1);
+    --p-overlay-modal-border-radius: var(--p-border-radius-xl);
+    --p-overlay-modal-padding: 1.25rem;
+    --p-overlay-modal-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);
+    --p-overlay-popover-border-radius: var(--p-border-radius-md);
+    --p-overlay-popover-padding: 0.75rem;
+    --p-overlay-popover-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1);
+    --p-overlay-select-border-radius: var(--p-border-radius-md);
+    --p-overlay-select-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1);
+    --p-navigation-submenu-icon-size: 0.875rem;
+    --p-navigation-submenu-label-padding: 0.5rem 0.75rem;
+    --p-navigation-submenu-label-font-weight: 600;
+    --p-navigation-item-padding: 0.5rem 0.75rem;
+    --p-navigation-item-border-radius: var(--p-border-radius-sm);
+    --p-navigation-item-gap: 0.5rem;
+    --p-navigation-list-padding: 0.25rem 0.25rem;
+    --p-navigation-list-gap: 2px;
+    --p-mask-transition-duration: 0.15s;
+    --p-content-border-radius: var(--p-border-radius-md);
+    --p-list-padding: 0.25rem 0.25rem;
+    --p-list-gap: 2px;
+    --p-list-option-group-padding: 0.5rem 0.75rem;
+    --p-list-option-group-font-weight: 600;
+    --p-list-option-padding: 0.5rem 0.75rem;
+    --p-list-option-border-radius: var(--p-border-radius-sm);
+    --p-list-header-padding: 0.5rem 1rem 0.25rem 1rem;
+    --p-form-field-padding-x: 0.75rem;
+    --p-form-field-padding-y: 0.5rem;
+    --p-form-field-border-radius: var(--p-border-radius-md);
+    --p-form-field-transition-duration: var(--p-transition-duration);
+    --p-form-field-focus-ring-width: 0;
+    --p-form-field-focus-ring-style: none;
+    --p-form-field-focus-ring-color: transparent;
+    --p-form-field-focus-ring-offset: 0;
+    --p-form-field-focus-ring-shadow: none;
+    --p-form-field-lg-font-size: 1.125rem;
+    --p-form-field-lg-padding-x: 0.875rem;
+    --p-form-field-lg-padding-y: 0.625rem;
+    --p-form-field-sm-font-size: 0.875rem;
+    --p-form-field-sm-padding-x: 0.625rem;
+    --p-form-field-sm-padding-y: 0.375rem;
+    --p-primary-50: #eff6ff;
+    --p-primary-100: #dbeafe;
+    --p-primary-200: #bfdbfe;
+    --p-primary-300: #93c5fd;
+    --p-primary-400: #60a5fa;
+    --p-primary-500: #3b82f6;
+    --p-primary-600: #2563eb;
+    --p-primary-700: #1d4ed8;
+    --p-primary-800: #1e40af;
+    --p-primary-900: #1e3a8a;
+    --p-primary-950: #172554;
+    --p-focus-ring-width: 1px;
+    --p-focus-ring-style: solid;
+    --p-focus-ring-color: var(--p-primary-color);
+    --p-focus-ring-offset: 2px;
+    --p-focus-ring-shadow: none;
+    --p-navigation-submenu-icon-color: var(--p-surface-400);
+    --p-navigation-submenu-icon-focus-color: var(--p-surface-500);
+    --p-navigation-submenu-icon-active-color: var(--p-surface-500);
+    --p-navigation-submenu-label-background: transparent;
+    --p-navigation-submenu-label-color: var(--p-text-muted-color);
+    --p-navigation-item-focus-background: var(--p-surface-100);
+    --p-navigation-item-active-background: var(--p-surface-100);
+    --p-navigation-item-color: var(--p-text-color);
+    --p-navigation-item-focus-color: var(--p-text-hover-color);
+    --p-navigation-item-active-color: var(--p-text-hover-color);
+    --p-navigation-item-icon-color: var(--p-surface-400);
+    --p-navigation-item-icon-focus-color: var(--p-surface-500);
+    --p-navigation-item-icon-active-color: var(--p-surface-500);
+    --p-list-option-group-background: transparent;
+    --p-list-option-group-color: var(--p-text-muted-color);
+    --p-list-option-focus-background: var(--p-surface-100);
+    --p-list-option-selected-background: var(--p-highlight-background);
+    --p-list-option-selected-focus-background: var(--p-highlight-focus-background);
+    --p-list-option-color: var(--p-text-color);
+    --p-list-option-focus-color: var(--p-text-hover-color);
+    --p-list-option-selected-color: var(--p-highlight-color);
+    --p-list-option-selected-focus-color: var(--p-highlight-focus-color);
+    --p-list-option-icon-color: var(--p-surface-400);
+    --p-list-option-icon-focus-color: var(--p-surface-500);
+    --p-overlay-modal-background: var(--p-surface-0);
+    --p-overlay-modal-border-color: var(--p-surface-200);
+    --p-overlay-modal-color: var(--p-text-color);
+    --p-overlay-popover-background: var(--p-surface-0);
+    --p-overlay-popover-border-color: var(--p-surface-200);
+    --p-overlay-popover-color: var(--p-text-color);
+    --p-overlay-select-background: var(--p-surface-0);
+    --p-overlay-select-border-color: var(--p-surface-200);
+    --p-overlay-select-color: var(--p-text-color);
+    --p-content-background: var(--p-surface-0);
+    --p-content-hover-background: var(--p-surface-100);
+    --p-content-border-color: var(--p-surface-200);
+    --p-content-color: var(--p-text-color);
+    --p-content-hover-color: var(--p-text-hover-color);
+    --p-text-color: var(--p-surface-700);
+    --p-text-hover-color: var(--p-surface-800);
+    --p-text-muted-color: var(--p-surface-500);
+    --p-text-hover-muted-color: var(--p-surface-600);
+    --p-form-field-background: var(--p-surface-0);
+    --p-form-field-disabled-background: var(--p-surface-200);
+    --p-form-field-filled-background: var(--p-surface-50);
+    --p-form-field-filled-hover-background: var(--p-surface-50);
+    --p-form-field-filled-focus-background: var(--p-surface-50);
+    --p-form-field-border-color: var(--p-surface-300);
+    --p-form-field-hover-border-color: var(--p-surface-400);
+    --p-form-field-focus-border-color: var(--p-primary-color);
+    --p-form-field-invalid-border-color: var(--p-red-400);
+    --p-form-field-color: var(--p-surface-700);
+    --p-form-field-disabled-color: var(--p-surface-500);
+    --p-form-field-placeholder-color: var(--p-surface-500);
+    --p-form-field-invalid-placeholder-color: var(--p-red-600);
+    --p-form-field-float-label-color: var(--p-surface-500);
+    --p-form-field-float-label-focus-color: var(--p-primary-600);
+    --p-form-field-float-label-active-color: var(--p-surface-500);
+    --p-form-field-float-label-invalid-color: var(--p-form-field-invalid-placeholder-color);
+    --p-form-field-icon-color: var(--p-surface-400);
+    --p-form-field-shadow: 0 0 #0000,0 0 #0000,0 1px 2px 0 rgba(18,18,23,0.05);
+    --p-mask-background: rgba(0,0,0,0.4);
+    --p-mask-color: var(--p-surface-200);
+    --p-highlight-background: var(--p-primary-50);
+    --p-highlight-focus-background: var(--p-primary-100);
+    --p-highlight-color: var(--p-primary-700);
+    --p-highlight-focus-color: var(--p-primary-800);
+    --p-primary-color: var(--p-primary-500);
+    --p-primary-contrast-color: #ffffff;
+    --p-primary-hover-color: var(--p-primary-600);
+    --p-primary-active-color: var(--p-primary-700);
+    --p-surface-0: color-mix(in srgb,var(--p-primary-900),white 100%);
+    --p-surface-50: color-mix(in srgb,var(--p-primary-900),white 95%);
+    --p-surface-100: color-mix(in srgb,var(--p-primary-900),white 90%);
+    --p-surface-200: color-mix(in srgb,var(--p-primary-900),white 80%);
+    --p-surface-300: color-mix(in srgb,var(--p-primary-900),white 70%);
+    --p-surface-400: color-mix(in srgb,var(--p-primary-900),white 60%);
+    --p-surface-500: color-mix(in srgb,var(--p-primary-900),white 50%);
+    --p-surface-600: color-mix(in srgb,var(--p-primary-900),white 40%);
+    --p-surface-700: color-mix(in srgb,var(--p-primary-900),white 30%);
+    --p-surface-800: color-mix(in srgb,var(--p-primary-900),white 20%);
+    --p-surface-900: color-mix(in srgb,var(--p-primary-900),white 10%);
+    --p-surface-950: color-mix(in srgb,var(--p-primary-900),white 0%);
+}
