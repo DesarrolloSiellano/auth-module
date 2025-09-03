@@ -36,10 +36,10 @@ body {
   overflow-x: hidden;
 
   @media (max-width: 1200px) {
-    padding: 0 2rem; /* menos padding en móvil */
+    padding: 5rem 2rem; /* menos padding en móvil */
   }
   @media (max-width: 768px) {
-    padding: 0 1rem; /* menos padding en móvil */
+    padding: 5rem 1rem; /* menos padding en móvil */
   }
 }
 
@@ -137,7 +137,6 @@ body {
   scrollbar-width: thin;      /* scrollbar delgada */
   scrollbar-color: var(--color-gray-400) transparent;  /* color thumb y track */
 }
-
 
 
 

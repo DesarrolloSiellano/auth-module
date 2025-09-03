@@ -81,15 +81,14 @@
 
         @if (item.type === 'textarea') {
         <div class="p-md">
-          <span class="p-float-label p-fluid textarea-field ">
+          <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
             <textarea
               rows="5" cols="30" autocomplete="off"
-              pInputTextarea id="{{item.name}}" formControlName="{{item.name}}"
-              placeholder="{{item.placeholder}}" required="{{item.required}}"
-              [pKeyFilter]="item.pKeyFilter">
-                  </textarea>
+              pTextarea id="{{item.name}}" formControlName="{{item.name}}"
+              placeholder="{{item.placeholder}}" required="{{item.required}}" class="h-full w-full">
+            </textarea>
             <label for="{{item.name}}">{{item.label}}</label>
-          </span>
+          </p-floatlabel>
           <div class="message-validation">
             @if (formGroup.get(item.name)?.invalid &&
             formGroup.get(item.name)?.touched) {
@@ -146,7 +145,7 @@
           <div class="flex items-center gap-2">
             <p-checkbox inputId="{{item.name}}" formControlName="{{item.name}}"
               [binary]="true" />
-            <label for="{{item.name}}" class>{{item.label}}</label>
+            <label for="{{item.name}}" class="label-checkbox"> {{item.label}}</label>
           </div>
         </div>
         }

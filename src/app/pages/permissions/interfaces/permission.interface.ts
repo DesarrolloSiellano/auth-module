@@ -1,6 +1,7 @@
 import { Rol } from "../../roles/interface/rol.interface";
 
 export interface Permission {
+  _id: string;
   name: string;
   description: string;
   action: string; // `create`, `read`, `update`, `delete`, etc.

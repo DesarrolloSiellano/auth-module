@@ -38,6 +38,9 @@
                 <i class="pi pi-search search-icon" (click)="toggleInput()"></i>
               </span>
             </div>
+            @if(toAdd){
+              <p-button label="Agregar" severity="secondary" icon="pi pi-plus" class="p-xs" (click)="onCreate()" ></p-button>
+            }
             <p-button label="Recargar" severity="secondary" icon="pi pi-refresh" class="p-xs" (click)="recharge()" ></p-button>
             <p-button label="Exportar" icon="pi pi-download" severity="primary" class="p-xs" (click)="exportAsXLSX()" ></p-button>
           </div>

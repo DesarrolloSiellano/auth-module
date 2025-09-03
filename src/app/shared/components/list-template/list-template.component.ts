@@ -103,6 +103,7 @@ export class ListTemplateComponent {
     this.view.emit(rowData);
   }
 
+
   exportAsTotalXLSX() {
     this.exportTotal.emit();
   }

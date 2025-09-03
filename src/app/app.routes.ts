@@ -20,7 +20,7 @@ export const routes: Routes = [
       {
         path: 'permissions',
         loadComponent: () =>
-          import('./pages/permissions/permissions').then((m) => m.Permissions),
+          import('./pages/permissions/permissions').then((m) => m.PermissionsComponent),
       },
       {
         path: 'users',
