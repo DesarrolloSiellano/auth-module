@@ -144,8 +144,8 @@
         <div class="p-md ">
           <div class="flex items-center gap-2">
             <p-checkbox inputId="{{item.name}}" formControlName="{{item.name}}"
-              [binary]="true" />
-            <label for="{{item.name}}" class="label-checkbox"> {{item.label}}</label>
+              [binary]="true"  />
+            <label for="{{item.name}}" class="label-checkbox w-full"> {{item.label}}</label>
           </div>
         </div>
         }
@@ -199,16 +199,16 @@
 
         @if (item.type === 'multiselect') {
         <div class="p-md ">
-          <span class="p-float-label p-fluid input-field ">
-            <p-multiselect id="{{item.name}}"
+          <p-floatlabel class="p-float-label p-fluid input-field ">
+            <p-multiselect id="{{item.name}}" class="w-full"
               [options]="item.options"
               optionLabel="{{item.optionName}}"
               optionValue="{{item.optionValue}}"
               formControlName="{{item.name}}"
               placeholder="{{item.placeholder}}"
-              [selectedItemsLabel]="getMultiSelectLabel(item.name)" />
+              [selectedItemsLabel]="getMultiSelectLabel(item.name)" appendTo="body"/>
             <label for="{{item.name}}">{{item.label}}</label>
-          </span>
+          </p-floatlabel>
           <div class="message-validation">
             @if (formGroup.get(item.name)?.invalid &&
             formGroup.get(item.name)?.touched) {

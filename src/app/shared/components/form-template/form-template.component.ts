@@ -51,7 +51,7 @@ FormValidationUtils;
     CheckboxModule,
     MultiSelectModule,
     ColorPickerModule,
-    FloatLabelModule
+    FloatLabelModule,
   ],
   templateUrl: './form-template.component.html',
   styleUrl: './form-template.component.scss',
@@ -78,6 +78,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.form = filterAndSort(this.form);
+
     this.formGroup = this.formBuilder.group(
       this.form.reduce((group, item) => {
         const isCheckbox = item.type === 'checkbox'; // Verificar si es un checkbox
@@ -95,8 +96,6 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       }, {})
     );
 
-
-
     this.form.forEach((item) => {
       if (item.dependsOn) {
         this.formGroup.get(item.dependsOn)?.valueChanges.subscribe(() => {
@@ -104,8 +103,12 @@ export class FormTemplateComponent implements OnInit, OnChanges {
         });
       }
 
-      if (item.type === 'checkbox' && item.controls && Array.isArray(item.controls)) {
-        this.formGroup.get(item.name)?.valueChanges.subscribe(value => {
+      if (
+        item.type === 'checkbox' &&
+        item.controls &&
+        Array.isArray(item.controls)
+      ) {
+        this.formGroup.get(item.name)?.valueChanges.subscribe((value) => {
           this.updateFieldStateDisabled();
         });
       }
@@ -120,8 +123,10 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       this.updateFieldStateDisabled();
       this.updateFieldStatesDisabledByDepends();
     }
+  }
 
-
+  compareObjects(o1: any, o2: any): boolean {
+    return o1 && o2 ? o1.name === o2.name : o1 === o2;
   }
 
   updateFieldStatesDisabledByDepends(): void {
@@ -143,8 +148,12 @@ export class FormTemplateComponent implements OnInit, OnChanges {
   }
 
   updateFieldStateDisabled(): void {
-     this.form.forEach((item) => {
-      if (item.type === 'checkbox' && item.controls && Array.isArray(item.controls)) {
+    this.form.forEach((item) => {
+      if (
+        item.type === 'checkbox' &&
+        item.controls &&
+        Array.isArray(item.controls)
+      ) {
         const checkboxControl = this.formGroup.get(item.name);
         if (checkboxControl) {
           const checkboxValue = checkboxControl.value;
@@ -181,7 +190,6 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     const control = this.formGroup.get(controlName);
     return control ? FormValidationUtils.getErrorMessage(control) : null;
   }
-
 
   reset(): void {
     this.isEdit = false;

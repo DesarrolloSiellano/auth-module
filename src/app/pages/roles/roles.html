@@ -27,6 +27,7 @@
   <p-dialog [(visible)]="isDisplayForm" [style]="{width: '70vw'}"
     [header]="titleForm" [draggable]="false" [resizable]="false" [closable]="false" [modal]="true"
     [baseZIndex]="10000">
+    @if (updatedFormFields.length > 0) {
     <app-form-template
       [width]="'70rem'"
       [title]="titleForm"
@@ -35,6 +36,7 @@
       [initialData]="initialData"
       [form]="form">
     </app-form-template>
+  }
     <ng-template #footer>
         <p-button label="Cancel" [text]="true" severity="secondary" (click)="closeDialog()" />
         <p-button label="Save" [outlined]="true" severity="primary" (click)="save()"  />

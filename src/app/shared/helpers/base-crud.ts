@@ -69,7 +69,7 @@ export abstract class BaseCrud<T> {
   }
 
   create() {
-    this.titleForm = this.title;
+    this.titleForm = 'Creación';
     this.isFormVisible = true;
     this.isDisplayForm = true;
     this.isEditForm = false;
@@ -127,7 +127,6 @@ export abstract class BaseCrud<T> {
     let id = '';
     if(this.isEditForm) id = (this.initialData as any)?._id;
 
-
     const formValues = this.getFormattedFormValues();
     const request$ = this.isEditForm
       ? this.service.update(id, formValues)
@@ -139,7 +138,7 @@ export abstract class BaseCrud<T> {
           this.closeDialog();
           this.confirmService.showMessage(
             'info',
-            (this.isEditForm ? 'Edición' : 'Creación') + ' ' + 'de permiso',
+            (this.isEditForm ? 'Edición' : 'Creación'),
             'El permiso se ha ' +
               (this.isEditForm ? 'editado' : 'creado') +
               ' correctamente'
@@ -152,7 +151,7 @@ export abstract class BaseCrud<T> {
         if (err.error.statusCode === 400) {
           this.confirmService.showMessage(
             'error',
-            'Error al ' + (this.isEditForm ? 'editar' : 'crear') + ' permiso',
+            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
             err.error.message
           );
         }
@@ -214,7 +213,7 @@ export abstract class BaseCrud<T> {
   onSelectionChange(selectedItem: any) {
     if (selectedItem) {
       this.isEditForm = true;
-      this.titleForm = 'Edición de permisos';
+      this.titleForm = 'Edición';
       this.isFormVisible = true;
       this.isDisplayForm = true;
 
