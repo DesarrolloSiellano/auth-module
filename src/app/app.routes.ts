@@ -15,7 +15,7 @@ export const routes: Routes = [
       {
         path: 'roles',
         loadComponent: () =>
-          import('./pages/roles/roles').then((m) => m.Roles),
+          import('./pages/roles/roles').then((m) => m.RolesComponent),
       },
       {
         path: 'permissions',

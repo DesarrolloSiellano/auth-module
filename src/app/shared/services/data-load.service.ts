@@ -34,7 +34,6 @@ export class DataLoaderService {
   }
 
   handleResponse(response: any): any {
-    console.log('data', response);
     if (response.message !== 'Token no válido') {
       return {
         ok: true,

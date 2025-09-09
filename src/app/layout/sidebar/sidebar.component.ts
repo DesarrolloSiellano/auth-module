@@ -23,8 +23,6 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.routes = this.getConfigApp.getRoutes();
-    console.log(this.routes);
-
   }
 
   toggleSubmenu() {

@@ -8,7 +8,6 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const token = localStorage.getItem('token');
   const currentTime = Math.floor(Date.now() / 1000);
-  console.log(currentTime);
 
   if (!token) {
     router.navigate(['/login']);
@@ -17,10 +16,6 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   try {
     const decoded = jwtDecode<JwtPayload>(token);
-
-    console.log(decoded);
-
-
     if (!decoded.isActived) {
       router.navigate(['/login']);
       return false;
@@ -45,8 +40,6 @@ export const authGuard: CanActivateFn = (route, state) => {
       router.navigate(['/login']); // Ruta para acceso denegado, si tienes
       return false;
     }
-
-    console.log(route, state);
 
     // Validar rol con codeRol 'ADM' y activo
     const hasAdminRole = decoded.roles?.some(

@@ -77,8 +77,6 @@ export class FormTemplateComponent implements OnInit, OnChanges {
   constructor(private formBuilder: FormBuilder) {}
 
   ngOnInit() {
-    console.log('FormTemplateComponent initialized with form:', this.form);
-
     this.form = filterAndSort(this.form);
     this.formGroup = this.formBuilder.group(
       this.form.reduce((group, item) => {
