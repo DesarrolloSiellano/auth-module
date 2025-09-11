@@ -1,1 +1,284 @@
-<p>modules works!</p>
+<p-toast />
+
+<div class="content">
+  <app-list-template
+    [title]="'Lista de Módulos'"
+    [showTitle]="true"
+    [toAdd]="toAdd"
+    [options]="true"
+    [cols]="cols"
+    [data]="data"
+    [lazy]="true"
+    [totalRecords]="totalRecords"
+    [loading]="loading"
+    [filtersGlobal]="filtersGlobal"
+    [updateItem]="update.bind(this)"
+    [deleteItem]="delete.bind(this)"
+    (loadLazy)="load($any($event))"
+    (dateQuery)="queryDate($event)"
+    (create)="create()"
+    (update)="update($event)"
+    (delete)="delete($event)"
+    (exportPage)="exportAsXLSX()"
+    (reload)="rechargeTable()"
+    (onRowSelectionChange)="onSelectionChange($any($event))">
+  </app-list-template>
+
+  <p-dialog [(visible)]="isDisplayForm" [style]="{width: '70vw'}"
+    [header]="titleForm" [draggable]="false" [resizable]="false"
+    [closable]="false" [modal]="true"
+    [baseZIndex]="10000">
+
+    <form [formGroup]="moduleForm" (ngSubmit)="onSubmit()">
+      <div class="row ">
+        <div class="col-lg-4 col-md-6 col-sm-12 w-full ">
+          <div class="p-md w-full">
+            <p-floatlabel variant="on"
+              class=" ">
+              <input type="text" pInputText id="name"
+                autocomplete="off"
+                class="w-full"
+                formControlName="name" />
+              <label for="name">Nombre</label>
+            </p-floatlabel>
+            <div class="message-validation">
+              @if (moduleForm.get('name')?.invalid &&
+              moduleForm.get('name')?.touched) {
+              <span>{{getErrorMessage('name') }}</span>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12 w-full ">
+          <div class="p-md">
+            <p-floatlabel variant="on"
+              class=" ">
+              <textarea
+                rows="5" cols="30" autocomplete="off"
+                pTextarea id="description" formControlName="description"
+                class="h-full w-full">
+                </textarea>
+              <label for="description">Descripción</label>
+            </p-floatlabel>
+            <div class="message-validation">
+              @if (moduleForm.get('description')?.invalid &&
+              moduleForm.get('description')?.touched) {
+              <span>{{getErrorMessage('description') }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
+          <div class="p-md ">
+            <div class="flex items-center gap-2">
+              <p-checkbox inputId="isActive" formControlName="isActive"
+                [binary]="true" />
+              <label for="isActive" class="label-checkbox w-full">
+                Activo</label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <p-divider></p-divider>
+
+      <div formArrayName="routes">
+        @for (route of routes.controls; track route; let i = $index) {
+        <div [formGroupName]="i" class="route-block p-mb-3 p-p-3 p-shadow-2">
+
+            <h4>Ruta Padre</h4>
+
+            <div class="row">
+              <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                <div class="p-md w-full">
+                  <p-floatlabel variant="on"
+                    class=" ">
+                    <input type="text" pInputText id="name"
+                      autocomplete="off"
+                      class="w-full"
+                      formControlName="name" />
+                    <label for="name">Nombre</label>
+                  </p-floatlabel>
+                  <div class="message-validation">
+                    @if (moduleForm.get('name')?.invalid &&
+                    moduleForm.get('name')?.touched) {
+                    <span>{{getErrorMessage('name') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                <div class="p-md w-full">
+                  <p-floatlabel variant="on"
+                    class=" ">
+                    <input type="text" pInputText id="path"
+                      autocomplete="off"
+                      class="w-full"
+                      formControlName="path" />
+                    <label for="path">Path</label>
+                  </p-floatlabel>
+                  <div class="message-validation">
+                    @if (moduleForm.get('path')?.invalid &&
+                    moduleForm.get('path')?.touched) {
+                    <span>{{getErrorMessage('path') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                <div class="p-md w-full">
+                  <p-floatlabel variant="on"
+                    class=" ">
+                    <input type="text" pInputText id="icon"
+                      autocomplete="off"
+                      class="w-full"
+                      formControlName="icon" />
+                    <label for="path">Icon</label>
+                  </p-floatlabel>
+                  <div class="message-validation">
+                    @if (moduleForm.get('icon')?.invalid &&
+                    moduleForm.get('path')?.touched) {
+                    <span>{{getErrorMessage('icon') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                <div class="p-md ">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="isActive" formControlName="isActive"
+                      [binary]="true" />
+                    <label for="isActive" class="label-checkbox w-full">
+                      Activo</label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Hijos -->
+            <div formArrayName="children" class="p-mt-2">
+              @for (child of getChildren(route).controls; track child; let j = $index) {
+              <div [formGroupName]="j" class="child-route">
+                <h5>Ruta Hija</h5>
+
+                <div class="row ">
+                  <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                    <div class="p-md w-full">
+                      <p-floatlabel variant="on"
+                        class=" ">
+                        <input type="text" pInputText id="name"
+                          autocomplete="off"
+                          class="w-full"
+                          formControlName="name" />
+                        <label for="name">Nombre</label>
+                      </p-floatlabel>
+                      <div class="message-validation">
+                        @if (moduleForm.get('name')?.invalid &&
+                        moduleForm.get('name')?.touched) {
+                        <span>{{getErrorMessage('name') }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                    <div class="p-md w-full">
+                      <p-floatlabel variant="on"
+                        class=" ">
+                        <input type="text" pInputText id="path"
+                          autocomplete="off"
+                          class="w-full"
+                          formControlName="path" />
+                        <label for="path">Path</label>
+                      </p-floatlabel>
+                      <div class="message-validation">
+                        @if (moduleForm.get('path')?.invalid &&
+                        moduleForm.get('path')?.touched) {
+                        <span>{{getErrorMessage('path') }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-3 col-md-6 col-sm-12 w-full ">
+                    <div class="p-md w-full">
+                      <p-floatlabel variant="on"
+                        class=" ">
+                        <input type="text" pInputText id="icon"
+                          autocomplete="off"
+                          class="w-full"
+                          formControlName="icon" />
+                        <label for="path">Icon</label>
+                      </p-floatlabel>
+                      <div class="message-validation">
+                        @if (moduleForm.get('icon')?.invalid &&
+                        moduleForm.get('path')?.touched) {
+                        <span>{{getErrorMessage('icon') }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
+                    <div class="p-md ">
+                      <div class="flex items-center gap-2">
+                        <p-checkbox inputId="isActive"
+                          formControlName="isActive"
+                          [binary]="true" />
+                        <label for="isActive" class="label-checkbox w-full">
+                          Activo</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-1 col-md-6 col-sm-12 w-full m-button-delete">
+                    <p-button  type="button" icon="pi pi-trash"
+                      severity="danger" [outlined]="true" [disabled]=""
+                      (click)="removeRouteChild(i, j)"></p-button>
+                  </div>
+                </div>
+
+
+              </div>
+              }
+            </div>
+            <div class="flex justify-end gap-2">
+              <button pButton type="button" label="Agregar hijo"
+                class="p-button-secondary mr-md"
+                (click)="addRouteChild(i)"></button>
+
+            <button pButton type="button" label="Eliminar ruta"
+              class="p-button-danger p-mt-3" (click)="removeRoute(i)"></button>
+
+            </div>
+        </div>
+        }
+
+        <div class="flex justify-end">
+          <button pButton type="button" label="Agregar ruta"
+            class="p-button-primary p-mt-3" (click)="addRoute()"></button>
+        </div>
+      </div>
+
+    </form>
+
+    <ng-template #footer >
+      <div class="mt-md">
+
+        <p-button label="Cancel" [text]="true" severity="secondary"
+          (click)="closeDialog()" class="mr-md" />
+        <p-button label="Save" [disabled]="moduleForm.invalid" [outlined]="true"
+          severity="primary"
+          (click)="onSubmit()" />
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

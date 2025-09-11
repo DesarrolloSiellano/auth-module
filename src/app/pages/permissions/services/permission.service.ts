@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ENVIROMENT } from '../../../../enviroments/enviroment';
 import { BaseService } from '../../../shared/services/base.service';
 import { Permission } from '../interfaces/permission.interface';
-import { Response } from '../../../shared/interfaces/response.interface';
+import { Response } from '../../../shared/interfaces/response.interface';/*  */
 
 
 @Injectable({

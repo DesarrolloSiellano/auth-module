@@ -29,6 +29,7 @@ export abstract class BaseCrud<T> {
   titleForm: string = '';
   initialData!: T;
   title: string = '';
+  subtitle: string = '';
 
   toAdd: boolean = true;
   options: boolean = false;
@@ -69,7 +70,7 @@ export abstract class BaseCrud<T> {
   }
 
   create() {
-    this.titleForm = 'Creación';
+    this.titleForm = 'Creación de ' + this.title;
     this.isFormVisible = true;
     this.isDisplayForm = true;
     this.isEditForm = false;
@@ -81,8 +82,8 @@ export abstract class BaseCrud<T> {
   async delete(selected: any) {
     const isConfirm = await this.confirmService.confirmDelete(
       selected.name,
-      'Eliminar permiso',
-      'Estas seguro de eliminar el permiso',
+      `Eliminación de ${this.title}`,
+      'Estas seguro de eliminar el registro',
       'pi pi-exclamation-triangle',
       'Cancelar',
       'Aceptar',
@@ -93,7 +94,7 @@ export abstract class BaseCrud<T> {
       this.confirmService.showMessage(
         'error',
         'Cancelado',
-        'El permiso no se ha eliminado correctamente'
+        `El ${this.subtitle} no se ha eliminado correctamente`
       );
     }
 
@@ -104,7 +105,7 @@ export abstract class BaseCrud<T> {
             this.confirmService.showMessage(
               'success',
               'Eliminación',
-              'El permiso se ha eliminado correctamente'
+              `El ${this.subtitle} se ha eliminado correctamente`
             );
           }
         },
@@ -113,7 +114,7 @@ export abstract class BaseCrud<T> {
           if (err.error.statusCode === 400) {
             this.confirmService.showMessage(
               'error',
-              'Error al eliminar permiso',
+              `Error al eliminar el ${this.subtitle}`,
               err.error.message
             );
           }
@@ -139,7 +140,7 @@ export abstract class BaseCrud<T> {
           this.confirmService.showMessage(
             'info',
             (this.isEditForm ? 'Edición' : 'Creación'),
-            'El permiso se ha ' +
+            `El ${this.subtitle} se ha ` +
               (this.isEditForm ? 'editado' : 'creado') +
               ' correctamente'
           );
@@ -213,7 +214,7 @@ export abstract class BaseCrud<T> {
   onSelectionChange(selectedItem: any) {
     if (selectedItem) {
       this.isEditForm = true;
-      this.titleForm = 'Edición';
+      this.titleForm = 'Edición de ' + this.title;
       this.isFormVisible = true;
       this.isDisplayForm = true;
 
@@ -224,7 +225,7 @@ export abstract class BaseCrud<T> {
     }
   }
 
-  private getFormattedFormValues(): any {
+  getFormattedFormValues(): any {
     const values = { ...this.formComponent?.formGroup?.value };
     return values;
   }

@@ -53,6 +53,8 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
     { field: 'description', header: 'Descripción' },
   ];
 
+  override title = 'Roles';
+
   protected override form = ROLES_FORM;
 
 
@@ -118,7 +120,7 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
       };
 
       this.isEditForm = true;
-      this.titleForm = 'Edición';
+      this.titleForm = 'Edición de ' + this.title;
       this.isFormVisible = true;
       this.isDisplayForm = true;
     }

@@ -4,7 +4,6 @@ export interface ModuleConfig {
   description: string;
   isActive: boolean;
   isSystemModule: boolean;
-
   routes: RoutesModuleConfig[]
 }
 

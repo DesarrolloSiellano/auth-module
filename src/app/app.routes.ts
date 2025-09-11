@@ -30,7 +30,7 @@ export const routes: Routes = [
       {
         path: 'modules',
         loadComponent: () =>
-          import('./pages/modules/modules').then((m) => m.Modules),
+          import('./pages/modules/modules').then((m) => m.ModulesComponent),
       },
 
     ]
