@@ -17,6 +17,8 @@ export class ProcessAuthData {
       localStorage.setItem('iat', String(decoded.iat));
       localStorage.setItem('isActive', String(decoded.isActived));
       localStorage.setItem('isAdmin', String(decoded.isAdmin));
+      localStorage.setItem('isSuperAdmin', String(decoded.isSuperAmin));
+      localStorage.setItem('isSuperAdmin', String(decoded.isSuperAmin));
       localStorage.setItem('userName', decoded.name + ' ' + decoded.lastName);
       localStorage.setItem('email', decoded.email);
       localStorage.setItem('_id', decoded._id);

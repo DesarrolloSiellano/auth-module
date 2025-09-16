@@ -32,6 +32,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/modules/modules').then((m) => m.ModulesComponent),
       },
+      {
+        path: 'companies',
+        loadComponent: () =>
+          import('./pages/companies/companies').then((m) => m.CompaniesComponent),
+      },
 
     ]
   }

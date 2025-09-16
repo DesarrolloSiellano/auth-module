@@ -11,7 +11,7 @@ export const ROLES_FORM = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: 'alpha',
+    pKeyFilter: '',
     pattern: '',
   },
   {

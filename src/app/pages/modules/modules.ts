@@ -5,7 +5,6 @@ import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 import { ModuleService } from './services/module.service';
 import { Module, Route } from './interfaces/module.interface';
-import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';

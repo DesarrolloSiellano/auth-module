@@ -2,7 +2,7 @@
 
 <div class="content">
   <app-list-template
-    [title]="'Lista de Módulos'"
+    [title]="'Lista de Permisos'"
     [showTitle]="true"
     [toAdd]="toAdd"
     [options]="true"
@@ -25,29 +25,24 @@
   </app-list-template>
 
   <p-dialog [(visible)]="isDisplayForm" [style]="{width: '70vw'}"
-    [header]="titleForm" [draggable]="false" [resizable]="false"
-    [closable]="false" [modal]="true"
+    [header]="titleForm" [draggable]="false" [resizable]="false" [closable]="false" [modal]="true"
     [baseZIndex]="10000">
-
-
-
-
-
-
-
-
-
-    <ng-template #footer >
-      <div class="mt-md">
-
-        <p-button label="Cancel" [text]="true" severity="secondary"
-          (click)="closeDialog()" class="mr-md" />
-        <p-button label="Save" [disabled]="false" [outlined]="true"
-          severity="primary"
-          (click)="onSubmit()" />
-      </div>
+    <app-form-template
+      [width]="'70rem'"
+      [title]="titleForm"
+      [isVisible]="isFormVisible"
+      [isEdit]="isEditForm"
+      [initialData]="initialData"
+      [form]="form">
+    </app-form-template>
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="secondary" (click)="closeDialog()" />
+        <p-button label="Save" [outlined]="true" severity="primary" (click)="save()"  />
     </ng-template>
   </p-dialog>
-
-
 </div>
+
+
+
+
+
