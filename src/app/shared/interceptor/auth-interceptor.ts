@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         console.error('⚠️ El servidor devolvió 401 - No autorizado');
 
         localStorage.removeItem('token');
-        router.navigate(['/login']);
+        router.navigate(['/exception/401']);
       }
 
       return throwError(() => error);

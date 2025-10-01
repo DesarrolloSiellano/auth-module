@@ -11,6 +11,7 @@ export interface ModuleConfig {
 export interface RoutesModuleConfig {
   _id: string;
   path: string;
+  open: boolean;
   initPath: string;
   name: string;
   icon: string;

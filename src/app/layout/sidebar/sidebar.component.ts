@@ -11,24 +11,24 @@ import { ENVIROMENT } from '../../../enviroments/enviroment';
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
-  providers: [GetConfigAppService]
+  providers: [GetConfigAppService],
 })
 export class SidebarComponent implements OnInit {
   routes: RoutesModuleConfig[] = [];
-  isChangeIcon: boolean = false
+  isChangeIcon: boolean = false;
 
-  title = ENVIROMENT.title
+  title = ENVIROMENT.title;
 
-  constructor(private getConfigApp: GetConfigAppService) { }
+  constructor(private getConfigApp: GetConfigAppService) {}
 
   ngOnInit(): void {
-    this.routes = this.getConfigApp.getRoutes();
+    this.routes = this.getConfigApp.getRoutes().map((route) => ({
+      ...route,
+      open: true, // agrega propiedad de visibilidad
+    }));
   }
 
-  toggleSubmenu() {
-    this.isChangeIcon = !this.isChangeIcon;
-    const submenu = document.querySelector('.submenu');
-    submenu?.classList.toggle('hidden-submenu');
+  toggleSubmenu(route: any) {
+    route.open = !route.open;
   }
-
 }

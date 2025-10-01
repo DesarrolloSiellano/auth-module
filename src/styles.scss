@@ -29,7 +29,7 @@ body {
 
 .dashboard-content {
   flex: 1;                 /* que tome todo espacio disponible */
-  padding: 5rem 7rem;
+  padding: 5rem 2rem;
   background: var(--backgraund-surface);
   overflow-y: auto;
   min-height: 0;
@@ -139,7 +139,7 @@ body {
 }
 
 
-.error-page-404 {
+.error-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -148,6 +148,7 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
   text-align: center;
   padding: 0 20px;
+  background-color: var(--backgraund-surface);
 }
 
 .glitch-soft {
@@ -239,6 +240,14 @@ body {
   display: inline-block;
   transition: color 0.2s;
   &:hover { color: #ff005a; }
+}
+
+.message-validation{
+  padding: auto;
+  span {
+    color: var(--color-danger);
+    font-size: 10px;
+  }
 }
 
 

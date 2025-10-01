@@ -8,6 +8,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./auth/login/login').then((m) => m.Login),
   },
+
+  {
+    path: 'exception/:code',
+    loadComponent: () =>
+      import('./shared/components/exception/exception.component').then((m) => m.ExceptionComponent),
+  },
+
   {
     path: 'pages',
     loadComponent: () => import('./pages/template/template.component').then((m) => m.TemplateComponent), canActivate: [authGuard],
@@ -39,5 +46,6 @@ export const routes: Routes = [
       },
 
     ]
-  }
+  },
+  { path: '**', redirectTo: 'exception/404' }
 ];

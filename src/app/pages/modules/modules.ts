@@ -65,7 +65,6 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
   override title = 'Módulos';
   override subtitle = 'Módulo';
 
-  protected override form = ROLES_FORM;
 
   constructor(
     protected override service: ModuleService,

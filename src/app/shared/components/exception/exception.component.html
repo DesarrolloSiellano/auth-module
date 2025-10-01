@@ -1,0 +1,45 @@
+@if (code === '404') {
+  <div class="error-page">
+    <h1 class="glitch-soft" data-text="404">
+      404
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+    </h1>
+    <p class="error-title">Page Not Found</p>
+    <p class="error-desc">It looks like you found a glitch in the matrix...</p>
+    <a routerLink="/pages/users" class="back-link">&larr; Back to Dashboard</a>
+  </div>
+}
+@else if (code === '401') {
+  <div class="error-page">
+    <h1 class="glitch-soft" data-text="401">
+      401
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+    </h1>
+    <p class="error-title">Unauthorized</p>
+    <p class="error-desc">You don’t have permission to access this resource.</p>
+    <a routerLink="/pages/users" class="back-link">&larr; Back to Dashboard</a>
+  </div>
+}
+@else {
+  <div class="error-page">
+    <h1 class="glitch-soft" data-text="Error">
+      Error
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+      <span class="glitch-line"></span>
+    </h1>
+    <p class="error-title">Unexpected Error</p>
+    <p class="error-desc">Something went wrong. Please try again later.</p>
+    <a routerLink="/pages/users" class="back-link">&larr; Back to Dashboard</a>
+  </div>
+}
