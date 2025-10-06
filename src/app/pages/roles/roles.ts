@@ -54,6 +54,7 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
   ];
 
   override title = 'Roles';
+  override subtitle = 'Rol';
 
   protected override form = ROLES_FORM;
 

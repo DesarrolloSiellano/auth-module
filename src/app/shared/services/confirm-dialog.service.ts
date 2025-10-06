@@ -1,5 +1,6 @@
 // confirm-dialog.service.ts
 import { Injectable } from '@angular/core';
+import { item } from '@primeuix/themes/aura/breadcrumb';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Injectable({
@@ -11,7 +12,7 @@ export class ConfirmService {
     private messageService: MessageService
   ) {}
 
-  confirmDelete(
+  confirm(
     itemName: string,
     header: string,
     message: string,
@@ -24,7 +25,7 @@ export class ConfirmService {
     return new Promise<boolean>((resolve) => {
       this.confirmationService.confirm({
         header: header,
-        message: `${message} ${itemName}?`,
+        message: itemName ? `${message} ${itemName}?` : `${message}`,
         icon: icon,
         rejectButtonProps: {
           label: labelrejectButton || 'Cancelar',

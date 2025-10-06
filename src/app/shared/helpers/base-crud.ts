@@ -70,7 +70,7 @@ export abstract class BaseCrud<T> {
   }
 
   create() {
-    this.titleForm = 'Creación de ' + this.title;
+    this.titleForm = 'Creación de ' + this.subtitle;
     this.isFormVisible = true;
     this.isDisplayForm = true;
     this.isEditForm = false;
@@ -80,7 +80,7 @@ export abstract class BaseCrud<T> {
     this.onSelectionChange(selected);
   }
   async delete(selected: any) {
-    const isConfirm = await this.confirmService.confirmDelete(
+    const isConfirm = await this.confirmService.confirm(
       selected.name,
       `Eliminación de ${this.title}`,
       'Estas seguro de eliminar el registro',
@@ -214,7 +214,7 @@ export abstract class BaseCrud<T> {
   onSelectionChange(selectedItem: any) {
     if (selectedItem) {
       this.isEditForm = true;
-      this.titleForm = 'Edición de ' + this.title;
+      this.titleForm = 'Edición de ' + this.subtitle;
       this.isFormVisible = true;
       this.isDisplayForm = true;
 

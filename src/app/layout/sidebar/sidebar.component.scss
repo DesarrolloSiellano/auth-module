@@ -58,7 +58,6 @@
       margin: 1rem 0 0 0;
       color: var(--color-white);
       width: 100%;
-      background-color: var(--bg-surface-contrast);
       border-radius: 10px;
       transition: height 0.5s ease;
       font-size: 14px;
@@ -132,7 +131,6 @@
           }
 
           &:hover {
-            //color: var(--color-white);
             border-left: 2px solid var(--color-white);
            // background-color: var(--bg-surface-contrast);
             transition: background 0.5s ease-in-out;
@@ -157,3 +155,18 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 16rem;
+    z-index: 300;
+    box-shadow: none;
+    transition: width 0.5s ease;
+  }
+}
+
+

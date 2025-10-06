@@ -26,6 +26,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-modules',
@@ -43,6 +44,7 @@ import { CardModule } from 'primeng/card';
     InputTextModule,
     DividerModule,
     CardModule,
+    MessageModule,
   ],
   templateUrl: './modules.html',
   styleUrl: './modules.scss',
@@ -64,7 +66,6 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
 
   override title = 'Módulos';
   override subtitle = 'Módulo';
-
 
   constructor(
     protected override service: ModuleService,
@@ -103,8 +104,9 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
     return this.fb.group({
       name: [route?.name || '', Validators.required],
       path: [route?.path || '', Validators.required],
+      initPath: [route?.initPath || ''],
       icon: [route?.icon || ''],
-      isActive: [route?.isActive ],
+      isActive: [route?.isActive],
       children: this.fb.array(
         route?.children
           ? route.children.map((child) => this.createRouteGroup(child))
@@ -127,6 +129,8 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
   // Quitar ruta padre
   removeRoute(index: number) {
     this.routes.removeAt(index);
+    this.moduleForm.updateValueAndValidity();
+    this.cdr.detectChanges();
   }
 
   // Quitar ruta hijo
@@ -154,39 +158,36 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
     return values;
   }
 
+  override onSelectionChange(selectedItem: any) {
+    if (selectedItem) {
+      this.isEditForm = true;
+      this.titleForm = 'Edición de ' + this.title;
+      this.isFormVisible = true;
+      this.isDisplayForm = true;
 
-override onSelectionChange(selectedItem: any) {
-  console.log(selectedItem);
+      this.moduleForm.patchValue({
+        name: selectedItem.name,
+        description: selectedItem.description,
+        isActive: selectedItem.isActive,
+      });
 
-  if (selectedItem) {
-    this.isEditForm = true;
-    this.titleForm = 'Edición de ' + this.title;
-    this.isFormVisible = true;
-    this.isDisplayForm = true;
+      // Usar la propiedad correcta del objeto (routes)
+      const rawRoutes = Array.isArray(selectedItem.routes)
+        ? selectedItem.routes
+        : [];
+      const routesFormArray = this.fb.array(
+        rawRoutes.map((route: any) => this.createRouteGroup(route))
+      );
+      this.moduleForm.setControl('routes', routesFormArray);
 
-    this.moduleForm.patchValue({
-      name: selectedItem.name,
-      description: selectedItem.description,
-      isActive: selectedItem.isActive,
-    });
 
-    // Usar la propiedad correcta del objeto (routes)
-    const rawRoutes = Array.isArray(selectedItem.routes) ? selectedItem.routes : [];
-    const routesFormArray = this.fb.array(
-      rawRoutes.map((route: any) => this.createRouteGroup(route))
-    );
-    this.moduleForm.setControl('routes', routesFormArray);
 
-    console.log(this.moduleForm.value);
-
-    this.initialData = {
-      ...this.initialData,
-      ...selectedItem,
-    };
+      this.initialData = {
+        ...this.initialData,
+        ...selectedItem,
+      };
+    }
   }
-}
-
-
 
   // Enviar datos
   onSubmit() {

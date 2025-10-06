@@ -2,7 +2,7 @@
 
 <div class="content">
   <app-list-template
-    [title]="'Lista de Módulos'"
+    [title]="'Lista de ' + title"
     [showTitle]="true"
     [toAdd]="toAdd"
     [options]="true"
@@ -24,7 +24,7 @@
     (onRowSelectionChange)="onSelectionChange($any($event))">
   </app-list-template>
 
-  <p-dialog [(visible)]="isDisplayForm" [style]="{width: '70vw'}"
+  <p-dialog [(visible)]="isDisplayForm" [style]="{width: '90vw'}"
     [header]="titleForm" [draggable]="false" [resizable]="false"
     [closable]="false" [modal]="true"
     [baseZIndex]="10000">
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Usuario -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
+       <!--  <div class="col-lg-4 col-md-6 col-sm-12 w-full">
           <div class="p-md w-full">
             <p-floatlabel variant="on">
               <input type="text" pInputText id="username"
@@ -114,9 +114,9 @@
               <label for="username">Usuario</label>
             </p-floatlabel>
           </div>
-        </div>
+        </div> -->
 
-        <!-- Contraseña -->
+        @if(!isEditForm){
         <div class="col-lg-4 col-md-6 col-sm-12 w-full">
           <div class="p-md w-full">
             <p-floatlabel variant="on">
@@ -126,59 +126,147 @@
                 formControlName="password" />
               <label for="password">Contraseña</label>
             </p-floatlabel>
+            <div class="message-validation">
+              @if (userForm.get('password')?.invalid &&
+              userForm.get('password')?.touched) {
+              <span>{{ getErrorMessage('password') }}</span>
+              }
+            </div>
           </div>
         </div>
-      </div>
+        }
 
-      <div class="row">
+        @if(!isEditForm) {
         <!-- Empresa -->
-        <div class="col-lg-6 col-md-6 col-sm-12 w-full">
+        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
           <div class="p-md w-full">
             <p-floatlabel variant="on">
-              <input type="text" pInputText id="company"
-                autocomplete="off"
-                class="w-full"
-                formControlName="company" />
+              <p-autocomplete [dropdown]="true"
+                [suggestions]="itemsAutocomplete"
+                (completeMethod)="findByAutoComplete($event)"
+                optionLabel="name" optionValue="name" formControlName="company"
+                class="w-full" />
               <label for="company">Empresa</label>
             </p-floatlabel>
+            <div class="message-validation">
+              @if (userForm.get('company')?.invalid &&
+              userForm.get('company')?.touched) {
+              <span>{{ getErrorMessage('company') }}</span>
+              }
+            </div>
           </div>
         </div>
 
+        }
+
+        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
+          <div class="p-md w-full">
+            <p-floatlabel class="p-float-label p-fluid input-field ">
+              <p-multiselect id="permissions" class="w-full"
+                [options]="permissionsOptions"
+                optionLabel="name"
+                optionValue="value"
+                formControlName="permissions"
+                appendTo="body" />
+              <label for="permissions">Permisos Generales</label>
+            </p-floatlabel>
+            <div class="message-validation">
+              @if (userForm.get('permissions')?.invalid &&
+              userForm.get('permissions')?.touched) {
+              <span>{{ getErrorMessage('permissions') }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
+          <div class="p-md w-full">
+            <p-floatlabel class="p-float-label p-fluid input-field ">
+              <p-multiselect id="roles" class="w-full"
+                [options]="rolesOptions"
+                optionLabel="name"
+                optionValue="value"
+                formControlName="roles"
+                appendTo="body" />
+              <label for="roles">Roles</label>
+            </p-floatlabel>
+            <div class="message-validation">
+              @if (userForm.get('roles')?.invalid &&
+              userForm.get('roles')?.touched) {
+              <span>{{ getErrorMessage('roles') }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
+          <div class="p-md w-full">
+            <p-floatlabel class="p-float-label p-fluid input-field ">
+              <p-multiselect id="modules" class="w-full"
+                [options]="modulesOptions"
+                optionLabel="name"
+                optionValue="value"
+                formControlName="modules"
+                appendTo="body" />
+              <label for="modules">Módulos</label>
+            </p-floatlabel>
+            <div class="message-validation">
+              @if (userForm.get('modules')?.invalid &&
+              userForm.get('modules')?.touched) {
+              <span>{{ getErrorMessage('modules') }}</span>
+              }
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
+          <div class="p-md ">
+            <div class="flex items-center gap-2">
+              <p-checkbox inputId="isActived" formControlName="isActived"
+                [binary]="true" />
+              <label for="isActived" class="label-checkbox p-xs w-full">
+                Activo</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
+          <div class="p-md ">
+            <div class="flex items-center gap-2">
+              <p-checkbox inputId="isAdmin" formControlName="isAdmin"
+                [binary]="true" />
+              <label for="isAdmin" class="label-checkbox p-xs w-full">
+                Administrador</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
+          <div class="p-md ">
+            <div class="flex items-center gap-2">
+              <p-checkbox inputId="isSuperAdmin" formControlName="isSuperAdmin"
+                [binary]="true" />
+              <label for="isSuperAdmin" class="label-checkbox p-xs w-full">
+                Super Usuario</label>
+            </div>
+          </div>
+        </div>
 
       </div>
-
-
-      <p-divider></p-divider>
-
-      <!-- Aquí irían los formArray para módulos, roles y permisos -->
-      <div formArrayName="modules">
-        <h4>Módulos</h4>
-        <!-- Similar a cómo manejas routes en módulos -->
-      </div>
-
-      <div formArrayName="roles">
-        <h4>Roles</h4>
-        <!-- Similar a módulos -->
-      </div>
-
-      <div formArrayName="permissions">
-        <h4>Permisos</h4>
-        <!-- Similar a módulos -->
-      </div>
-
 
     </form>
 
     <ng-template #footer>
       <div class="mt-md">
 
-        <p-button label="Cancel" [text]="true" severity="secondary"
+        <p-button label="Cancelar" [text]="true" severity="secondary"
           (click)="closeDialog()" class="mr-md" />
-        <p-button label="Save" [disabled]="false" [outlined]="true"
+        <p-button label="Guardar" [disabled]="userForm.invalid"
+          [outlined]="true"
           severity="primary"
           (click)="onSubmit()" />
       </div>
     </ng-template>
   </p-dialog>
-
 </div>

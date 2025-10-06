@@ -211,6 +211,27 @@
   }
 }
 
+.navbar-icon-option{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+
+  i {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    transition: color 0.18s;
+    font-weight: bold;
+    cursor: pointer;
+    display: block;
+
+    @media (max-width: 768px) {
+      font-size: 1.3rem; /* icono más pequeño en móvil */
+    }
+  }
+}
+
 .avatar {
   padding: 0;
   cursor: pointer;

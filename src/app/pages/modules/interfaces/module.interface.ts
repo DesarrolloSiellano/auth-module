@@ -16,6 +16,7 @@ export interface Module {
 export interface Route {
   name: string;
   path: string;
+  initPath: string;
   icon: string;
   isActive: boolean;
   children?: Route[]; // Opcional, arreglo de rutas hijas

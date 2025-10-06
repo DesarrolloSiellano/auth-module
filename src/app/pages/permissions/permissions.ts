@@ -49,6 +49,7 @@ export class PermissionsComponent extends BaseCrud<Permission> {
   ];
 
   override title = 'Permisos';
+  override subtitle = 'Permiso';
 
   protected override form = PERMISSION_FORM;
 
