@@ -1,26 +1,59 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { SidebarService } from '../services/sidebar.service';
 import { ModuleConfig } from '../../shared/interfaces/module-config.interface';
 import { GetConfigAppService } from '../../shared/services/get-config.service';
 import { Router } from '@angular/router';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
+import { IconDropdownComponent } from '../../shared/components/dropdown/dropdown.component';
+import { DialogModule } from 'primeng/dialog';
+import { CHANGE_PASSWORD_FORM } from '../../shared/forms/change-password.form';
+import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
+import { ButtonModule } from 'primeng/button';
+import { Auth, ChangePassword } from '../../auth/service/auth';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, AvatarModule],
+  imports: [
+    CommonModule,
+    AvatarModule,
+    IconDropdownComponent,
+    DialogModule,
+    FormTemplateComponent,
+    ButtonModule,
+  ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
   providers: [SidebarService], // Proporciona el servicio de sidebar
 })
 export class NavbarComponent implements OnInit {
+  @ViewChild('dropdown') dropdown!: IconDropdownComponent;
+
+  @ViewChild(FormTemplateComponent)
+  declare formComponent?: FormTemplateComponent;
   inputVisible: boolean = false;
   isSidebarOpen: boolean = false;
   moduleConfig: ModuleConfig = {} as ModuleConfig;
   username: string = '';
   private scrollListener!: () => void;
+
+  cogOptions = [
+    {
+      label: 'Cambiar contraseña',
+      action: () => this.changePassword(),
+    },
+  ];
+
+  isDisplayChangePassword: boolean = false;
+  changePasswordForm = CHANGE_PASSWORD_FORM;
 
   constructor(
     private sidebarService: SidebarService,
@@ -28,7 +61,8 @@ export class NavbarComponent implements OnInit {
     private renderer: Renderer2,
     private el: ElementRef,
     private router: Router,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private authService: Auth
   ) {}
 
   ngOnInit(): void {
@@ -61,12 +95,17 @@ export class NavbarComponent implements OnInit {
         this.toggleSidebar();
       }
     });
+
+
+  }
+
+  toggleDropdown(trigger: HTMLElement) {
+    this.dropdown.open(trigger);
   }
 
   handleResize(): void {
     const sidebar = document.querySelector('.sidebar');
     const navbar = document.querySelector('.navbar');
-    const content = document.querySelector('.dashboard-content');
 
     if (window.innerWidth <= 1024) {
       if (sidebar && !sidebar.classList.contains('collapsed')) {
@@ -142,5 +181,56 @@ export class NavbarComponent implements OnInit {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  changePassword() {
+    this.isDisplayChangePassword = true;
+  }
+
+  closeDialog() {
+    this.isDisplayChangePassword = false;
+  }
+
+  save() {
+    const changePassword: ChangePassword = {
+      id: localStorage.getItem('_id') as string,
+      currentPassword: this.formComponent?.formGroup?.get('currentPassword')?.value,
+      newPassword: this.formComponent?.formGroup?.get('newPassword')?.value,
+    };
+
+    this.authService.changePassword(changePassword).subscribe({
+      next: (res) => {
+        console.log(res);
+        if(res.statusCode === 400 || res.statusCode === 404) {
+          this.confirmService.showMessage(
+            'error',
+            'Error',
+            res.message
+          );
+        }
+
+        if(res.statusCode === 200 || res.statusCode === 201) {
+          this.confirmService.showMessage(
+            'info',
+            'Exito',
+            res.message
+          );
+
+        }
+
+      },
+      error: (err) => {
+        console.error(err.error.message);
+        this.confirmService.showMessage(
+          'error',
+          'Error',
+          err.error.message
+        );
+      },
+      complete: () => {
+        this.isDisplayChangePassword = false;
+        this.formComponent?.formGroup?.reset();
+      }
+    })
   }
 }

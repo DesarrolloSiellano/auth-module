@@ -13,8 +13,7 @@
   z-index: 110; /* más alto que sidebar */
   transition: left 0.5s ease, width 0.5s ease;
   overflow-x: hidden;
-
-
+  overflow-y: hidden ;
 
   @media (max-width: 1200px) {
     padding: 0 2rem; /* menos padding en móvil */

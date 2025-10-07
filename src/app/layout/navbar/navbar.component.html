@@ -7,17 +7,30 @@
     <span class="navbar-title">{{ moduleConfig.description }}</span>
   </div>
   <div class="navbar-right">
-    <!-- <div class="search-container">
-      <input type="text" placeholder="Buscar..."
-        [ngClass]="{'show': inputVisible, 'hide': !inputVisible}">
-      <i class="pi pi-search search-icon" (click)="toggleInput()"></i>
-    </div> -->
 
-     <div class="navbar-icon-option" (click)="logout()">
+    <div #cogIcon class="navbar-icon-option" (click)="toggleDropdown(cogIcon)">
+      <i class="pi pi-cog"></i>
+    </div>
+
+    <div class="navbar-icon-option" (click)="logout()">
       <i class="pi pi-sign-out"></i>
     </div>
 
   </div>
+
 </header>
+<app-icon-dropdown #dropdown [options]="cogOptions"></app-icon-dropdown>
 
+<p-dialog [(visible)]="isDisplayChangePassword" header="Cambiar Contraseña"
+  [draggable]="false" [resizable]="false" [closable]="false" [modal]="true"
+  [baseZIndex]="10000" [style]="{width: '25vw'}">
 
+  <app-form-template [form]="changePasswordForm"
+    [colClass]="'col-12'"></app-form-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" />
+        <p-button label="Save" [outlined]="true" severity="primary" [disabled]="formComponent?.formGroup?.invalid" (click)="save()"  />
+    </ng-template>
+
+</p-dialog>

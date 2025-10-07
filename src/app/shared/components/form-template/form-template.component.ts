@@ -21,7 +21,10 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { TextareaModule } from 'primeng/textarea';
 import { InputMaskModule } from 'primeng/inputmask';
 import { filterAndSort } from './helpers/filterAndSort';
-import { FormValidationUtils } from '../../validations/validations-message';
+import {
+  FormValidationUtils,
+  passwordMatchValidator,
+} from '../../validations/validations-message';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -96,6 +99,30 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       }, {})
     );
 
+    if (
+      this.formGroup.get('currentPassword') &&
+      this.formGroup.get('newPassword')
+    ) {
+      this.formGroup.setValidators(
+        passwordMatchValidator('newPassword', 'confirmPassword')
+      );
+    }
+
+    // Suscríbete a los valueChanges para revalidar cuando cambie:
+    this.formGroup.get('confirmPassword')?.valueChanges.subscribe(() => {
+      this.formGroup.updateValueAndValidity({
+        onlySelf: true,
+        emitEvent: false,
+      });
+    });
+
+    this.formGroup.get('newPassword')?.valueChanges.subscribe(() => {
+      this.formGroup.updateValueAndValidity({
+        onlySelf: true,
+        emitEvent: false,
+      });
+    });
+
     this.form.forEach((item) => {
       if (item.dependsOn) {
         this.formGroup.get(item.dependsOn)?.valueChanges.subscribe(() => {
@@ -123,6 +150,14 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       this.updateFieldStateDisabled();
       this.updateFieldStatesDisabledByDepends();
     }
+  }
+
+  get passwordMismatch(): boolean {
+    return !!this.formGroup.errors?.['passwordMismatch'];
+  }
+
+  passwordMismatchMessage(): string {
+    return FormValidationUtils.passwordMismatchMessage();
   }
 
   compareObjects(o1: any, o2: any): boolean {

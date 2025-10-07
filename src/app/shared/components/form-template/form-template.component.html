@@ -71,9 +71,14 @@
             <label for="{{item.name}}">{{item.label}}</label>
           </p-floatlabel>
           <div class="message-validation">
-            @if (formGroup.get(item.name)?.invalid &&
+            @if (passwordMismatch && formGroup.get(item.name)?.invalid &&
             formGroup.get(item.name)?.touched) {
             <span>{{getErrorMessage(item.name) }}</span>
+            }
+          </div>
+          <div class="message-validation">
+             @if (passwordMismatch && (item.name === 'confirmPassword')) {
+            <span>{{passwordMismatchMessage()}}</span>
             }
           </div>
         </div>
