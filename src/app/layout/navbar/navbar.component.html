@@ -22,8 +22,8 @@
 <app-icon-dropdown #dropdown [options]="cogOptions"></app-icon-dropdown>
 
 <p-dialog [(visible)]="isDisplayChangePassword" header="Cambiar Contraseña"
-  [draggable]="false" [resizable]="false" [closable]="false" [modal]="true"
-  [baseZIndex]="10000" [style]="{width: '25vw'}">
+  [draggable]="false" [resizable]="true" [closable]="false" [modal]="true"
+  [baseZIndex]="10000" >
 
   <app-form-template [form]="changePasswordForm"
     [colClass]="'col-12'"></app-form-template>
