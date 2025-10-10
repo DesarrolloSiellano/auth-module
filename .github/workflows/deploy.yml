@@ -40,18 +40,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             source ~/.bashrc
-            cd /var/www/html/auth-module
+            cd /var/www/html/
 
-            git remote set-url origin git@github.com:${{ github.repository }}.git
-            git fetch
-            current_branch=$(git rev-parse --abbrev-ref HEAD)
-            echo "Current branch: $current_branch"
-
-            if [ "$current_branch" != "${{ secrets.MAIN_BRANCH }}" ]; then
-              git checkout ${{ secrets.MAIN_BRANCH }}
-            fi
-
-            git pull origin ${{ secrets.MAIN_BRANCH }}
 
             # Eliminar backup anterior si existe
             if [ -d /var/www/html/auth-module-backup ]; then
@@ -59,12 +49,12 @@ jobs:
             fi
 
             # Renombrar la carpeta actual a backup
-            if [ -d /var/www/html/auth-module/browser ]; then
-              mv /var/www/html/auth-module/browser /var/www/html/auth-module-backup
+            if [ -d /var/www/html/auth-module/ ]; then
+              mv /var/www/html/auth-module/ /var/www/html/auth-module-backup
             fi
 
             # Copiar build generado al servidor (cambiar ruta si usas Docker u otra configuración)
-            cp -r ./dist/auth-module/browser/* /var/www/html/angular-app/browser/
+            cp -r ./dist/auth-module/browser/* /var/www/html/auth-module/
 
             # Reiniciar servicio web si es necesario (nginx, apache, etc)
             sudo systemctl restart nginx
