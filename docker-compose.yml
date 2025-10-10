@@ -1,0 +1,63 @@
+name: Deploy Angular app to Remote Server
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Angular app
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # o la versión de Node que uses en tu proyecto
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular production
+        run: npm run build -- --configuration production
+
+      - name: Deploy to remote server via SSH
+        if: github.event.pull_request.merged == true
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            source ~/.bashrc
+            cd /opt/angular-app
+
+            git remote set-url origin git@github.com:${{ github.repository }}.git
+            git fetch
+            current_branch=$(git rev-parse --abbrev-ref HEAD)
+            echo "Current branch: $current_branch"
+
+            if [ "$current_branch" != "${{ secrets.MAIN_BRANCH }}" ]; then
+              git checkout ${{ secrets.MAIN_BRANCH }}
+            fi
+
+            git pull origin ${{ secrets.MAIN_BRANCH }}
+
+            # Opcional: eliminar versión anterior de la app
+            rm -rf /var/www/html/angular-app/*
+
+            # Copiar build generado al servidor (cambiar ruta si usas Docker u otra configuración)
+            cp -r ./dist/angular-app/* /var/www/html/angular-app/
+
+            # Reiniciar servicio web si es necesario (nginx, apache, etc)
+            sudo systemctl restart nginx
