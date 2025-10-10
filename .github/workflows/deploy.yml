@@ -53,8 +53,15 @@ jobs:
 
             git pull origin ${{ secrets.MAIN_BRANCH }}
 
-            # Opcional: eliminar versión anterior de la app
-            rm -rf /var/www/html/auth-module/browser/*
+            # Eliminar backup anterior si existe
+            if [ -d /var/www/html/auth-module-backup ]; then
+              rm -rf /var/www/html/auth-module-backup
+            fi
+
+            # Renombrar la carpeta actual a backup
+            if [ -d /var/www/html/auth-module/browser ]; then
+              mv /var/www/html/auth-module/browser /var/www/html/auth-module-backup
+            fi
 
             # Copiar build generado al servidor (cambiar ruta si usas Docker u otra configuración)
             cp -r ./dist/auth-module/browser/* /var/www/html/angular-app/browser/
