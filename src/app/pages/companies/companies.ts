@@ -19,7 +19,7 @@ import { CompaniesService } from './services/companies.service';
 import { COMPANIES_FORM } from '../../shared/forms/companies.form';
 
 @Component({
-  selector: 'app-permissions',
+  selector: 'app-companies',
   standalone: true,
   imports: [
     CommonModule,

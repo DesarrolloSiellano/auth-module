@@ -10,7 +10,7 @@
   align-items: center;
   gap: 1rem;
 
-  .icon-container{
+  .icon-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,6 +37,13 @@
     }
   }
 
+  .recovery {
+    margin: 1rem;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+  }
 
   .title-card {
     margin: 1rem;
@@ -50,6 +57,11 @@
 
   .message {
     margin: 1rem;
+  }
+
+  .items-form {
+    width: 450px;
+    margin: 13px;
   }
 
   .accpet-items {

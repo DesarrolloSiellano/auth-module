@@ -12,8 +12,12 @@
         }
       </div>
 
-      <app-form-template [form]="loginForm"
-        [colClass]="'col-12'"></app-form-template>
+      <div>
+        <app-form-template [form]="loginForm"
+          [colClass]="'col-12'"></app-form-template>
+      </div>
+
+      <div class="recovery" ><a routerLink="/recovery">¿Olvidaste tu contraseña?</a></div>
 
       <ng-template #footer>
         <div class="flex justify-center m-md">
@@ -21,9 +25,8 @@
             [outlined]="true" styleClass="w-full" (click)="login()"
             [disabled]="formComponent?.formGroup?.invalid">
             Entrar <i class="pi pi-sign-in"></i></p-button>
-        </div>
-      </ng-template>
-
-    </p-card>
+          </div>
+        </ng-template>
+      </p-card>
   </section>
 </div>

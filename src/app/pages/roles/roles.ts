@@ -6,7 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { RolesServices } from './services/roles';
-import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
+import { ConfirmationService, MessageService,  } from 'primeng/api';
 import { Rol } from './interface/rol.interface';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';

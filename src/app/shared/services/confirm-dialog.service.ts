@@ -22,7 +22,13 @@ export class ConfirmService {
     severityCancel?: 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'primary',
     severityAccept?: 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'primary',
   ): Promise<boolean> {
+    console.log('ConfirmService confirm called');
+    console.log(itemName, header, message, icon, labelrejectButton, labelacceptButton, severityCancel, severityAccept);
+
+
     return new Promise<boolean>((resolve) => {
+      console.log('Displaying confirmation dialog');
+
       this.confirmationService.confirm({
         header: header,
         message: itemName ? `${message} ${itemName}?` : `${message}`,

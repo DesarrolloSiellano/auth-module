@@ -8,6 +8,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./auth/login/login').then((m) => m.Login),
   },
+  {
+    path: 'recovery',
+    loadComponent: () =>
+      import('./auth/recovery/recovery').then((m) => m.RecoveryComponent),
+  },
 
   {
     path: 'exception/:code',

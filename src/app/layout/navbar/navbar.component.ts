@@ -96,7 +96,9 @@ export class NavbarComponent implements OnInit {
       }
     });
 
-
+    if(localStorage.getItem('isNewUser') === 'true') {
+      this.isDisplayChangePassword = true;
+    }
   }
 
   toggleDropdown(trigger: HTMLElement) {
@@ -162,6 +164,8 @@ export class NavbarComponent implements OnInit {
   }
 
   async logout() {
+    console.log('logout');
+
     try {
       const isConfirm = await this.confirmService.confirm(
         '',
@@ -215,7 +219,7 @@ export class NavbarComponent implements OnInit {
             'Exito',
             res.message
           );
-
+          localStorage.setItem('isNewUser', 'false');
         }
 
       },

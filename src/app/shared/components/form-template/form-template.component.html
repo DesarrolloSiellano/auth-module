@@ -1,8 +1,8 @@
-<div class="flex justify-center">
+<div class="flex">
   <form [formGroup]="formGroup">
     <div class="row">
       @for(item of form; track item) {
-      <div class="{{colClass}} w-full">
+      <div class="{{colClass}} ">
         @if (item.type === 'text') {
         <div class="p-md w-full">
           <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
@@ -55,7 +55,6 @@
               strongLabel="Fuerte"
               formControlName="{{item.name}}"
               autocomplete="off"
-              [disabled]="isEdit"
               [pKeyFilter]="item.pKeyFilter">
               <ng-template pTemplate="footer">
                 <p-divider />

@@ -42,4 +42,12 @@ export class Auth {
       }
     );
   }
+
+
+  recoveryPassword(email: string): Observable<Response<any>> {
+    return this.http.post<Response<any>>(
+      `${ENVIROMENT.urlApi}/auth/recovery-password`,
+      { email }
+    );
+  }
 }

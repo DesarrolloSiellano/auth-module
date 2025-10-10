@@ -1,5 +1,5 @@
 export const ENVIROMENT = {
   production: false,
-  urlApi: 'http://localhost:3010/api',
+  urlApi: 'https://app.bponet.com.co/auth/api',
   title: 'BpoNet Usuarios',
 };

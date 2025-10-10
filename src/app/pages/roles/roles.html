@@ -12,8 +12,7 @@
     [totalRecords]="totalRecords"
     [loading]="loading"
     [filtersGlobal]="filtersGlobal"
-    [updateItem]="update.bind(this)"
-    [deleteItem]="delete.bind(this)"
+
     (loadLazy)="load($any($event))"
     (dateQuery)="queryDate($event)"
     (create)="create()"

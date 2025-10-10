@@ -156,6 +156,13 @@ export abstract class BaseCrud<T> {
             err.error.message
           );
         }
+        if (err.error.statusCode === 500) {
+          this.confirmService.showMessage(
+            'error',
+            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
+            err.error.message
+          );
+        }
       },
       complete: () => this.closeDialog(),
     });
