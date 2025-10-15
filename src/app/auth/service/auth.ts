@@ -7,6 +7,7 @@ import { ENVIROMENT } from '../../../enviroments/enviroment';
 export interface LoginRequest {
   email: string;
   password: string;
+  redirectUri?: string;
 }
 
 export interface ChangePassword {
@@ -21,11 +22,10 @@ export interface ChangePassword {
 export class Auth {
   constructor(private http: HttpClient) {}
 
-  login(loginRequest: LoginRequest): Observable<Response<any>> {
-    console.log(loginRequest);
+  login(loginRequest: LoginRequest, redirectUri?: any): Observable<Response<any>> {
 
     return this.http.post<Response<any>>(
-      `${ENVIROMENT.urlApi}/auth/login`,
+      `${ENVIROMENT.urlApi}/auth/login/?redirectUri=${redirectUri}`,
       loginRequest
     );
   }

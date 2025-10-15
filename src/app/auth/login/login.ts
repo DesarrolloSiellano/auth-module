@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, signal, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, signal, ViewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { PasswordModule } from 'primeng/password';
@@ -10,6 +10,7 @@ import { MessageModule } from 'primeng/message';
 import { ProcessAuthData } from '../service/process-auth-data';
 import { Router, RouterModule } from '@angular/router';
 import { LOGIN_FORM } from '../../shared/forms/login.form';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -27,23 +28,44 @@ import { LOGIN_FORM } from '../../shared/forms/login.form';
   styleUrl: './login.scss',
   providers: [Auth],
 })
-export class Login {
+export class Login implements OnInit {
   @ViewChild(FormTemplateComponent) formComponent?: FormTemplateComponent;
   loginForm = LOGIN_FORM;
   showMessageError = signal(false);
   errorMessage = signal(''); // Señal para mensaje
   errorStatus = signal(0);
 
+  redirectUri: string | null = null;
+
+
   constructor(
     private auth: Auth,
     private processAuthData: ProcessAuthData,
     private router: Router,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private route: ActivatedRoute,
   ) {}
 
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.redirectUri = params['redirect_uri'] || null;
+    });
+
+  }
+
   login() {
-    this.auth.login(this.formComponent?.formGroup?.value).subscribe({
+
+    this.auth.login(this.formComponent?.formGroup?.value, this.redirectUri).subscribe({
       next: (res) => {
+
+        if(res.url){
+          console.log(res.url);
+
+          // Reemplaza la URL actual por la que viene del backend sin recargar
+          window.location.href = String(res.url); //res.url;
+          return;
+        }
         this.processAuthData.proccesAuthData(res.meta.token);
         this.formComponent?.formGroup?.reset();
         //this.showMessageError.set(false);
