@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { PasswordModule } from 'primeng/password';
@@ -11,6 +17,7 @@ import { ProcessAuthData } from '../service/process-auth-data';
 import { Router, RouterModule } from '@angular/router';
 import { LOGIN_FORM } from '../../shared/forms/login.form';
 import { ActivatedRoute } from '@angular/router';
+import { UAParser } from 'ua-parser-js';
 
 @Component({
   selector: 'app-login',
@@ -36,34 +43,42 @@ export class Login implements OnInit {
   errorStatus = signal(0);
 
   redirectUri: string | null = null;
-
+  parser: UAParser = new UAParser();
 
   constructor(
     private auth: Auth,
     private processAuthData: ProcessAuthData,
     private router: Router,
     private cdRef: ChangeDetectorRef,
-    private route: ActivatedRoute,
+    private route: ActivatedRoute
   ) {}
 
-
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.redirectUri = params['redirect_uri'] || null;
     });
-
   }
 
   login() {
+    const info = this.parser.getResult();
+    const data = {
+      meta: {
+        os: info.os.name || '',
+        os_version: info.os.version || '',
+        browser: info.browser.name || '',
+        browser_version: info.browser.version || '',
+        istable: info.device.type === 'tablet',
+        ismovil: info.device.type === 'mobile',
+        isbrowser: !info.device.type,
+        user_agent: info.ua || '',
+      },
+      ...this.formComponent?.formGroup?.value,
+    };
 
-    this.auth.login(this.formComponent?.formGroup?.value, this.redirectUri).subscribe({
+    this.auth.login(data, this.redirectUri).subscribe({
       next: (res) => {
-
-        if(res.url){
-          console.log(res.url);
-
-          // Reemplaza la URL actual por la que viene del backend sin recargar
-          window.location.href = String(res.url); //res.url;
+        if (res.url) {
+          window.location.href = String(res.url);
           return;
         }
         this.processAuthData.proccesAuthData(res.meta.token);
