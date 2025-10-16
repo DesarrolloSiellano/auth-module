@@ -43,10 +43,10 @@ export class RecoveryComponent {
       .recoveryPassword(this.formComponent?.formGroup?.value.email)
       .subscribe({
         next: (res) => {
-          console.log(res);
+          console.info(res);
         },
         error: (err) => {
-          console.log(err);
+          console.error(err);
           setTimeout(() => {
             this.errorStatus.set(err.status);
             this.errorMessage.set(err.error.message);

@@ -133,7 +133,6 @@ export class Users extends BaseCrud<User> implements OnInit {
       rolesData: this.rolesService.findAll(),
       companyData: this.service.findAll(),
     }).subscribe(({ permissionData, modulesData, rolesData }) => {
-      console.log(permissionData);
 
       const peermissions =
         permissionData.data.filter((perm: any) => perm.isActive) || [];

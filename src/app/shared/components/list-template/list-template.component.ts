@@ -117,7 +117,6 @@ export class ListTemplateComponent {
   }
 
   recharge() {
-    console.log('recharge called');
     this.reload.emit();
   }
 

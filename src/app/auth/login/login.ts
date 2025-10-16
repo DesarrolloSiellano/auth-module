@@ -18,19 +18,22 @@ import { Router, RouterModule } from '@angular/router';
 import { LOGIN_FORM } from '../../shared/forms/login.form';
 import { ActivatedRoute } from '@angular/router';
 import { UAParser } from 'ua-parser-js';
+import { Toast, ToastModule } from "primeng/toast";
 
 @Component({
   selector: 'app-login',
   imports: [
     CardModule,
     PasswordModule,
+    ToastModule,
     ButtonModule,
     InputTextModule,
     FloatLabelModule,
     FormTemplateComponent,
     MessageModule,
     RouterModule,
-  ],
+    Toast
+],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   providers: [Auth],
@@ -88,7 +91,7 @@ export class Login implements OnInit {
         this.router.navigate(['/pages/users']);
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
         setTimeout(() => {
           this.errorStatus.set(err.status);
           this.errorMessage.set(err.error.message);

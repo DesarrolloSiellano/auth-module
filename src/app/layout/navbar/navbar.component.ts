@@ -164,8 +164,6 @@ export class NavbarComponent implements OnInit {
   }
 
   async logout() {
-    console.log('logout');
-
     try {
       const isConfirm = await this.confirmService.confirm(
         '',
@@ -183,7 +181,7 @@ export class NavbarComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -204,7 +202,6 @@ export class NavbarComponent implements OnInit {
 
     this.authService.changePassword(changePassword).subscribe({
       next: (res) => {
-        console.log(res);
         if(res.statusCode === 400 || res.statusCode === 404) {
           this.confirmService.showMessage(
             'error',
