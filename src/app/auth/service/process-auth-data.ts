@@ -1,17 +1,31 @@
 import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { JwtPayload } from '../../shared/interfaces/jwt-payload.interface';
+import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProcessAuthData {
+  constructor(private confirmService: ConfirmService) {}
+
   proccesAuthData(token: string) {
     try {
-      localStorage.setItem('token', token);
       const decoded = jwtDecode<JwtPayload>(token);
+
+      const validatedModuleExists = decoded.modules.some(
+        (mod) => mod.name === ENVIROMENT.storageKey
+      );
+
       console.log(decoded);
 
+      if (!validatedModuleExists) {
+        return;
+      }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('company', decoded.company);
       localStorage.setItem('date_joined', decoded.date_joined);
       localStorage.setItem('exp', String(decoded.exp));
       localStorage.setItem('iat', String(decoded.iat));
@@ -31,7 +45,6 @@ export class ProcessAuthData {
   saveModulesToLocalStorage(modules: any[]) {
     modules.forEach((mod) => {
       localStorage.setItem(mod.name, JSON.stringify(mod));
-
     });
   }
 }

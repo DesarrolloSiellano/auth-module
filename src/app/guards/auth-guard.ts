@@ -3,9 +3,11 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
+import { ConfirmService } from '../shared/services/confirm-dialog.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
+  const confirmService = inject(ConfirmService);
   const token = localStorage.getItem('token');
   const currentTime = Math.floor(Date.now() / 1000);
 
@@ -36,6 +38,11 @@ export const authGuard: CanActivateFn = (route, state) => {
     );
 
     if (!hasAdminModule) {
+      confirmService.showMessage(
+        'error',
+        `No tienes permisos para acceder a esta módulo`,
+        'Contacta al administrador del sistema'
+      );
       // No tiene el módulo activo requerido, redirigir o bloquear
       router.navigate(['/login']); // Ruta para acceso denegado, si tienes
       return false;
@@ -43,7 +50,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
     // Validar rol con codeRol 'ADM' y activo
     const hasAdminRole = decoded.roles?.some(
-      (role) => role.codeRol === 'ADM' && role.isActive === true,
+      (role) => role.codeRol === 'ADM' && role.isActive === true
     );
 
     if (!hasAdminRole) {
