@@ -38,6 +38,10 @@ body {
   }
 }
 
+.dashboard-content.dashboard-overlay {
+  position: relative; /* Contenedor relativo para que ::before sea absoluto respecto a este */
+}
+
 .dashboard-content.dashboard-overlay::before {
   content: "";
   position: absolute;
@@ -45,6 +49,7 @@ body {
   background-color: rgba(35, 34, 39, 0.6); /* overlay oscuro */
   z-index: 10; /* arriba del contenido */
   pointer-events: auto; /* bloquea clicks/covers */
+  max-height: 1000vh;
 }
 
 .sidebar.collapsed {

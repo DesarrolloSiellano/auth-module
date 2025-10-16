@@ -8,6 +8,18 @@ export interface LoginRequest {
   email: string;
   password: string;
   redirectUri?: string;
+  meta: Meta;
+}
+
+export interface Meta {
+    os: string;
+    os_version: string;
+    browser: string;
+    browser_version: string;
+    istable: boolean;
+    ismovil: boolean;
+    isbrowser:boolean;
+    user_agent: string;
 }
 
 export interface ChangePassword {
