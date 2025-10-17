@@ -190,7 +190,7 @@ export class Users extends BaseCrud<User> implements OnInit {
   }
 
   override onSelectionChange(selectedItem: any) {
-    console.log(selectedItem);
+
 
     this.isDisplayForm = true;
     this.isEditForm = true;
