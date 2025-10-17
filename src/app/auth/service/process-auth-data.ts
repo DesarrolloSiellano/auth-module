@@ -18,8 +18,6 @@ export class ProcessAuthData {
         (mod) => mod.name === ENVIROMENT.storageKey
       );
 
-      console.log(decoded);
-
       if (!validatedModuleExists) {
         return;
       }

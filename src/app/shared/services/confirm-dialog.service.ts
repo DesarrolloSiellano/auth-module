@@ -26,8 +26,6 @@ export class ConfirmService {
 
 
     return new Promise<boolean>((resolve) => {
-
-
       this.confirmationService.confirm({
         header: header,
         message: itemName ? `${message} ${itemName}?` : `${message}`,
