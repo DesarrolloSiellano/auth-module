@@ -8,31 +8,33 @@ import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  FormsModule,
   Validators,
 } from '@angular/forms';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
-import { DialogModule } from 'primeng/dialog';
-import { ToastModule } from 'primeng/toast';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DividerModule } from 'primeng/divider';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import {
   FormValidationUtils,
-  getNoSpace,
 } from '../../shared/validations/validations-message';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { forkJoin, last } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { RolesServices } from '../roles/services/roles';
 import { ModuleService } from '../modules/services/module.service';
 import { PermissionService } from '../permissions/services/permission.service';
-import { Permission } from '../permissions/interfaces/permission.interface';
 import { CompaniesService } from '../companies/services/companies.service';
 import { AutoComplete } from 'primeng/autocomplete';
-import { MultiSelect } from 'primeng/multiselect';
+
+import { AccordionModule, Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primeng/accordion';
+import { TabsModule, Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import { ToggleSwitchModule, ToggleSwitch } from 'primeng/toggleswitch';
+import { Checkbox, CheckboxModule } from 'primeng/checkbox';
+import { Button, ButtonModule } from 'primeng/button';
+import { Divider, DividerModule } from 'primeng/divider';
+import { Toast, ToastModule } from 'primeng/toast';
+import { Dialog, DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-users',
@@ -41,16 +43,34 @@ import { MultiSelect } from 'primeng/multiselect';
     ListTemplateComponent,
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     DialogModule,
+    Dialog,
     ToastModule,
+    Toast,
     ButtonModule,
+    Button,
     CheckboxModule,
+    Checkbox,
     DividerModule,
+    Divider,
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
     AutoComplete,
-    MultiSelect,
+    AccordionModule,
+    Accordion,
+    AccordionPanel,
+    AccordionHeader,
+    AccordionContent,
+    TabsModule,
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel,
+    ToggleSwitchModule,
+    ToggleSwitch,
   ],
   templateUrl: './users.html',
   styleUrl: './users.scss',
@@ -113,9 +133,9 @@ export class Users extends BaseCrud<User> implements OnInit {
       isAdmin: [false],
       isSuperAdmin: [false],
       company: [''],
-      modules: [[], Validators.required],
-      roles: [[], Validators.required],
-      permissions: [[], Validators.required],
+      modules: [[]],
+      roles: [[]],
+      permissions: [[]],
     });
 
     this.loadOptions();
@@ -127,34 +147,51 @@ export class Users extends BaseCrud<User> implements OnInit {
   }
 
   private loadOptions(): void {
+    if (this.permissionsOptions.length > 0 && this.modulesOptions.length > 0) return;
     forkJoin({
       permissionData: this.permissionService.findAll(),
       modulesData: this.moduleService.findAll(),
       rolesData: this.rolesService.findAll(),
-      companyData: this.service.findAll(),
-    }).subscribe(({ permissionData, modulesData, rolesData }) => {
-
-      const peermissions =
-        permissionData.data.filter((perm: any) => perm.isActive) || [];
-      this.permissionsOptions = peermissions.map((item) => ({
-        name: item.name,
-        value: item,
-      }));
-
-      const modules = modulesData.data.filter((mod: any) => mod.isActive) || [];
-      this.modulesOptions = modules.map((item) => ({
-        name: item.name,
-        value: item,
-      }));
-
-      const roles = rolesData.data.filter((rol: any) => rol.isActive) || [];
-      this.rolesOptions = roles.map((item) => ({
-        name: item.name,
-        value: item,
-      }));
-
-      this.cdr.detectChanges();
+      companyData: this.companiesService.findAll(),
+    }).subscribe({
+      next: ({ permissionData, modulesData, rolesData }) => {
+        this.permissionsOptions = permissionData.data || [];
+        this.modulesOptions = modulesData.data || [];
+        this.rolesOptions = rolesData.data || [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading options:', err)
     });
+  }
+
+  toggleAll(collection: string, state: boolean): void {
+    if (collection === 'permissions') {
+      this.userForm.get('permissions')?.setValue(state ? [...this.permissionsOptions] : []);
+    } else if (collection === 'roles') {
+      this.userForm.get('roles')?.setValue(state ? [...this.rolesOptions] : []);
+    }
+  }
+
+  toggleModule(module: any, event: any): void {
+    module.isActive = event.checked;
+    // Si se apaga el módulo, podríamos querer apagar todas sus rutas también? 
+    // El usuario pidió edición total, así que lo dejamos a su criterio.
+    if (!module.isActive) {
+      module.routes?.forEach((r: any) => {
+        r.isActive = false;
+        r.children?.forEach((child: any) => child.isActive = false);
+      });
+    } else {
+      // Si se activa el módulo, por defecto activamos las rutas?
+      module.routes?.forEach((r: any) => r.isActive = true);
+    }
+  }
+
+  toggleRoute(route: any, event: any): void {
+    route.isActive = event.checked;
+    if (route.children) {
+      route.children.forEach((child: any) => child.isActive = event.checked);
+    }
   }
 
   findByAutoComplete(event: any) {
@@ -180,7 +217,28 @@ export class Users extends BaseCrud<User> implements OnInit {
     passwordControl?.updateValueAndValidity();
   }
 
+  getRouteIcon(iconName: string): string {
+    return iconName ? `pi pi-${iconName}` : 'pi pi-circle';
+  }
+
   override create(): void {
+    this.userForm.reset({
+      isActived: true,
+      isAdmin: false,
+      isSuperAdmin: false,
+      permissions: [],
+      roles: [],
+      modules: JSON.parse(JSON.stringify(this.modulesOptions)).map((m: any) => {
+        m.isActive = false;
+        const routes = m.routes || m.router || [];
+        routes.forEach((r: any) => {
+          r.isActive = false;
+          (r.children || []).forEach((c: any) => (c.isActive = false));
+        });
+        m.routes = routes; // Normalizar a 'routes' en el formulario
+        return m;
+      })
+    });
     this.titleForm = 'Creación de ' + this.subtitle;
     this.isFormVisible = true;
     this.isDisplayForm = true;
@@ -203,8 +261,7 @@ export class Users extends BaseCrud<User> implements OnInit {
     const mappedPermissions = (selectedItem.permissions || []).map(
       (perm: any) => {
         return (
-          this.permissionsOptions.find((opt) => opt.name === perm.name)
-            ?.value || perm
+          this.permissionsOptions.find((opt: any) => opt.name === perm.name) || perm
         );
       }
     );
@@ -212,15 +269,76 @@ export class Users extends BaseCrud<User> implements OnInit {
     // Mapear roles seleccionados con las opciones reales
     const mappedRoles = (selectedItem.roles || []).map((rol: any) => {
       return (
-        this.rolesOptions.find((opt) => opt.name === rol.name)?.value || rol
+        this.rolesOptions.find((opt: any) => opt.name === rol.name) || rol
       );
     });
 
-    // Mapear módulos seleccionados con las opciones reales
-    const mappedModules = (selectedItem.modules || []).map((mod: any) => {
-      return (
-        this.modulesOptions.find((opt) => opt.name === mod.name)?.value || mod
+    // Mapear módulos: Mostrar todos los del sistema, pero con el estado del usuario si ya los tiene
+    const mappedModules = this.modulesOptions.map((systemMod: any) => {
+      // Intentar encontrar el módulo en el usuario por nombre o ID
+      const userMod = (selectedItem.modules || []).find(
+        (m: any) => m.name === systemMod.name || m._id === systemMod._id
       );
+
+      // Normalizar la propiedad de rutas (puede venir como 'routes' o 'router')
+      const getRoutes = (obj: any) => obj?.routes || obj?.router || [];
+      const systemRoutes = getRoutes(systemMod);
+      const userRoutes = getRoutes(userMod);
+
+      if (userMod) {
+        return {
+          ...JSON.parse(JSON.stringify(systemMod)),
+          isActive: userMod.isActive,
+          routes: systemRoutes.map((systemRoute: any) => {
+            const userRoute = userRoutes.find(
+              (r: any) => r.name === systemRoute.name || r.path === systemRoute.path
+            );
+
+            if (userRoute) {
+              const systemChildren = systemRoute.children || [];
+              const userChildren = userRoute.children || [];
+
+              return {
+                ...JSON.parse(JSON.stringify(systemRoute)),
+                isActive: userRoute.isActive,
+                children: systemChildren.map((systemChild: any) => {
+                  const userChild = userChildren.find(
+                    (c: any) => c.name === systemChild.name || c.path === systemChild.path
+                  );
+                  return {
+                    ...JSON.parse(JSON.stringify(systemChild)),
+                    isActive: userChild ? userChild.isActive : false,
+                  };
+                }),
+              };
+            }
+            // Si el usuario no tiene la ruta registrada, se muestra inactiva
+            return {
+              ...JSON.parse(JSON.stringify(systemRoute)),
+              isActive: false,
+              children: (systemRoute.children || []).map((c: any) => ({
+                ...c,
+                isActive: false,
+              })),
+            };
+          }),
+        };
+      }
+
+      // Si el usuario no tiene el módulo, lo mostramos como inactivo pero con toda su estructura disponible
+      const newMod = JSON.parse(JSON.stringify(systemMod));
+      newMod.isActive = false;
+      newMod.routes = systemRoutes.map((r: any) => {
+        const routeCopy = { ...r, isActive: false };
+        if (routeCopy.children) {
+          routeCopy.children = routeCopy.children.map((c: any) => ({
+            ...c,
+            isActive: false,
+          }));
+        }
+        return routeCopy;
+      });
+      return newMod;
     });
 
     this.userForm.patchValue({

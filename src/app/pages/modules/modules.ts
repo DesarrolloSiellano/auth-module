@@ -109,7 +109,7 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
       isActive: [route?.isActive],
       children: this.fb.array(
         route?.children
-          ? route.children.map((child) => this.createRouteGroup(child))
+          ? route.children.map((child: Route) => this.createRouteGroup(child))
           : []
       ),
     });
@@ -146,7 +146,8 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
       description: moduleData.description,
       isActive: moduleData.isActive,
     });
-    const routeFGs = moduleData.router.map((route) =>
+    const routes = moduleData.routes || (moduleData as any).router || [];
+    const routeFGs = routes.map((route: Route) =>
       this.createRouteGroup(route)
     );
     const routeFormArray = this.fb.array(routeFGs);
@@ -171,12 +172,14 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
         isActive: selectedItem.isActive,
       });
 
-      // Usar la propiedad correcta del objeto (routes)
+      // Usar la propiedad correcta del objeto (routes o router)
       const rawRoutes = Array.isArray(selectedItem.routes)
         ? selectedItem.routes
+        : Array.isArray(selectedItem.router)
+        ? selectedItem.router
         : [];
       const routesFormArray = this.fb.array(
-        rawRoutes.map((route: any) => this.createRouteGroup(route))
+        rawRoutes.map((route: Route) => this.createRouteGroup(route))
       );
       this.moduleForm.setControl('routes', routesFormArray);
 

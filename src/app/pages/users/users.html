@@ -1,270 +1,324 @@
 <p-toast />
 
 <div class="content">
-  <app-list-template
-    [title]="'Lista de ' + title"
-    [showTitle]="true"
-    [toAdd]="toAdd"
-    [options]="true"
-    [cols]="cols"
-    [data]="data"
-    [lazy]="true"
-    [totalRecords]="totalRecords"
-    [loading]="loading"
-    [filtersGlobal]="filtersGlobal"
-    [updateItem]="update.bind(this)"
-    [deleteItem]="delete.bind(this)"
-    (loadLazy)="load($any($event))"
-    (dateQuery)="queryDate($event)"
-    (create)="create()"
-    (update)="update($event)"
-    (delete)="delete($event)"
-    (exportPage)="exportAsXLSX()"
-    (reload)="rechargeTable()"
-    (onRowSelectionChange)="onSelectionChange($any($event))">
+  <app-list-template [title]="'Lista de ' + title" [showTitle]="true" [toAdd]="toAdd" [options]="true" [cols]="cols"
+    [data]="data" [lazy]="true" [totalRecords]="totalRecords" [loading]="loading" [filtersGlobal]="filtersGlobal"
+    [updateItem]="update.bind(this)" [deleteItem]="delete.bind(this)" (loadLazy)="load($any($event))"
+    (dateQuery)="queryDate($event)" (create)="create()" (update)="update($event)" (delete)="delete($event)"
+    (exportPage)="exportAsXLSX()" (reload)="rechargeTable()" (onRowSelectionChange)="onSelectionChange($any($event))">
   </app-list-template>
 
   <p-dialog [(visible)]="isDisplayForm" [style]="{width: '90vw'}"
-    [header]="titleForm" [draggable]="false" [resizable]="false"
-    [closable]="false" [modal]="true"
-    [baseZIndex]="10000">
+    [breakpoints]="{ '1199px': '75vw', '991px': '85vw', '767px': '95vw' }" [header]="titleForm" [draggable]="false"
+    [resizable]="false" [closable]="false" [modal]="true" [baseZIndex]="10000">
 
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-      <div class="row">
-        <!-- Nombre -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="text" pInputText id="name"
-                autocomplete="off"
-                class="w-full"
-                formControlName="name" />
-              <label for="name">Nombres</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('name')?.invalid &&
-              userForm.get('name')?.touched) {
-              <span>{{ getErrorMessage('name') }}</span>
-              }
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-user mr-sm text-primary-500"></i>
+              <span>Información Personal</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Apellidos -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="text" pInputText id="lastName"
-                autocomplete="off"
-                class="w-full"
-                formControlName="lastName" />
-              <label for="lastName">Apellidos</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('lastName')?.invalid &&
-              userForm.get('lastName')?.touched) {
-              <span>{{ getErrorMessage('lastName') }}</span>
-              }
+          </p-tab>
+          <p-tab value="1">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-shield mr-sm text-primary-500"></i>
+              <span>Roles</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Teléfono -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="text" pInputText id="phone"
-                autocomplete="off"
-                class="w-full"
-                formControlName="phone" />
-              <label for="phone">Teléfono</label>
-            </p-floatlabel>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <!-- Correo -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="email" pInputText id="email"
-                autocomplete="off"
-                class="w-full"
-                formControlName="email" />
-              <label for="email">Correo Electrónico</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('email')?.invalid &&
-              userForm.get('email')?.touched) {
-              <span>{{ getErrorMessage('email') }}</span>
-              }
+          </p-tab>
+          <p-tab value="2">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-key mr-sm text-primary-500"></i>
+              <span>Permisos</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Usuario -->
-       <!--  <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="text" pInputText id="username"
-                autocomplete="off"
-                class="w-full"
-                formControlName="username" />
-              <label for="username">Usuario</label>
-            </p-floatlabel>
-          </div>
-        </div> -->
-
-        @if(!isEditForm){
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <input type="password" pInputText id="password"
-                autocomplete="off"
-                class="w-full"
-                formControlName="password" />
-              <label for="password">Contraseña</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('password')?.invalid &&
-              userForm.get('password')?.touched) {
-              <span>{{ getErrorMessage('password') }}</span>
-              }
+          </p-tab>
+          <p-tab value="3">
+            <div class="flex items-center gap-3">
+              <i class="pi pi-box mr-sm text-primary-500"></i>
+              <span>Módulos</span>
             </div>
-          </div>
-        </div>
-        }
+          </p-tab>
+        </p-tablist>
 
-        @if(!isEditForm) {
-        <!-- Empresa -->
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel variant="on">
-              <p-autocomplete [dropdown]="true"
-                [suggestions]="itemsAutocomplete"
-                (completeMethod)="findByAutoComplete($event)"
-                optionLabel="name" optionValue="name" formControlName="company"
-                class="w-full" />
-              <label for="company">Empresa</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('company')?.invalid &&
-              userForm.get('company')?.touched) {
-              <span>{{ getErrorMessage('company') }}</span>
-              }
+        <p-tabpanels>
+          <!-- Pestaña 0: Información Personal -->
+          <p-tabpanel value="0">
+            <div class="row">
+              <!-- Nombre -->
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="text" pInputText id="name" autocomplete="off" class="w-full" formControlName="name" />
+                    <label for="name">Nombres</label>
+                  </p-floatLabel>
+                  <div class="message-validation">
+                    @if (userForm.get('name')?.invalid && userForm.get('name')?.touched) {
+                    <span>{{ getErrorMessage('name') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Apellidos -->
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="text" pInputText id="lastName" autocomplete="off" class="w-full"
+                      formControlName="lastName" />
+                    <label for="lastName">Apellidos</label>
+                  </p-floatLabel>
+                  <div class="message-validation">
+                    @if (userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
+                    <span>{{ getErrorMessage('lastName') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Teléfono -->
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="text" pInputText id="phone" autocomplete="off" class="w-full"
+                      formControlName="phone" />
+                    <label for="phone">Teléfono</label>
+                  </p-floatLabel>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        }
+            <div class="row">
+              <!-- Correo -->
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="email" pInputText id="email" autocomplete="off" class="w-full"
+                      formControlName="email" />
+                    <label for="email">Correo Electrónico</label>
+                  </p-floatLabel>
+                  <div class="message-validation">
+                    @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
+                    <span>{{ getErrorMessage('email') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
 
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel class="p-float-label p-fluid input-field ">
-              <p-multiselect id="permissions" class="w-full"
-                [options]="permissionsOptions"
-                optionLabel="name"
-                optionValue="value"
-                formControlName="permissions"
-                appendTo="body" />
-              <label for="permissions">Permisos Generales</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('permissions')?.invalid &&
-              userForm.get('permissions')?.touched) {
-              <span>{{ getErrorMessage('permissions') }}</span>
-              }
-            </div>
-          </div>
-        </div>
+              @if(!isEditForm){
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="password" pInputText id="password" autocomplete="off" class="w-full"
+                      formControlName="password" />
+                    <label for="password">Contraseña</label>
+                  </p-floatLabel>
+                  <div class="message-validation">
+                    @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+                    <span>{{ getErrorMessage('password') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
 
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel class="p-float-label p-fluid input-field ">
-              <p-multiselect id="roles" class="w-full"
-                [options]="rolesOptions"
-                optionLabel="name"
-                optionValue="value"
-                formControlName="roles"
-                appendTo="body" />
-              <label for="roles">Roles</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('roles')?.invalid &&
-              userForm.get('roles')?.touched) {
-              <span>{{ getErrorMessage('roles') }}</span>
-              }
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 col-sm-12 w-full">
-          <div class="p-md w-full">
-            <p-floatlabel class="p-float-label p-fluid input-field ">
-              <p-multiselect id="modules" class="w-full"
-                [options]="modulesOptions"
-                optionLabel="name"
-                optionValue="value"
-                formControlName="modules"
-                appendTo="body" />
-              <label for="modules">Módulos</label>
-            </p-floatlabel>
-            <div class="message-validation">
-              @if (userForm.get('modules')?.invalid &&
-              userForm.get('modules')?.touched) {
-              <span>{{ getErrorMessage('modules') }}</span>
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <p-autocomplete inputId="company" [dropdown]="true" [suggestions]="itemsAutocomplete"
+                      (completeMethod)="findByAutoComplete($event)" optionLabel="name" optionValue="name"
+                      formControlName="company" class="w-full" styleClass="w-full" />
+                    <label for="company">Empresa</label>
+                  </p-floatLabel>
+                </div>
+              </div>
               }
             </div>
 
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
-          <div class="p-md ">
-            <div class="flex items-center gap-2">
-              <p-checkbox inputId="isActived" formControlName="isActived"
-                [binary]="true" />
-              <label for="isActived" class="label-checkbox p-xs w-full">
-                Activo</label>
+            <div class="row mt-lg">
+              <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="p-md">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="isActived" formControlName="isActived" [binary]="true" />
+                    <label for="isActived" class="cursor-pointer font-medium p-xs">Activo</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="p-md">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="isAdmin" formControlName="isAdmin" [binary]="true" />
+                    <label for="isAdmin" class="cursor-pointer font-medium p-xs">Administrador</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="p-md">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="isSuperAdmin" formControlName="isSuperAdmin" [binary]="true" />
+                    <label for="isSuperAdmin" class="cursor-pointer font-medium p-xs">Super Usuario</label>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </p-tabpanel>
 
-        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
-          <div class="p-md ">
-            <div class="flex items-center gap-2">
-              <p-checkbox inputId="isAdmin" formControlName="isAdmin"
-                [binary]="true" />
-              <label for="isAdmin" class="label-checkbox p-xs w-full">
-                Administrador</label>
+          <!-- Pestaña 1: Roles -->
+          <p-tabpanel value="1">
+            <div class="p-md">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold m-0">Asignación de Roles</h3>
+                <div class="flex gap-2">
+                  <p-button label="Seleccionar Todo" [text]="true" size="small" (click)="toggleAll('roles', true)" />
+                  <p-button label="Limpiar" [text]="true" severity="secondary" size="small"
+                    (click)="toggleAll('roles', false)" />
+                </div>
+              </div>
+              <p-divider />
+              <div class="row mt-md">
+                @for (role of rolesOptions; track role._id) {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                  <div class="p-md">
+                    <div class="flex items-center gap-2">
+                      <p-checkbox [inputId]="'role_' + role._id" [value]="role" formControlName="roles" />
+                      <label [for]="'role_' + role._id" class="cursor-pointer font-medium p-xs">{{ role.name }}</label>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
             </div>
-          </div>
-        </div>
+          </p-tabpanel>
 
-        <div class="col-lg-2 col-md-6 col-sm-12 w-full ">
-          <div class="p-md ">
-            <div class="flex items-center gap-2">
-              <p-checkbox inputId="isSuperAdmin" formControlName="isSuperAdmin"
-                [binary]="true" />
-              <label for="isSuperAdmin" class="label-checkbox p-xs w-full">
-                Super Usuario</label>
+          <!-- Pestaña 2: Permisos -->
+          <p-tabpanel value="2">
+            <div class="p-md">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold m-0">Permisos Generales</h3>
+                <div class="flex gap-2">
+                  <p-button label="Seleccionar Todo" [text]="true" size="small"
+                    (click)="toggleAll('permissions', true)" />
+                  <p-button label="Limpiar" [text]="true" severity="secondary" size="small"
+                    (click)="toggleAll('permissions', false)" />
+                </div>
+              </div>
+              <p-divider />
+              <div class="row mt-md">
+                @for (perm of permissionsOptions; track perm._id) {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                  <div class="p-md">
+                    <div class="flex items-center gap-2">
+                      <p-checkbox [inputId]="'perm_' + perm._id" [value]="perm" formControlName="permissions" />
+                      <label [for]="'perm_' + perm._id" class="cursor-pointer font-medium p-xs">{{ perm.name }}</label>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
             </div>
-          </div>
-        </div>
+          </p-tabpanel>
 
-      </div>
+          <!-- Pestaña 3: Módulos -->
+          <p-tabpanel value="3">
+            <div class="p-md">
+              <h3 class="text-lg font-semibold mb-6">Módulos y Acceso Granular</h3>
+              <p-accordion [multiple]="true">
+                @for (module of userForm.get('modules')?.value; track module.name) {
+                <p-accordion-panel [value]="module.name">
+                  <p-accordion-header>
+                    <div class="flex items-center justify-between w-full route-header">
+                      <div class="flex items-center gap-3">
+                        <i class="pi pi-box mr-sm text-primary-500 text-xl"></i>
+                        <span class="font-bold capitalize text-primary-900">{{ module.name }}</span>
+                      </div>
+                      <div class="flex items-center mr-2" (click)="$event.stopPropagation()">
+                        <span class="text-xs font-bold mr-sm tracking-wider"
+                          [class.text-primary-600]="module.isActive">{{
+                          module.isActive ? 'ACTIVO' : 'INACTIVO' }}</span>
+                        <p-toggleSwitch [ngModel]="module.isActive" (onChange)="toggleModule(module, $event)"
+                          [ngModelOptions]="{standalone: true}" class="mr-sm" />
+                      </div>
+                    </div>
+                  </p-accordion-header>
 
+                  <p-accordion-content>
+                    <div class="p-md">
+                      <p class="text-sm text-gray-600 mb-6 bg-white p-3 border-round border-left-3 border-primary-500">
+                        {{ module.description }}</p>
+
+                      @if (module.routes && module.routes.length > 0) {
+                      <div class="bg-gray-50 p-lg border-round surface-border border-1">
+                        <h4 class="text-md font-bold mb-5 flex items-center gap-2 text-primary-700">
+                          <i class="pi pi-sitemap"></i>
+                          Rutas y Sub-permisos
+                        </h4>
+                        <div class="row">
+                          @for (route of module.routes; track route.name) {
+                          <div class="col-lg-12 mb-md">
+                            <!-- Ruta Principal -->
+                            <div
+                              class="flex items-center justify-between p-md bg-white border-1 border-gray-100 border-round shadow-1 mb-sm hover:border-primary-200 transition-colors route-header">
+                              <div class="flex items-center gap-3">
+                                <div class="p-sm bg-primary-50 border-round flex items-center justify-center">
+                                  <i [class]="getRouteIcon(route.icon) + ' text-primary-500'"></i>
+                                </div>
+                                <span class="font-bold text-sm text-gray-800 ml-2">{{ route.name }}</span>
+                              </div>
+                              <div class="flex items-center gap-3">
+                                <p-toggleSwitch [ngModel]="route.isActive" (onChange)="toggleRoute(route, $event)"
+                                  [ngModelOptions]="{standalone: true}" [disabled]="!module.isActive" />
+                              </div>
+                            </div>
+
+                            <!-- Sub-permisos -->
+                            @if (route.children && route.children.length > 0) {
+                            <div class="row mt-lg px-3 row-gap-md">
+                              @for (child of route.children; track child.name) {
+                              <div class="col-lg-4 col-md-6 col-sm-12 mb-4 px-2">
+                                <div
+                                  class="flex items-center justify-between p-md bg-white border-1 border-gray-100 border-round shadow-1 hover:border-primary-200 transition-colors group h-full route-header">
+                                  <div class="flex items-center gap-3">
+                                    <div
+                                      class="p-sm bg-gray-50 border-round flex items-center justify-center group-hover:bg-primary-50 transition-colors">
+                                      <i
+                                        [class]="getRouteIcon(child.icon) + ' text-gray-500 group-hover:text-primary-500 transition-colors'"></i>
+                                    </div>
+                                    <span class="text-xs font-semibold text-gray-700 ml-2">{{ child.name }}</span>
+                                  </div>
+                                  <div class="pl-2">
+                                    <p-toggleSwitch [ngModel]="child.isActive"
+                                      (onChange)="child.isActive = $event.checked" size="small"
+                                      [ngModelOptions]="{standalone: true}"
+                                      [disabled]="!route.isActive || !module.isActive" />
+                                  </div>
+                                </div>
+                              </div>
+                              }
+                            </div>
+                            }
+                          </div>
+                          }
+                        </div>
+                      </div>
+                      } @else {
+                      <div class="text-center p-6 bg-gray-50 border-round text-gray-400 text-xs italic">
+                        Este módulo no tiene rutas configurables.
+                      </div>
+                      }
+                    </div>
+                  </p-accordion-content>
+                </p-accordion-panel>
+                }
+              </p-accordion>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </form>
 
     <ng-template #footer>
-      <div class="mt-md">
-
-        <p-button label="Cancelar" [text]="true" severity="secondary"
-          (click)="closeDialog()" class="mr-md" />
-        <p-button label="Guardar" [disabled]="userForm.invalid"
-          [outlined]="true"
-          severity="primary"
+      <div class="mt-md flex justify-end">
+        <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" class="mr-md" />
+        <p-button label="Guardar" [disabled]="userForm.invalid" [outlined]="true" severity="primary"
           (click)="onSubmit()" />
       </div>
     </ng-template>
