@@ -10,7 +10,7 @@ export interface Module {
   idUserModified?: String;
   isActive: boolean;
   isSystemModule: boolean;
-  router: Route[];
+  routes: Route[];
 }
 
 export interface Route {
