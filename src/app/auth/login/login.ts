@@ -33,7 +33,7 @@ import { Toast, ToastModule } from "primeng/toast";
     MessageModule,
     RouterModule,
     Toast
-],
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   providers: [Auth],
@@ -54,7 +54,7 @@ export class Login implements OnInit {
     private router: Router,
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -109,5 +109,9 @@ export class Login implements OnInit {
         this.cdRef.detectChanges();
       },
     });
+  }
+
+  recoveryPass() {
+    this.router.navigate(['/recovery'], { queryParams: { redirect_uri: this.redirectUri } });
   }
 }
