@@ -12,14 +12,14 @@ export interface LoginRequest {
 }
 
 export interface Meta {
-    os: string;
-    os_version: string;
-    browser: string;
-    browser_version: string;
-    istable: boolean;
-    ismovil: boolean;
-    isbrowser:boolean;
-    user_agent: string;
+  os: string;
+  os_version: string;
+  browser: string;
+  browser_version: string;
+  istable: boolean;
+  ismovil: boolean;
+  isbrowser: boolean;
+  user_agent: string;
 }
 
 export interface ChangePassword {
@@ -32,7 +32,7 @@ export interface ChangePassword {
   providedIn: 'root',
 })
 export class Auth {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(loginRequest: LoginRequest, redirectUri?: any): Observable<Response<any>> {
 
