@@ -1,6 +1,6 @@
 <div class="container">
   <section class="login-content">
-    <p-card >
+    <p-card>
       <p class="title-card">Recuperar Cuenta</p>
       <div class="icon-container">
         <div class="no-image"><i class="pi pi-user"></i></div>
@@ -11,17 +11,19 @@
         <p-message [life]="3000" severity="error">{{ errorStatus() }} {{
           errorMessage()}}</p-message>
         }
+        @if(showMessageSuccess()) {
+        <p-message [life]="3000" severity="success">{{ successStatus() }} {{
+          messageSuccess()}}</p-message>
+        }
       </div>
 
-       <app-form-template [form]="recoveryForm" [width]="'70rem'"
-        [colClass]="'col-12 col-md-12'"></app-form-template>
+      <app-form-template [form]="recoveryForm" [width]="'70rem'" [colClass]="'col-12 col-md-12'"></app-form-template>
 
       <div class="recovery"><a routerLink="/login">Iniciar Sesión</a></div>
 
       <ng-template #footer>
         <div class="flex justify-center m-md">
-          <p-button severity="primary" class="w-full"
-            [outlined]="true" styleClass="w-full" (click)="recovery()"
+          <p-button severity="primary" class="w-full" [outlined]="true" styleClass="w-full" (click)="recovery()"
             [disabled]="formComponent?.formGroup?.invalid">
             Recuperar cuenta <i class="pi pi-sign-in"></i></p-button>
         </div>
