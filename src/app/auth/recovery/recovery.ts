@@ -53,7 +53,7 @@ export class RecoveryComponent implements OnInit {
 
   recovery() {
     this.auth
-      .recoveryPassword(this.formComponent?.formGroup?.value.email)
+      .recoveryPassword(this.formComponent?.formGroup?.value.email, this.redirectUri)
       .subscribe({
         next: (res) => {
           this.successStatus.set(res.statusCode);

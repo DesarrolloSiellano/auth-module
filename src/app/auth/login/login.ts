@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -38,7 +39,7 @@ import { Toast, ToastModule } from "primeng/toast";
   styleUrl: './login.scss',
   providers: [Auth],
 })
-export class Login implements OnInit {
+export class Login implements OnInit, AfterViewInit {
   @ViewChild(FormTemplateComponent) formComponent?: FormTemplateComponent;
   loginForm = LOGIN_FORM;
   showMessageError = signal(false);
@@ -60,6 +61,10 @@ export class Login implements OnInit {
     this.route.queryParams.subscribe((params) => {
       this.redirectUri = params['redirect_uri'] || null;
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.cdRef.detectChanges();
   }
 
   login() {
