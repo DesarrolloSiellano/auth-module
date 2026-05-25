@@ -11,6 +11,7 @@ import {
 } from 'rxjs';
 import { Auth } from '../../auth/service/auth';
 import { ProcessAuthData } from '../../auth/service/process-auth-data';
+import { ConfirmService } from '../services/confirm-dialog.service';
 
 let isRefreshing = false;
 const refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<
@@ -21,6 +22,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(Auth);
   const processAuthData = inject(ProcessAuthData);
+  const confirmService = inject(ConfirmService);
 
   const token = localStorage.getItem('token');
 
@@ -41,6 +43,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Validar si el error es 429 (Too Many Requests)
+      if (error.status === 429) {
+        confirmService.showMessage(
+          'warn',
+          'Límite de peticiones excedido',
+          'Has realizado demasiadas solicitudes en poco tiempo. Por favor, espera un momento.',
+          5000,
+        );
+        return throwError(() => error);
+      }
+
       // Validar si el error es 401 y no proviene de login ni de refresh para evitar bucles.
       if (
         error.status === 401 &&
