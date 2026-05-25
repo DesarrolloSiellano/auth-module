@@ -10,12 +10,12 @@ import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 export class ProcessAuthData {
   constructor(private confirmService: ConfirmService) {}
 
-  proccesAuthData(token: string) {
+  proccesAuthData(token: string, refreshToken?: string) {
     try {
       const decoded = jwtDecode<JwtPayload>(token);
 
       const validatedModuleExists = decoded.modules.some(
-        (mod) => mod.name === ENVIROMENT.storageKey
+        (mod) => mod.name === ENVIROMENT.storageKey,
       );
 
       if (!validatedModuleExists) {
@@ -23,10 +23,14 @@ export class ProcessAuthData {
       }
 
       localStorage.setItem('token', token);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
       localStorage.setItem('company', decoded.company);
       localStorage.setItem('date_joined', decoded.date_joined);
       localStorage.setItem('exp', String(decoded.exp));
       localStorage.setItem('iat', String(decoded.iat));
+      localStorage.setItem('tenantId', String(decoded.tenantId));
       localStorage.setItem('isActive', String(decoded.isActived));
       localStorage.setItem('isAdmin', String(decoded.isAdmin));
       localStorage.setItem('isSuperAdmin', String(decoded.isSuperAdmin));

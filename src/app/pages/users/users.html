@@ -106,20 +106,7 @@
               </div>
 
               @if(!isEditForm){
-              <div class="col-lg-4 col-md-6 col-sm-12">
-                <div class="p-md">
-                  <p-floatLabel variant="on">
-                    <input type="password" pInputText id="password" autocomplete="off" class="w-full"
-                      formControlName="password" />
-                    <label for="password">Contraseña</label>
-                  </p-floatLabel>
-                  <div class="message-validation">
-                    @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
-                    <span>{{ getErrorMessage('password') }}</span>
-                    }
-                  </div>
-                </div>
-              </div>
+
 
               <div class="col-lg-4 col-md-6 col-sm-12">
                 <div class="p-md">
@@ -319,7 +306,7 @@
       <div class="mt-md flex justify-end">
         <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" class="mr-md" />
         <p-button label="Guardar" [disabled]="userForm.invalid" [outlined]="true" severity="primary"
-          (click)="onSubmit()" />
+          (click)="onSubmit()" [disabled]="disabledButton" />
       </div>
     </ng-template>
   </p-dialog>

@@ -15,9 +15,7 @@ import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import {
-  FormValidationUtils,
-} from '../../shared/validations/validations-message';
+import { FormValidationUtils } from '../../shared/validations/validations-message';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { forkJoin } from 'rxjs';
@@ -27,8 +25,21 @@ import { PermissionService } from '../permissions/services/permission.service';
 import { CompaniesService } from '../companies/services/companies.service';
 import { AutoComplete } from 'primeng/autocomplete';
 
-import { AccordionModule, Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primeng/accordion';
-import { TabsModule, Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
+import {
+  AccordionModule,
+  Accordion,
+  AccordionPanel,
+  AccordionHeader,
+  AccordionContent,
+} from 'primeng/accordion';
+import {
+  TabsModule,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from 'primeng/tabs';
 import { ToggleSwitchModule, ToggleSwitch } from 'primeng/toggleswitch';
 import { Checkbox, CheckboxModule } from 'primeng/checkbox';
 import { Button, ButtonModule } from 'primeng/button';
@@ -116,7 +127,7 @@ export class Users extends BaseCrud<User> implements OnInit {
     private permissionService: PermissionService,
     private rolesService: RolesServices,
     private moduleService: ModuleService,
-    private companiesService: CompaniesService
+    private companiesService: CompaniesService,
   ) {
     super(service, cdr, dataLoader, excelexport, confirmService);
   }
@@ -128,7 +139,6 @@ export class Users extends BaseCrud<User> implements OnInit {
       phone: [''],
       email: ['', [Validators.required, Validators.email]],
       //username: ['', Validators.required],
-      password: [''],
       isActived: [true],
       isAdmin: [false],
       isSuperAdmin: [false],
@@ -147,7 +157,8 @@ export class Users extends BaseCrud<User> implements OnInit {
   }
 
   private loadOptions(): void {
-    if (this.permissionsOptions.length > 0 && this.modulesOptions.length > 0) return;
+    if (this.permissionsOptions.length > 0 && this.modulesOptions.length > 0)
+      return;
     forkJoin({
       permissionData: this.permissionService.findAll(),
       modulesData: this.moduleService.findAll(),
@@ -160,13 +171,15 @@ export class Users extends BaseCrud<User> implements OnInit {
         this.rolesOptions = rolesData.data || [];
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error loading options:', err)
+      error: (err) => console.error('Error loading options:', err),
     });
   }
 
   toggleAll(collection: string, state: boolean): void {
     if (collection === 'permissions') {
-      this.userForm.get('permissions')?.setValue(state ? [...this.permissionsOptions] : []);
+      this.userForm
+        .get('permissions')
+        ?.setValue(state ? [...this.permissionsOptions] : []);
     } else if (collection === 'roles') {
       this.userForm.get('roles')?.setValue(state ? [...this.rolesOptions] : []);
     }
@@ -174,23 +187,23 @@ export class Users extends BaseCrud<User> implements OnInit {
 
   toggleModule(module: any, event: any): void {
     module.isActive = event.checked;
-    // Si se apaga el módulo, podríamos querer apagar todas sus rutas también? 
+    // Si se apaga el módulo, podríamos querer apagar todas sus rutas también?
     // El usuario pidió edición total, así que lo dejamos a su criterio.
     if (!module.isActive) {
       module.routes?.forEach((r: any) => {
         r.isActive = false;
-        r.children?.forEach((child: any) => child.isActive = false);
+        r.children?.forEach((child: any) => (child.isActive = false));
       });
     } else {
       // Si se activa el módulo, por defecto activamos las rutas?
-      module.routes?.forEach((r: any) => r.isActive = true);
+      module.routes?.forEach((r: any) => (r.isActive = true));
     }
   }
 
   toggleRoute(route: any, event: any): void {
     route.isActive = event.checked;
     if (route.children) {
-      route.children.forEach((child: any) => child.isActive = event.checked);
+      route.children.forEach((child: any) => (child.isActive = event.checked));
     }
   }
 
@@ -237,7 +250,7 @@ export class Users extends BaseCrud<User> implements OnInit {
         });
         m.routes = routes; // Normalizar a 'routes' en el formulario
         return m;
-      })
+      }),
     });
     this.titleForm = 'Creación de ' + this.subtitle;
     this.isFormVisible = true;
@@ -248,8 +261,6 @@ export class Users extends BaseCrud<User> implements OnInit {
   }
 
   override onSelectionChange(selectedItem: any) {
-
-
     this.isDisplayForm = true;
     this.isEditForm = true;
     this.titleForm = 'Edición de ' + this.subtitle;
@@ -261,23 +272,22 @@ export class Users extends BaseCrud<User> implements OnInit {
     const mappedPermissions = (selectedItem.permissions || []).map(
       (perm: any) => {
         return (
-          this.permissionsOptions.find((opt: any) => opt.name === perm.name) || perm
+          this.permissionsOptions.find((opt: any) => opt.name === perm.name) ||
+          perm
         );
-      }
+      },
     );
 
     // Mapear roles seleccionados con las opciones reales
     const mappedRoles = (selectedItem.roles || []).map((rol: any) => {
-      return (
-        this.rolesOptions.find((opt: any) => opt.name === rol.name) || rol
-      );
+      return this.rolesOptions.find((opt: any) => opt.name === rol.name) || rol;
     });
 
     // Mapear módulos: Mostrar todos los del sistema, pero con el estado del usuario si ya los tiene
     const mappedModules = this.modulesOptions.map((systemMod: any) => {
       // Intentar encontrar el módulo en el usuario por nombre o ID
       const userMod = (selectedItem.modules || []).find(
-        (m: any) => m.name === systemMod.name || m._id === systemMod._id
+        (m: any) => m.name === systemMod.name || m._id === systemMod._id,
       );
 
       // Normalizar la propiedad de rutas (puede venir como 'routes' o 'router')
@@ -291,7 +301,8 @@ export class Users extends BaseCrud<User> implements OnInit {
           isActive: userMod.isActive,
           routes: systemRoutes.map((systemRoute: any) => {
             const userRoute = userRoutes.find(
-              (r: any) => r.name === systemRoute.name || r.path === systemRoute.path
+              (r: any) =>
+                r.name === systemRoute.name || r.path === systemRoute.path,
             );
 
             if (userRoute) {
@@ -303,7 +314,9 @@ export class Users extends BaseCrud<User> implements OnInit {
                 isActive: userRoute.isActive,
                 children: systemChildren.map((systemChild: any) => {
                   const userChild = userChildren.find(
-                    (c: any) => c.name === systemChild.name || c.path === systemChild.path
+                    (c: any) =>
+                      c.name === systemChild.name ||
+                      c.path === systemChild.path,
                   );
                   return {
                     ...JSON.parse(JSON.stringify(systemChild)),
@@ -348,6 +361,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       email: selectedItem.email,
       isActived: selectedItem.isActived,
       isAdmin: selectedItem.isAdmin,
+      company: selectedItem.company,
       isSuperAdmin: selectedItem.isSuperAdmin,
       permissions: mappedPermissions,
       roles: mappedRoles,

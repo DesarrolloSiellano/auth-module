@@ -62,4 +62,11 @@ export class Auth {
       { email }
     );
   }
+
+  refreshToken(refreshToken: string): Observable<any> {
+    return this.http.post<any>(
+      `${ENVIROMENT.urlApi}/auth/refresh`,
+      { refreshToken }
+    );
+  }
 }
