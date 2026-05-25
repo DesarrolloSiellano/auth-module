@@ -1,12 +1,21 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError, BehaviorSubject, filter, take } from 'rxjs';
+import {
+  catchError,
+  switchMap,
+  throwError,
+  BehaviorSubject,
+  filter,
+  take,
+} from 'rxjs';
 import { Auth } from '../../auth/service/auth';
 import { ProcessAuthData } from '../../auth/service/process-auth-data';
 
 let isRefreshing = false;
-const refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+const refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<
+  string | null
+>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -18,11 +27,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Inyectar el token dinámicamente a las cabeceras de la petición si existe.
   // Esto previene que se manden tokens viejos cacheados por los constructores de BaseService.
   let authReq = req;
-  if (token && !req.url.includes('/auth/login') && !req.url.includes('/auth/refresh')) {
+  if (
+    token &&
+    !req.url.includes('/auth/login') &&
+    !req.url.includes('/auth/refresh')
+  ) {
     authReq = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
@@ -34,11 +47,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         !req.url.includes('/auth/login') &&
         !req.url.includes('/auth/refresh')
       ) {
-        console.warn('⚠️ El servidor devolvió 401 - Iniciando refresco de token...');
+        console.warn(
+          '⚠️ El servidor devolvió 401 - Iniciando refresco de token...',
+        );
         const refreshToken = localStorage.getItem('refreshToken');
 
         if (!refreshToken) {
-          console.error('❌ No se encontró un refresh token. Redirigiendo a login.');
+          console.error(
+            '❌ No se encontró un refresh token. Redirigiendo a login.',
+          );
           clearSessionAndRedirect(router);
           return throwError(() => error);
         }
@@ -50,7 +67,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return authService.refreshToken(refreshToken).pipe(
             switchMap((res) => {
               isRefreshing = false;
-              console.log('✅ Token refrescado exitosamente.');
+              console.info('✅ Token refrescado exitosamente.');
               const newToken = res.accessToken;
               processAuthData.proccesAuthData(newToken, refreshToken);
               refreshTokenSubject.next(newToken);
@@ -59,17 +76,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               return next(
                 req.clone({
                   setHeaders: {
-                    Authorization: `Bearer ${newToken}`
-                  }
-                })
+                    Authorization: `Bearer ${newToken}`,
+                  },
+                }),
               );
             }),
             catchError((refreshError) => {
               isRefreshing = false;
-              console.error('❌ Falló el refresco del token. Redirigiendo a login.', refreshError);
+              console.error(
+                '❌ Falló el refresco del token. Redirigiendo a login.',
+                refreshError,
+              );
               clearSessionAndRedirect(router);
               return throwError(() => refreshError);
-            })
+            }),
           );
         } else {
           // Si ya se está refrescando, encolar esta petición hasta tener el nuevo token
@@ -80,17 +100,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               return next(
                 req.clone({
                   setHeaders: {
-                    Authorization: `Bearer ${newToken}`
-                  }
-                })
+                    Authorization: `Bearer ${newToken}`,
+                  },
+                }),
               );
-            })
+            }),
           );
         }
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };
 

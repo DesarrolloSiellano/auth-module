@@ -89,9 +89,10 @@ export class Login implements OnInit, AfterViewInit {
           window.location.href = String(res.url);
           return;
         }
-        console.log(res.meta.token);
-
-        this.processAuthData.proccesAuthData(res.meta.accessToken || res.meta.token, res.meta.refreshToken);
+        this.processAuthData.proccesAuthData(
+          res.meta.accessToken || res.meta.token,
+          res.meta.refreshToken,
+        );
         this.formComponent?.formGroup?.reset();
         //this.showMessageError.set(false);
 

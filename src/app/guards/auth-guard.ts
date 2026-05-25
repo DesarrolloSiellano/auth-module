@@ -33,13 +33,15 @@ export const authGuard: CanActivateFn = (route, state) => {
     // Si el access token ha expirado, intentar refrescarlo proactivamente antes de denegar el acceso
     if (decoded.exp && decoded.exp < currentTime) {
       if (refreshToken) {
-        console.warn('🔑 El token ha expirado. Intentando refrescarlo de manera asíncrona en la guardia...');
+        console.warn(
+          '🔑 El token ha expirado. Intentando refrescarlo de manera asíncrona en la guardia...',
+        );
         return authService.refreshToken(refreshToken).pipe(
           map((res) => {
             const newToken = res.accessToken;
             processAuthData.proccesAuthData(newToken, refreshToken);
-            console.log('✅ Token refrescado exitosamente en la guardia.');
-            
+            console.info('✅ Token refrescado exitosamente en la guardia.');
+
             // Re-evaluar los permisos con el nuevo token obtenido
             const newDecoded = jwtDecode<JwtPayload>(newToken);
             return checkPermissions(newDecoded, router, confirmService);
@@ -50,7 +52,7 @@ export const authGuard: CanActivateFn = (route, state) => {
             sessionStorage.clear();
             router.navigate(['/login']);
             return of(false);
-          })
+          }),
         );
       } else {
         router.navigate(['/login']);
@@ -60,7 +62,10 @@ export const authGuard: CanActivateFn = (route, state) => {
 
     return checkPermissions(decoded, router, confirmService);
   } catch (error) {
-    console.error('❌ Error de decodificación o validación del token en la guardia:', error);
+    console.error(
+      '❌ Error de decodificación o validación del token en la guardia:',
+      error,
+    );
     router.navigate(['/login']);
     return false;
   }
@@ -69,7 +74,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 function checkPermissions(
   decoded: JwtPayload,
   router: Router,
-  confirmService: ConfirmService
+  confirmService: ConfirmService,
 ): boolean {
   if (!decoded.isAdmin) {
     router.navigate(['/login']);
@@ -77,14 +82,14 @@ function checkPermissions(
   }
 
   const hasAdminModule = decoded.modules?.some(
-    (module) => module.name === 'adminUserModule' && module.isActive === true
+    (module) => module.name === 'adminUserModule' && module.isActive === true,
   );
 
   if (!hasAdminModule) {
     confirmService.showMessage(
       'error',
       `No tienes permisos para acceder a esta módulo`,
-      'Contacta al administrador del sistema'
+      'Contacta al administrador del sistema',
     );
     router.navigate(['/login']);
     return false;
@@ -92,7 +97,7 @@ function checkPermissions(
 
   // Validar rol con codeRol 'ADM' y activo
   const hasAdminRole = decoded.roles?.some(
-    (role) => role.codeRol === 'ADM' && role.isActive === true
+    (role) => role.codeRol === 'ADM' && role.isActive === true,
   );
 
   if (!hasAdminRole) {
