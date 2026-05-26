@@ -13,6 +13,7 @@ export interface JwtPayload {
   isSuperAdmin: boolean;
   isNewUser: boolean;
   company: string;
+  tenantId: string;
   modules: any[];
   roles: Rol[];
   permissions: Permission[];

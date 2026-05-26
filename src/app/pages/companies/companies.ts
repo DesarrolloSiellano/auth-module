@@ -1,9 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectorRef,
-  Component,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
 import { DialogModule } from 'primeng/dialog';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
@@ -39,7 +35,8 @@ import { COMPANIES_FORM } from '../../shared/forms/companies.form';
   ],
 })
 export class CompaniesComponent extends BaseCrud<Companies> {
-  @ViewChild(FormTemplateComponent) declare formComponent?: FormTemplateComponent;
+  @ViewChild(FormTemplateComponent)
+  declare formComponent?: FormTemplateComponent;
 
   cols = [
     { field: 'name', header: 'Nombre' },
@@ -61,14 +58,8 @@ export class CompaniesComponent extends BaseCrud<Companies> {
     protected override cdr: ChangeDetectorRef,
     protected override dataLoader: DataLoaderService,
     protected override excelexport: ExcelExportService,
-    protected override confirmService: ConfirmService
+    protected override confirmService: ConfirmService,
   ) {
     super(service, cdr, dataLoader, excelexport, confirmService);
   }
-
-
-
-
-
-
 }

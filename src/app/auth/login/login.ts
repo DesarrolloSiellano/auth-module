@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -18,7 +19,7 @@ import { Router, RouterModule } from '@angular/router';
 import { LOGIN_FORM } from '../../shared/forms/login.form';
 import { ActivatedRoute } from '@angular/router';
 import { UAParser } from 'ua-parser-js';
-import { Toast, ToastModule } from "primeng/toast";
+import { Toast, ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-login',
@@ -32,13 +33,13 @@ import { Toast, ToastModule } from "primeng/toast";
     FormTemplateComponent,
     MessageModule,
     RouterModule,
-    Toast
+    Toast,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   providers: [Auth],
 })
-export class Login implements OnInit {
+export class Login implements OnInit, AfterViewInit {
   @ViewChild(FormTemplateComponent) formComponent?: FormTemplateComponent;
   loginForm = LOGIN_FORM;
   showMessageError = signal(false);
@@ -53,13 +54,17 @@ export class Login implements OnInit {
     private processAuthData: ProcessAuthData,
     private router: Router,
     private cdRef: ChangeDetectorRef,
-    private route: ActivatedRoute
-  ) { }
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       this.redirectUri = params['redirect_uri'] || null;
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.cdRef.detectChanges();
   }
 
   login() {
@@ -84,7 +89,10 @@ export class Login implements OnInit {
           window.location.href = String(res.url);
           return;
         }
-        this.processAuthData.proccesAuthData(res.meta.token);
+        this.processAuthData.proccesAuthData(
+          res.meta.accessToken || res.meta.token,
+          res.meta.refreshToken,
+        );
         this.formComponent?.formGroup?.reset();
         //this.showMessageError.set(false);
 
@@ -112,6 +120,8 @@ export class Login implements OnInit {
   }
 
   recoveryPass() {
-    this.router.navigate(['/recovery'], { queryParams: { redirect_uri: this.redirectUri } });
+    this.router.navigate(['/recovery'], {
+      queryParams: { redirect_uri: this.redirectUri },
+    });
   }
 }

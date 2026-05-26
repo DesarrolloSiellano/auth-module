@@ -38,17 +38,18 @@ export abstract class BaseCrud<T> {
   items: MenuItem[] = [];
   filterExcel: any[] = [];
   isSearchPopulation: boolean = false;
-  protected form : any = {} as any;
+  protected form: any = {} as any;
   //create - update
 
   protected formComponent?: { formGroup: any; reset: () => void };
+  disabledButton: boolean = false;
 
   constructor(
     protected service: IBaseService<T>,
     protected cdr: ChangeDetectorRef,
     protected dataLoader: DataLoaderService,
     protected excelexport: ExcelExportService,
-    protected confirmService: ConfirmService
+    protected confirmService: ConfirmService,
   ) {}
 
   load(event?: TableLazyLoadEvent) {
@@ -87,14 +88,14 @@ export abstract class BaseCrud<T> {
       'pi pi-exclamation-triangle',
       'Cancelar',
       'Aceptar',
-      'secondary'
+      'secondary',
     );
 
     if (!isConfirm) {
       this.confirmService.showMessage(
         'error',
         'Cancelado',
-        `El ${this.subtitle} no se ha eliminado correctamente`
+        `El ${this.subtitle} no se ha eliminado correctamente`,
       );
     }
 
@@ -105,7 +106,7 @@ export abstract class BaseCrud<T> {
             this.confirmService.showMessage(
               'success',
               'Eliminación',
-              `El ${this.subtitle} se ha eliminado correctamente`
+              `El ${this.subtitle} se ha eliminado correctamente`,
             );
           }
         },
@@ -115,7 +116,7 @@ export abstract class BaseCrud<T> {
             this.confirmService.showMessage(
               'error',
               `Error al eliminar el ${this.subtitle}`,
-              err.error.message
+              err.error.message,
             );
           }
         },
@@ -125,8 +126,9 @@ export abstract class BaseCrud<T> {
   }
 
   save() {
+    this.disabledButton = true;
     let id = '';
-    if(this.isEditForm) id = (this.initialData as any)?._id;
+    if (this.isEditForm) id = (this.initialData as any)?._id;
 
     const formValues = this.getFormattedFormValues();
     const request$ = this.isEditForm
@@ -139,10 +141,10 @@ export abstract class BaseCrud<T> {
           this.closeDialog();
           this.confirmService.showMessage(
             'info',
-            (this.isEditForm ? 'Edición' : 'Creación'),
+            this.isEditForm ? 'Edición' : 'Creación',
             `El ${this.subtitle} se ha ` +
               (this.isEditForm ? 'editado' : 'creado') +
-              ' correctamente'
+              ' correctamente',
           );
           this.rechargeTable();
         }
@@ -153,14 +155,14 @@ export abstract class BaseCrud<T> {
           this.confirmService.showMessage(
             'error',
             'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message
+            err.error.message,
           );
         }
         if (err.error.statusCode === 500) {
           this.confirmService.showMessage(
             'error',
             'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message
+            err.error.message,
           );
         }
       },
@@ -200,7 +202,7 @@ export abstract class BaseCrud<T> {
     this.service
       .findByDate(
         moment(event.initial).format('YYYY-MM-DD'),
-        moment(event.final).format('YYYY-MM-DD')
+        moment(event.final).format('YYYY-MM-DD'),
       )
       .subscribe((data: any) => {
         const result = this.dataLoader.handleResponse(data);
@@ -241,5 +243,6 @@ export abstract class BaseCrud<T> {
     this.isDisplayForm = false;
     this.isFormVisible = false;
     this.formComponent?.reset();
+    this.disabledButton = false;
   }
 }

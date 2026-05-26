@@ -56,10 +56,17 @@ export class Auth {
   }
 
 
-  recoveryPassword(email: string): Observable<Response<any>> {
+  recoveryPassword(email: string, redirectUri?: any): Observable<Response<any>> {
     return this.http.post<Response<any>>(
-      `${ENVIROMENT.urlApi}/auth/recovery-password`,
+      `${ENVIROMENT.urlApi}/auth/recovery-password/?redirectUri=${redirectUri}`,
       { email }
+    );
+  }
+
+  refreshToken(refreshToken: string): Observable<any> {
+    return this.http.post<any>(
+      `${ENVIROMENT.urlApi}/auth/refresh`,
+      { refreshToken }
     );
   }
 }

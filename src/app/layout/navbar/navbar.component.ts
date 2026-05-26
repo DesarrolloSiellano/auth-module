@@ -44,6 +44,7 @@ export class NavbarComponent implements OnInit {
   moduleConfig: ModuleConfig = {} as ModuleConfig;
   username: string = '';
   private scrollListener!: () => void;
+  disabledButton: boolean = false;
 
   cogOptions = [
     {
@@ -62,7 +63,7 @@ export class NavbarComponent implements OnInit {
     private el: ElementRef,
     private router: Router,
     private confirmService: ConfirmService,
-    private authService: Auth
+    private authService: Auth,
   ) {}
 
   ngOnInit(): void {
@@ -89,14 +90,14 @@ export class NavbarComponent implements OnInit {
 
     this.renderer.listen('document', 'click', (event) => {
       const content = document.querySelector(
-        '.dashboard-content.dashboard-overlay'
+        '.dashboard-content.dashboard-overlay',
       );
       if (content && content.contains(event.target)) {
         this.toggleSidebar();
       }
     });
 
-    if(localStorage.getItem('isNewUser') === 'true') {
+    if (localStorage.getItem('isNewUser') === 'true') {
       this.isDisplayChangePassword = true;
     }
   }
@@ -172,7 +173,7 @@ export class NavbarComponent implements OnInit {
         'pi pi-exclamation-triangle',
         'Cancelar',
         'Aceptar',
-        'secondary'
+        'secondary',
       );
 
       if (isConfirm) {
@@ -196,42 +197,33 @@ export class NavbarComponent implements OnInit {
   save() {
     const changePassword: ChangePassword = {
       id: localStorage.getItem('_id') as string,
-      currentPassword: this.formComponent?.formGroup?.get('currentPassword')?.value,
+      currentPassword:
+        this.formComponent?.formGroup?.get('currentPassword')?.value,
       newPassword: this.formComponent?.formGroup?.get('newPassword')?.value,
     };
 
+    this.disabledButton = true;
+
     this.authService.changePassword(changePassword).subscribe({
       next: (res) => {
-        if(res.statusCode === 400 || res.statusCode === 404) {
-          this.confirmService.showMessage(
-            'error',
-            'Error',
-            res.message
-          );
+        if (res.statusCode === 400 || res.statusCode === 404) {
+          this.confirmService.showMessage('error', 'Error', res.message);
         }
 
-        if(res.statusCode === 200 || res.statusCode === 201) {
-          this.confirmService.showMessage(
-            'info',
-            'Exito',
-            res.message
-          );
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          this.confirmService.showMessage('info', 'Exito', res.message);
           localStorage.setItem('isNewUser', 'false');
         }
-
       },
       error: (err) => {
         console.error(err.error.message);
-        this.confirmService.showMessage(
-          'error',
-          'Error',
-          err.error.message
-        );
+        this.confirmService.showMessage('error', 'Error', err.error.message);
       },
       complete: () => {
         this.isDisplayChangePassword = false;
+        this.disabledButton = false;
         this.formComponent?.formGroup?.reset();
-      }
-    })
+      },
+    });
   }
 }
