@@ -19,6 +19,11 @@ export class ProcessAuthData {
       );
 
       if (!validatedModuleExists) {
+        this.confirmService.showMessage(
+          'error',
+          `No tienes permisos para acceder a esta módulo`,
+          'Contacta al administrador del sistema',
+        );
         return;
       }
 
