@@ -13,7 +13,7 @@
     [(selection)]="selected" (onRowSelect)="onRowSelect()"
     currentPageReportTemplate="Vista {first} a {last} de {totalRecords} registros"
     [rowsPerPageOptions]="[100,150,200]"
-    [globalFilterFields]="['nombres','apellidos','email']" [tableStyle]="{ 'min-width': '50rem' }"
+    [tableStyle]="{ 'min-width': '50rem' }"
     [resizableColumns]="true"  [rowHover]="true"
     >
 
@@ -65,7 +65,7 @@
           </th>
         }
         @if (options) {
-          <th id="options" style="width:200px" pSortableColumn="estado">Opciones</th>
+          <th id="options" style="width:200px">Opciones</th>
         }
       </tr>
     </ng-template>
@@ -91,18 +91,13 @@
 
     <ng-template #empty pTemplate="emptymessage">
       <tr>
-        <td colspan="12">Registros no encontrados.</td>
+        <td [attr.colspan]="cols.length + 1">Registros no encontrados.</td>
       </tr>
     </ng-template>
 
   </p-table>
 
-  @if(items.length > 0) {
-  }
   <p-contextMenu #cm [model]="items"></p-contextMenu>
 
-  <p-confirmDialog header="Confirmación" icon="pi pi-exclamation-triangle"
-    acceptLabel="Si" header="Confirmación"
-    icon="pi pi-info-circle"></p-confirmDialog>
 </div>
 

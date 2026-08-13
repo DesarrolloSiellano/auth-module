@@ -38,17 +38,18 @@ export abstract class BaseCrud<T> {
   items: MenuItem[] = [];
   filterExcel: any[] = [];
   isSearchPopulation: boolean = false;
-  protected form : any = {} as any;
+  protected form: any = {} as any;
   //create - update
 
   protected formComponent?: { formGroup: any; reset: () => void };
+  disabledButton: boolean = false;
 
   constructor(
     protected service: IBaseService<T>,
     protected cdr: ChangeDetectorRef,
     protected dataLoader: DataLoaderService,
     protected excelexport: ExcelExportService,
-    protected confirmService: ConfirmService
+    protected confirmService: ConfirmService,
   ) {}
 
   load(event?: TableLazyLoadEvent) {
@@ -57,10 +58,9 @@ export abstract class BaseCrud<T> {
       .loadData(this.service.findByPage.bind(this.service), event)
       .subscribe((response: any) => {
         const result = this.dataLoader.handleResponse(response);
-        setTimeout(() => {}, 1500);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
@@ -87,37 +87,31 @@ export abstract class BaseCrud<T> {
       'pi pi-exclamation-triangle',
       'Cancelar',
       'Aceptar',
-      'secondary'
+      'secondary',
     );
 
     if (!isConfirm) {
       this.confirmService.showMessage(
         'error',
         'Cancelado',
-        `El ${this.subtitle} no se ha eliminado correctamente`
+        `El ${this.subtitle} no se ha eliminado correctamente`,
       );
     }
 
     if (isConfirm) {
       this.service.delete(selected._id).subscribe({
         next: (response: any) => {
-          if (response.statusCode === 200) {
+          const status = response?.statusCode;
+          if (status === 200 || status === 201 || status === 204) {
             this.confirmService.showMessage(
               'success',
               'Eliminación',
-              `El ${this.subtitle} se ha eliminado correctamente`
+              `El ${this.subtitle} se ha eliminado correctamente`,
             );
           }
         },
         error: (err: any) => {
           console.error(err.error);
-          if (err.error.statusCode === 400) {
-            this.confirmService.showMessage(
-              'error',
-              `Error al eliminar el ${this.subtitle}`,
-              err.error.message
-            );
-          }
         },
         complete: () => this.rechargeTable(),
       });
@@ -125,8 +119,9 @@ export abstract class BaseCrud<T> {
   }
 
   save() {
+    this.disabledButton = true;
     let id = '';
-    if(this.isEditForm) id = (this.initialData as any)?._id;
+    if (this.isEditForm) id = (this.initialData as any)?._id;
 
     const formValues = this.getFormattedFormValues();
     const request$ = this.isEditForm
@@ -139,32 +134,19 @@ export abstract class BaseCrud<T> {
           this.closeDialog();
           this.confirmService.showMessage(
             'info',
-            (this.isEditForm ? 'Edición' : 'Creación'),
+            this.isEditForm ? 'Edición' : 'Creación',
             `El ${this.subtitle} se ha ` +
               (this.isEditForm ? 'editado' : 'creado') +
-              ' correctamente'
+              ' correctamente',
           );
           this.rechargeTable();
         }
       },
       error: (err: any) => {
+        // El error se notifica de forma global vía el errorInterceptor
         console.error(err.error);
-        if (err.error.statusCode === 400) {
-          this.confirmService.showMessage(
-            'error',
-            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message
-          );
-        }
-        if (err.error.statusCode === 500) {
-          this.confirmService.showMessage(
-            'error',
-            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message
-          );
-        }
+        this.disabledButton = false;
       },
-      complete: () => this.closeDialog(),
     });
   }
 
@@ -184,8 +166,8 @@ export abstract class BaseCrud<T> {
       .subscribe((response) => {
         const result = this.dataLoader.handleResponse(response);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
@@ -200,13 +182,13 @@ export abstract class BaseCrud<T> {
     this.service
       .findByDate(
         moment(event.initial).format('YYYY-MM-DD'),
-        moment(event.final).format('YYYY-MM-DD')
+        moment(event.final).format('YYYY-MM-DD'),
       )
       .subscribe((data: any) => {
         const result = this.dataLoader.handleResponse(data);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
@@ -241,5 +223,6 @@ export abstract class BaseCrud<T> {
     this.isDisplayForm = false;
     this.isFormVisible = false;
     this.formComponent?.reset();
+    this.disabledButton = false;
   }
 }

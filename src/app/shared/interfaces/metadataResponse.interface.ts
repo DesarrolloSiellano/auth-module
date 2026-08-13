@@ -12,4 +12,6 @@ export interface MetadataResponse {
   deletedAt: string;
   version: number;
   token: string;
+  accessToken?: string;
+  refreshToken?: string;
 }

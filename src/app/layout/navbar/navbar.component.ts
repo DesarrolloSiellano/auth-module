@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   Renderer2,
   ViewChild,
@@ -17,7 +18,9 @@ import { DialogModule } from 'primeng/dialog';
 import { CHANGE_PASSWORD_FORM } from '../../shared/forms/change-password.form';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
 import { ButtonModule } from 'primeng/button';
-import { Auth, ChangePassword } from '../../auth/service/auth';
+import { Auth, ChangePassword } from '../../features/auth/service/auth';
+import { SessionStore } from '../../core/services/session.store';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -34,7 +37,7 @@ import { Auth, ChangePassword } from '../../auth/service/auth';
   styleUrl: './navbar.component.scss',
   providers: [SidebarService], // Proporciona el servicio de sidebar
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   @ViewChild('dropdown') dropdown!: IconDropdownComponent;
 
   @ViewChild(FormTemplateComponent)
@@ -44,6 +47,9 @@ export class NavbarComponent implements OnInit {
   moduleConfig: ModuleConfig = {} as ModuleConfig;
   username: string = '';
   private scrollListener!: () => void;
+  private readonly listeners: (() => void)[] = [];
+  private subscriptions: Subscription = new Subscription();
+  disabledButton: boolean = false;
 
   cogOptions = [
     {
@@ -62,15 +68,18 @@ export class NavbarComponent implements OnInit {
     private el: ElementRef,
     private router: Router,
     private confirmService: ConfirmService,
-    private authService: Auth
+    private authService: Auth,
+    private session: SessionStore,
   ) {}
 
   ngOnInit(): void {
     this.moduleConfig = this.getConfigApp.getModule();
     this.username = this.getConfigApp.getUserName();
-    this.sidebarService.sidebarState.subscribe((isOpen) => {
-      this.isSidebarOpen = isOpen;
-    });
+    this.subscriptions.add(
+      this.sidebarService.sidebarState.subscribe((isOpen) => {
+        this.isSidebarOpen = isOpen;
+      }),
+    );
 
     this.scrollListener = this.renderer.listen('window', 'scroll', () => {
       const navbarElement = this.el.nativeElement.querySelector('.navbar');
@@ -80,25 +89,35 @@ export class NavbarComponent implements OnInit {
         this.renderer.removeClass(navbarElement, 'scrolled');
       }
     });
+    this.listeners.push(this.scrollListener);
 
     // Manejo resize y llamado inicial
     this.handleResize(); // Para el estado inicial
-    this.renderer.listen('window', 'resize', () => {
-      this.handleResize();
-    });
+    this.listeners.push(
+      this.renderer.listen('window', 'resize', () => {
+        this.handleResize();
+      }),
+    );
 
-    this.renderer.listen('document', 'click', (event) => {
-      const content = document.querySelector(
-        '.dashboard-content.dashboard-overlay'
-      );
-      if (content && content.contains(event.target)) {
-        this.toggleSidebar();
-      }
-    });
+    this.listeners.push(
+      this.renderer.listen('document', 'click', (event) => {
+        const content = document.querySelector(
+          '.dashboard-content.dashboard-overlay',
+        );
+        if (content && content.contains(event.target)) {
+          this.toggleSidebar();
+        }
+      }),
+    );
 
-    if(localStorage.getItem('isNewUser') === 'true') {
+    if (localStorage.getItem('isNewUser') === 'true') {
       this.isDisplayChangePassword = true;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.listeners.forEach((remove) => remove());
   }
 
   toggleDropdown(trigger: HTMLElement) {
@@ -172,12 +191,11 @@ export class NavbarComponent implements OnInit {
         'pi pi-exclamation-triangle',
         'Cancelar',
         'Aceptar',
-        'secondary'
+        'secondary',
       );
 
       if (isConfirm) {
-        localStorage.clear();
-        sessionStorage.clear();
+        this.session.clear();
         this.router.navigate(['/login']);
       }
     } catch (error) {
@@ -196,42 +214,30 @@ export class NavbarComponent implements OnInit {
   save() {
     const changePassword: ChangePassword = {
       id: localStorage.getItem('_id') as string,
-      currentPassword: this.formComponent?.formGroup?.get('currentPassword')?.value,
+      currentPassword:
+        this.formComponent?.formGroup?.get('currentPassword')?.value,
       newPassword: this.formComponent?.formGroup?.get('newPassword')?.value,
     };
 
+    this.disabledButton = true;
+
     this.authService.changePassword(changePassword).subscribe({
       next: (res) => {
-        if(res.statusCode === 400 || res.statusCode === 404) {
-          this.confirmService.showMessage(
-            'error',
-            'Error',
-            res.message
-          );
-        }
-
-        if(res.statusCode === 200 || res.statusCode === 201) {
-          this.confirmService.showMessage(
-            'info',
-            'Exito',
-            res.message
-          );
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          this.confirmService.showMessage('info', 'Exito', res.message);
           localStorage.setItem('isNewUser', 'false');
         }
-
       },
       error: (err) => {
-        console.error(err.error.message);
-        this.confirmService.showMessage(
-          'error',
-          'Error',
-          err.error.message
-        );
+        // El error se notifica de forma global vía el errorInterceptor
+        console.error(err.error?.message || err.message);
+        this.disabledButton = false;
       },
       complete: () => {
         this.isDisplayChangePassword = false;
+        this.disabledButton = false;
         this.formComponent?.formGroup?.reset();
-      }
-    })
+      },
+    });
   }
 }

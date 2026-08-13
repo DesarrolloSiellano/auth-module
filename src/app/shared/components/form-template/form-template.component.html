@@ -49,7 +49,7 @@
               [toggleMask]="true"
               promptLabel="Ingrese la contraseña"
               weakLabel="Devil"
-              [feedback]="item.feedback"
+              [feedback]="item.feedback ?? false"
               mediumLabel="Medio"
               class="w-full"
               strongLabel="Fuerte"
@@ -112,7 +112,7 @@
               slotChar="{{item.slotChar}}"
               required="{{item.required}}"
               formControlName="{{item.name}}"
-              [disabled]="item.disabled"
+              [disabled]="item.disabled ?? false"
               [pKeyFilter]="item.pKeyFilter" />
             <label for="{{item.name}}">{{item.label}}</label>
           </p-floatlabel>

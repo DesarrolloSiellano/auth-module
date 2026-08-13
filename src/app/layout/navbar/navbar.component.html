@@ -1,4 +1,3 @@
-
 <header class="navbar">
   <div class="nabvar-title-wrapper">
     <div class="btn btn-link btn-sm" (click)="toggleSidebar()">
@@ -21,16 +20,15 @@
 </header>
 <app-icon-dropdown #dropdown [options]="cogOptions"></app-icon-dropdown>
 
-<p-dialog [(visible)]="isDisplayChangePassword" header="Cambiar Contraseña"
-  [draggable]="false" [resizable]="true" [closable]="false" [modal]="true"
-  [baseZIndex]="10000" >
+<p-dialog [(visible)]="isDisplayChangePassword" header="Cambiar Contraseña" [draggable]="false" [resizable]="true"
+  [closable]="false" [modal]="true" [baseZIndex]="10000">
 
-  <app-form-template [form]="changePasswordForm"
-    [colClass]="'col-12'"></app-form-template>
+  <app-form-template [form]="changePasswordForm" [colClass]="'col-12'"></app-form-template>
 
-    <ng-template #footer>
-        <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" />
-        <p-button label="Save" [outlined]="true" severity="primary" [disabled]="formComponent?.formGroup?.invalid" (click)="save()"  />
-    </ng-template>
+  <ng-template #footer>
+    <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" />
+    <p-button label="Save" [outlined]="true" severity="primary"
+      [disabled]="formComponent?.formGroup?.invalid || disabledButton" (click)="save()" />
+  </ng-template>
 
 </p-dialog>

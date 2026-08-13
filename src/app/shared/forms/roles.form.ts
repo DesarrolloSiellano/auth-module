@@ -1,4 +1,6 @@
-export const ROLES_FORM = [
+import { FormFieldConfig } from './form-field.model';
+
+export const ROLES_FORM: FormFieldConfig[] = [
   {
     name: 'name',
     label: 'Nombre',
