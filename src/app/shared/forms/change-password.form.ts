@@ -1,4 +1,6 @@
-export const CHANGE_PASSWORD_FORM = [
+import { FormFieldConfig } from './form-field.model';
+
+export const CHANGE_PASSWORD_FORM: FormFieldConfig[] = [
   {
     name: 'currentPassword',
     label: 'Contraseña Actual',

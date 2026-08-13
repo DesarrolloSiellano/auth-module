@@ -1,4 +1,6 @@
-export const MODULE_FORM = [
+import { FormFieldConfig } from './form-field.model';
+
+export const MODULE_FORM: FormFieldConfig[] = [
   {
     name: 'name',
     label: 'Nombre',

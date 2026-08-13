@@ -1,4 +1,5 @@
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
@@ -10,8 +11,10 @@ import Aura from '@primeuix/themes/aura';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { authInterceptor } from './shared/interceptor/auth-interceptor';
-import { idempotencyInterceptor } from './shared/interceptor/idempotency.interceptor';
+import { idempotencyInterceptor } from './core/interceptors/idempotency.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { SessionBootstrapService } from './core/services/session-bootstrap.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     ConfirmationService,
     MessageService,
     provideHttpClient(
-      withInterceptors([authInterceptor, idempotencyInterceptor]),
+      withInterceptors([errorInterceptor, authInterceptor, idempotencyInterceptor]),
     ),
     provideAnimationsAsync(),
     providePrimeNG({
@@ -35,5 +38,12 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (sessionBootstrap: SessionBootstrapService) => () =>
+        sessionBootstrap.load(),
+      deps: [SessionBootstrapService],
+      multi: true,
+    },
   ],
 };

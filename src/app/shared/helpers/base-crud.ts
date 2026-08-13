@@ -58,10 +58,9 @@ export abstract class BaseCrud<T> {
       .loadData(this.service.findByPage.bind(this.service), event)
       .subscribe((response: any) => {
         const result = this.dataLoader.handleResponse(response);
-        setTimeout(() => {}, 1500);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
@@ -102,7 +101,8 @@ export abstract class BaseCrud<T> {
     if (isConfirm) {
       this.service.delete(selected._id).subscribe({
         next: (response: any) => {
-          if (response.statusCode === 200) {
+          const status = response?.statusCode;
+          if (status === 200 || status === 201 || status === 204) {
             this.confirmService.showMessage(
               'success',
               'Eliminación',
@@ -112,13 +112,6 @@ export abstract class BaseCrud<T> {
         },
         error: (err: any) => {
           console.error(err.error);
-          if (err.error.statusCode === 400) {
-            this.confirmService.showMessage(
-              'error',
-              `Error al eliminar el ${this.subtitle}`,
-              err.error.message,
-            );
-          }
         },
         complete: () => this.rechargeTable(),
       });
@@ -150,23 +143,10 @@ export abstract class BaseCrud<T> {
         }
       },
       error: (err: any) => {
+        // El error se notifica de forma global vía el errorInterceptor
         console.error(err.error);
-        if (err.error.statusCode === 400) {
-          this.confirmService.showMessage(
-            'error',
-            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message,
-          );
-        }
-        if (err.error.statusCode === 500) {
-          this.confirmService.showMessage(
-            'error',
-            'Error al ' + (this.isEditForm ? 'editar' : 'crear'),
-            err.error.message,
-          );
-        }
+        this.disabledButton = false;
       },
-      complete: () => this.closeDialog(),
     });
   }
 
@@ -186,8 +166,8 @@ export abstract class BaseCrud<T> {
       .subscribe((response) => {
         const result = this.dataLoader.handleResponse(response);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
@@ -207,8 +187,8 @@ export abstract class BaseCrud<T> {
       .subscribe((data: any) => {
         const result = this.dataLoader.handleResponse(data);
         if (result.ok) {
-          this.totalRecords = result.totalResults;
-          this.data = result.data;
+          this.totalRecords = result.totalResults ?? 0;
+          this.data = (result.data ?? []) as T[];
           this.loading = false;
         } else {
           this.loading = false;
