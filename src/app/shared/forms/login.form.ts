@@ -1,4 +1,6 @@
-export const LOGIN_FORM = [
+import { FormFieldConfig } from './form-field.model';
+
+export const LOGIN_FORM: FormFieldConfig[] = [
   {
     name: 'email',
     label: 'Correo Electronico',
@@ -34,7 +36,7 @@ export const LOGIN_FORM = [
 ];
 
 
-export const RECOVERY_FORM = [
+export const RECOVERY_FORM: FormFieldConfig[] = [
   {
     name: 'email',
     label: 'Correo Electronico',

@@ -1,52 +1,62 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export abstract class BaseService<TModel, TResponse> {
-  protected headers: HttpHeaders;
-  protected token: string = '';
-
   constructor(
     protected http: HttpClient,
-    protected baseUrl: string  // URL base para las peticiones
-  ) {
-    this.token = localStorage.getItem('token') || '';  /// puedes pasar el token por parámetro si quieres
-    this.headers = this.token ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`) : new HttpHeaders();
-  }
+    protected baseUrl: string,
+  ) {}
 
   findAll(): Observable<TResponse> {
-    return this.http.get<TResponse>(`${this.baseUrl}` , { headers: this.headers });
+    return this.http.get<TResponse>(`${this.baseUrl}`);
   }
 
   findByDocument(document: string): Observable<TResponse> {
-    return this.http.get<TResponse>(`${this.baseUrl}/${document}`, { headers: this.headers });
+    return this.http.get<TResponse>(`${this.baseUrl}/${encodeURIComponent(document)}`);
   }
 
   findById(id: string): Observable<TResponse> {
-    return this.http.get<TResponse>(`${this.baseUrl}/${id}`, { headers: this.headers });
+    return this.http.get<TResponse>(`${this.baseUrl}/${encodeURIComponent(id)}`);
   }
 
   findByPage(
     from?: number,
     limit?: number,
-    global?: any,
-    filters?: string
+    global?: string,
+    filters?: string,
   ): Observable<TResponse> {
-    return this.http.get<TResponse>(`${this.baseUrl}/findByPage?from=${from}&limit=${limit}&global=${global}&filters=${filters}`, { headers: this.headers });
+    const params = [
+      from !== undefined ? `from=${encodeURIComponent(String(from))}` : '',
+      limit !== undefined ? `limit=${encodeURIComponent(String(limit))}` : '',
+      global ? `global=${encodeURIComponent(global)}` : '',
+      filters ? `filters=${encodeURIComponent(filters)}` : '',
+    ]
+      .filter(Boolean)
+      .join('&');
+
+    return this.http.get<TResponse>(`${this.baseUrl}/findByPage${params ? `?${params}` : ''}`);
   }
 
-  findByDate(dateIni?: string, dateEnd?: string): Observable<TResponse> {
-    return this.http.get<TResponse>(`${this.baseUrl}/findByDate/?dateIni=${dateIni}&dateEnd=${dateEnd}`, { headers: this.headers });
+  findByDate(startDate?: string, endDate?: string): Observable<TResponse> {
+    const params = [
+      startDate ? `startDate=${encodeURIComponent(startDate)}` : '',
+      endDate ? `endDate=${encodeURIComponent(endDate)}` : '',
+    ]
+      .filter(Boolean)
+      .join('&');
+
+    return this.http.get<TResponse>(`${this.baseUrl}/findByDate${params ? `?${params}` : ''}`);
   }
 
   create(item: TModel): Observable<TResponse> {
-    return this.http.post<TResponse>(`${this.baseUrl}`, item, { headers: this.headers });
+    return this.http.post<TResponse>(`${this.baseUrl}`, item);
   }
 
   update(id: string, item: TModel): Observable<TResponse> {
-    return this.http.put<TResponse>(`${this.baseUrl}/${id}`, item, { headers: this.headers });
+    return this.http.put<TResponse>(`${this.baseUrl}/${encodeURIComponent(id)}`, item);
   }
 
   delete(id: string): Observable<TResponse> {
-    return this.http.delete<TResponse>(`${this.baseUrl}/${id}`, { headers: this.headers });
+    return this.http.delete<TResponse>(`${this.baseUrl}/${encodeURIComponent(id)}`);
   }
 }

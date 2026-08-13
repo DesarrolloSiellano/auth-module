@@ -3,6 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   SimpleChanges,
@@ -33,8 +34,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 
 import { ColorPickerModule } from 'primeng/colorpicker';
-
-FormValidationUtils;
+import { Subscription } from 'rxjs';
+import { FormFieldConfig } from '../../forms/form-field.model';
 
 @Component({
   selector: 'app-form-template',
@@ -61,7 +62,7 @@ FormValidationUtils;
 })
 export class FormTemplateComponent implements OnInit, OnChanges {
   @Input() isVisible: boolean = false;
-  @Input() form: any[] = [];
+  @Input() form: FormFieldConfig[] = [];
   @Input() formValidations: any;
   @Input() initialData: any;
   @Input() id: string = '';
@@ -76,6 +77,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
   @Input() cancelForm!: Function;
 
   formGroup!: FormGroup;
+  private subscriptions = new Subscription();
 
   constructor(private formBuilder: FormBuilder) {}
 
@@ -83,7 +85,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     this.form = filterAndSort(this.form);
 
     this.formGroup = this.formBuilder.group(
-      this.form.reduce((group, item) => {
+      this.form.reduce<Record<string, any>>((group, item) => {
         const isCheckbox = item.type === 'checkbox'; // Verificar si es un checkbox
 
         group[item.name] = [
@@ -93,6 +95,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
             item.maxLength ? Validators.maxLength(+item.maxLength) : null,
             item.minLength ? Validators.minLength(+item.minLength) : null,
             item.pattern ? Validators.pattern(item.pattern) : null,
+            ...(item.extraValidators || []),
           ].filter(Boolean),
         ];
         return group;
@@ -109,25 +112,31 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     }
 
     // Suscríbete a los valueChanges para revalidar cuando cambie:
-    this.formGroup.get('confirmPassword')?.valueChanges.subscribe(() => {
-      this.formGroup.updateValueAndValidity({
-        onlySelf: true,
-        emitEvent: false,
-      });
-    });
+    this.subscriptions.add(
+      this.formGroup.get('confirmPassword')?.valueChanges.subscribe(() => {
+        this.formGroup.updateValueAndValidity({
+          onlySelf: true,
+          emitEvent: false,
+        });
+      }),
+    );
 
-    this.formGroup.get('newPassword')?.valueChanges.subscribe(() => {
-      this.formGroup.updateValueAndValidity({
-        onlySelf: true,
-        emitEvent: false,
-      });
-    });
+    this.subscriptions.add(
+      this.formGroup.get('newPassword')?.valueChanges.subscribe(() => {
+        this.formGroup.updateValueAndValidity({
+          onlySelf: true,
+          emitEvent: false,
+        });
+      }),
+    );
 
     this.form.forEach((item) => {
       if (item.dependsOn) {
-        this.formGroup.get(item.dependsOn)?.valueChanges.subscribe(() => {
-          this.updateFieldStatesDisabledByDepends();
-        });
+        this.subscriptions.add(
+          this.formGroup.get(item.dependsOn)?.valueChanges.subscribe(() => {
+            this.updateFieldStatesDisabledByDepends();
+          }),
+        );
       }
 
       if (
@@ -135,17 +144,27 @@ export class FormTemplateComponent implements OnInit, OnChanges {
         item.controls &&
         Array.isArray(item.controls)
       ) {
-        this.formGroup.get(item.name)?.valueChanges.subscribe((value) => {
-          this.updateFieldStateDisabled();
-        });
+        this.subscriptions.add(
+          this.formGroup.get(item.name)?.valueChanges.subscribe((value) => {
+            this.updateFieldStateDisabled();
+          }),
+        );
       }
     });
     this.updateFieldStatesDisabledByDepends();
     this.updateFieldStateDisabled();
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialData'] && changes['initialData'].currentValue) {
+    if (
+      changes['initialData'] &&
+      changes['initialData'].currentValue &&
+      this.formGroup
+    ) {
       this.formGroup.patchValue(changes['initialData'].currentValue);
       this.updateFieldStateDisabled();
       this.updateFieldStatesDisabledByDepends();
@@ -215,7 +234,9 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     if (selectedValues.length === 0) {
       return 'Ningún ítem seleccionado';
     } else if (selectedValues.length <= 3) {
-      return selectedValues.map((item: any) => item.nombre || item).join(', ');
+      return selectedValues
+        .map((item: any) => item.name || item.nombre || item)
+        .join(', ');
     } else {
       return `Has seleccionado ${selectedValues.length} items`;
     }

@@ -1,4 +1,6 @@
-export const COMPANIES_FORM = [
+import { FormFieldConfig } from './form-field.model';
+
+export const COMPANIES_FORM: FormFieldConfig[] = [
   {
     name: 'name',
     label: 'Nombre',

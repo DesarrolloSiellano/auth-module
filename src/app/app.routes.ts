@@ -1,17 +1,17 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth-guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>
-      import('./auth/login/login').then((m) => m.Login),
+      import('./features/auth/login/login').then((m) => m.Login),
   },
   {
     path: 'recovery',
     loadComponent: () =>
-      import('./auth/recovery/recovery').then((m) => m.RecoveryComponent),
+      import('./features/auth/recovery/recovery').then((m) => m.RecoveryComponent),
   },
 
   {
@@ -22,32 +22,32 @@ export const routes: Routes = [
 
   {
     path: 'pages',
-    loadComponent: () => import('./pages/template/template.component').then((m) => m.TemplateComponent), canActivate: [authGuard],
+    loadComponent: () => import('./features/template/template.component').then((m) => m.TemplateComponent), canActivate: [authGuard],
     children: [
       {
         path: 'roles',
         loadComponent: () =>
-          import('./pages/roles/roles').then((m) => m.RolesComponent),
+          import('./features/roles/roles').then((m) => m.RolesComponent),
       },
       {
         path: 'permissions',
         loadComponent: () =>
-          import('./pages/permissions/permissions').then((m) => m.PermissionsComponent),
+          import('./features/permissions/permissions').then((m) => m.PermissionsComponent),
       },
       {
         path: 'users',
         loadComponent: () =>
-          import('./pages/users/users').then((m) => m.Users),
+          import('./features/users/users').then((m) => m.Users),
       },
       {
         path: 'modules',
         loadComponent: () =>
-          import('./pages/modules/modules').then((m) => m.ModulesComponent),
+          import('./features/modules/modules').then((m) => m.ModulesComponent),
       },
       {
         path: 'companies',
         loadComponent: () =>
-          import('./pages/companies/companies').then((m) => m.CompaniesComponent),
+          import('./features/companies/companies').then((m) => m.CompaniesComponent),
       },
 
     ]
