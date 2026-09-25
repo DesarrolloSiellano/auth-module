@@ -26,7 +26,7 @@ describe('FormTemplateComponent', () => {
       { name: 'name', label: 'Nombre', type: 'text', show: true, required: true, weight: 1 },
       { name: 'active', label: 'Activo', type: 'checkbox', show: true, value: false, weight: 2 },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     fixture.detectChanges();
 
     expect(component.formGroup.get('name')).toBeTruthy();
@@ -40,7 +40,7 @@ describe('FormTemplateComponent', () => {
       { name: 'hidden', label: 'H', type: 'text', show: false, weight: 1 },
       { name: 'a', label: 'A', type: 'text', show: true, weight: 2 },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     fixture.detectChanges();
 
     expect(component.formGroup.get('hidden')).toBeNull();
@@ -61,7 +61,7 @@ describe('FormTemplateComponent', () => {
       { name: 'tm', label: 'T2', type: 'timeonly', show: true, weight: 10 },
       { name: 'ms', label: 'Ms', type: 'multiselect', show: true, weight: 11, options: [{ name: 'X', value: 1 }], optionName: 'name' },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     expect(() => fixture.detectChanges()).not.toThrow();
 
     ['txt', 'em', 'pw', 'ta', 'mk', 'sel', 'cb', 'col', 'dp', 'tm', 'ms'].forEach(
@@ -75,7 +75,7 @@ describe('FormTemplateComponent', () => {
       { name: 'newPassword', label: 'Nueva', type: 'password', show: true, weight: 2 },
       { name: 'confirmPassword', label: 'Confirmar', type: 'password', show: true, weight: 3 },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     fixture.detectChanges();
 
     component.formGroup.setValue({
@@ -93,7 +93,7 @@ describe('FormTemplateComponent', () => {
       { name: 'active', label: 'Activo', type: 'checkbox', show: true, value: false, weight: 1, controls: ['detail'] },
       { name: 'detail', label: 'Detalle', type: 'text', show: true, weight: 2 },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     fixture.detectChanges();
 
     expect(component.formGroup.get('detail')?.disabled).toBe(true);
@@ -115,7 +115,7 @@ describe('FormTemplateComponent', () => {
         disabledCondition: (group: any) => group.get('kind')?.value !== 'full',
       },
     ];
-    component.form = fields;
+    fixture.componentRef.setInput('form', fields);
     fixture.detectChanges();
 
     expect(component.formGroup.get('extra')?.disabled).toBe(true);
@@ -125,9 +125,9 @@ describe('FormTemplateComponent', () => {
   });
 
   it('should provide a multiselect label', () => {
-    component.form = [
+    fixture.componentRef.setInput('form', [
       { name: 'ms', label: 'Ms', type: 'multiselect', show: true, options: [{ name: 'A' }, { name: 'B' }, { name: 'C' }], optionName: 'name' },
-    ] as FormFieldConfig[];
+    ] as FormFieldConfig[]);
     fixture.detectChanges();
 
     expect(component.getMultiSelectLabel('ms')).toBe('Ningún ítem seleccionado');
@@ -146,9 +146,9 @@ describe('FormTemplateComponent', () => {
   });
 
   it('should build the multiselect label from alternative fields', () => {
-    component.form = [
+    fixture.componentRef.setInput('form', [
       { name: 'ms', label: 'Ms', type: 'multiselect', show: true, options: [{ name: 'A' }], optionName: 'name' },
-    ] as FormFieldConfig[];
+    ] as FormFieldConfig[]);
     fixture.detectChanges();
 
     component.formGroup.get('ms')?.setValue([{ nombre: 'X' }]);
@@ -159,29 +159,26 @@ describe('FormTemplateComponent', () => {
   });
 
   it('should patch initial data on changes', () => {
-    component.form = [
+    fixture.componentRef.setInput('form', [
       { name: 'name', label: 'Nombre', type: 'text', show: true, weight: 1 },
-    ] as FormFieldConfig[];
+    ] as FormFieldConfig[]);
     fixture.detectChanges();
 
-    component.ngOnChanges({
-      initialData: { previousValue: null, currentValue: { name: 'John' }, firstChange: true },
-    } as any);
+    fixture.componentRef.setInput('initialData', { name: 'John' });
+    fixture.detectChanges();
 
     expect(component.formGroup.get('name')?.value).toBe('John');
   });
 
   it('should reset the form and state', () => {
-    component.form = [
+    fixture.componentRef.setInput('form', [
       { name: 'name', label: 'Nombre', type: 'text', show: true, weight: 1 },
-    ] as FormFieldConfig[];
+    ] as FormFieldConfig[]);
     fixture.detectChanges();
 
     component.formGroup.patchValue({ name: 'X' });
     component.reset();
 
-    expect(component.isEdit).toBe(false);
-    expect(component.initialData).toBeNull();
     expect(component.formGroup.get('name')?.value).toBeFalsy();
   });
 });

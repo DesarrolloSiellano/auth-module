@@ -1,0 +1,63 @@
+.sessions {
+  .sess-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .sess-title {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+
+    .sess-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 16px;
+      background: rgba(94, 122, 244, 0.14);
+      color: #4054c7;
+      font-size: 1.35rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--p-surface-800);
+    }
+
+    p {
+      margin: 0.1rem 0 0;
+      color: var(--p-surface-500);
+      font-size: 0.88rem;
+    }
+  }
+
+  .sess-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .sess-panel {
+    background: #fff;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 16px;
+    padding: 1rem 1.15rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .sess-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+}

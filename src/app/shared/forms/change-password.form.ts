@@ -13,7 +13,7 @@ export const CHANGE_PASSWORD_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -28,7 +28,7 @@ export const CHANGE_PASSWORD_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -44,7 +44,7 @@ export const CHANGE_PASSWORD_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     //pattern: /^[a-zA-ZáéíóúÁÉÍÓÜñÜ\s]+$/,
   },
 ];

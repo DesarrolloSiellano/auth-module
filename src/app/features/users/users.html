@@ -2,12 +2,129 @@
 
 
 <div class="content">
+  <div class="users-filters card">
+    <div class="users-filters-head">
+      <p-button [label]="filtersPanelVisible ? 'Ocultar filtros' : 'Búsqueda avanzada'"
+        icon="pi pi-filter" severity="secondary" [outlined]="true"
+        (click)="toggleFiltersPanel()" />
+      @if (savedFilters.length) {
+        <span class="saved-label">Guardadas:</span>
+        @for (sf of savedFilters; track sf._id) {
+          <p-button [label]="sf.name" icon="pi pi-bookmark" size="small"
+            severity="info" [outlined]="true" (onClick)="applySavedFilter(sf)" />
+          <p-button icon="pi pi-times" size="small" severity="danger"
+            [text]="true" ariaLabel="Eliminar búsqueda"
+            (click)="deleteSavedFilter(sf)" />
+        }
+      }
+    </div>
+
+    @if (filtersPanelVisible) {
+      <div class="users-filters-grid">
+        <input pInputText class="w-full" placeholder="Empresa"
+          [(ngModel)]="advancedFilters['company']" />
+        <input pInputText class="w-full" placeholder="Rol (código/nombre)"
+          [(ngModel)]="advancedFilters['rol']" />
+        <p-select styleClass="w-full"
+          [options]="[{label:'Todos',value:''},{label:'Activos',value:'true'},{label:'Inactivos',value:'false'}]"
+          optionLabel="label" optionValue="value" appendTo="body"
+          [(ngModel)]="advancedFilters['estado']" placeholder="Estado" />
+        <p-select styleClass="w-full"
+          [options]="[{label:'Todos',value:''},{label:'Bloqueados',value:'true'},{label:'No bloqueados',value:'false'}]"
+          optionLabel="label" optionValue="value" appendTo="body"
+          [(ngModel)]="advancedFilters['isBlocked']" placeholder="Bloqueo" />
+        <input pInputText class="w-full" placeholder="Correo"
+          [(ngModel)]="advancedFilters['email']" />
+        <input pInputText class="w-full" placeholder="Usuario"
+          [(ngModel)]="advancedFilters['username']" />
+        <input pInputText class="w-full" placeholder="Etiquetas (coma)"
+          [(ngModel)]="advancedFilters['tags']" />
+        <input pInputText class="w-full" placeholder="Grupos (coma)"
+          [(ngModel)]="advancedFilters['groups']" />
+        <p-datepicker styleClass="w-full" dateFormat="yy-mm-dd" appendTo="body"
+          [showIcon]="true" [(ngModel)]="advancedFilters['desde']" placeholder="Desde" />
+        <p-datepicker styleClass="w-full" dateFormat="yy-mm-dd" appendTo="body"
+          [showIcon]="true" [(ngModel)]="advancedFilters['hasta']" placeholder="Hasta" />
+      </div>
+      <div class="users-filters-actions">
+        <p-button label="Buscar" icon="pi pi-search" [loading]="loading"
+          [disabled]="loading" (click)="applyAdvancedFilters()" />
+        <p-button label="Limpiar" icon="pi pi-filter-slash" severity="secondary"
+          [text]="true" (click)="clearAdvancedFilters()" />
+        <p-button label="Guardar búsqueda" icon="pi pi-bookmark" severity="info"
+          [outlined]="true" [disabled]="actionBusy" (click)="openSaveFilter()" />
+        <span class="export-group">
+          <p-button label="Excel" icon="pi pi-file-excel" severity="success"
+            [outlined]="true" [loading]="exporting" [disabled]="exporting"
+            (click)="exportFiltered('xlsx')" />
+          <p-button label="CSV" icon="pi pi-file" severity="secondary"
+            [outlined]="true" [disabled]="exporting"
+            (click)="exportFiltered('csv')" />
+          <p-button label="PDF" icon="pi pi-file-pdf" severity="danger"
+            [outlined]="true" [disabled]="exporting"
+            (click)="exportFiltered('pdf')" />
+        </span>
+      </div>
+    }
+  </div>
+
   <app-list-template [title]="'Lista de ' + title" [showTitle]="true" [toAdd]="toAdd" [options]="true" [cols]="cols"
     [data]="data" [lazy]="true" [totalRecords]="totalRecords" [loading]="loading" [filtersGlobal]="filtersGlobal"
     [updateItem]="update.bind(this)" [deleteItem]="delete.bind(this)" (loadLazy)="load($any($event))"
-    (dateQuery)="queryDate($event)" (create)="create()" (update)="update($event)" (delete)="delete($event)"
-    (exportPage)="exportAsXLSX()" (reload)="rechargeTable()" (onRowSelectionChange)="onSelectionChange($any($event))">
+    (dateQuery)="queryDate($event)" (create)="create()" (update)="update($any($event))" (delete)="delete($any($event))"
+    (exportPage)="exportAsXLSX()" (reload)="rechargeTable()" (onRowSelectionChange)="onSelectionChange($any($event))"
+    [bulkSelectable]="true" [bulkActions]="bulkActionsList" [rowActionsFn]="rowActionsFor"
+    [showDelete]="false" [actionsDisabled]="actionBusy || isBulkProcessing"
+    (bulkAction)="onBulkAction($any($event))" (extraAction)="onExtraAction($any($event))">
   </app-list-template>
+
+  <p-dialog [(visible)]="blockDialogVisible" [modal]="true" [style]="{ width: '440px' }"
+    header="Bloquear usuario" [draggable]="false">
+    @if (blockTarget) {
+      <p class="m-0 mb-3">Usuario: <strong>{{ blockTarget.email }}</strong></p>
+      <input pInputText class="w-full mb-3" placeholder="Motivo del bloqueo"
+        [(ngModel)]="blockReason" />
+      <p-datepicker [showTime]="true" appendTo="body" class="w-full"
+        [(ngModel)]="blockUntil" placeholder="Bloquear hasta (opcional)" />
+    }
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" severity="secondary" [text]="true"
+        (click)="blockDialogVisible = false" />
+      <p-button label="Bloquear" severity="danger" [loading]="actionBusy"
+        [disabled]="actionBusy" (click)="saveBlock()" />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="saveFilterDialogVisible" [modal]="true"
+    [style]="{ width: '420px' }" header="Guardar búsqueda" [draggable]="false">
+    <input pInputText class="w-full" placeholder="Nombre de la búsqueda"
+      [(ngModel)]="savedFilterName" />
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" severity="secondary" [text]="true"
+        (click)="saveFilterDialogVisible = false" />
+      <p-button label="Guardar" [loading]="actionBusy" [disabled]="actionBusy"
+        (click)="saveCurrentFilter()" />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="bulkAssignDialogVisible" [modal]="true"
+    [style]="{ width: '460px' }" [header]="bulkAssignTitle" [draggable]="false">
+    <p class="m-0 mb-3">
+      Usuarios seleccionados: <strong>{{ bulkAssignTargets.length }}</strong>
+    </p>
+    <p-multiselect [options]="bulkAssignOptions"
+      [optionLabel]="bulkAssignOptionLabel"
+      [optionValue]="bulkAssignOptionValue"
+      [(ngModel)]="bulkAssignSelection" appendTo="body" [filter]="true"
+      [placeholder]="bulkAssignTitle" class="w-full" />
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" severity="secondary" [text]="true"
+        (click)="bulkAssignDialogVisible = false" />
+      <p-button label="Asignar" [loading]="isBulkProcessing"
+        [disabled]="bulkAssignSelection.length === 0 || isBulkProcessing"
+        (click)="confirmBulkAssign()" />
+    </ng-template>
+  </p-dialog>
 
   <p-dialog [(visible)]="isDisplayForm" [style]="{width: '90vw'}"
     [breakpoints]="{ '1199px': '75vw', '991px': '85vw', '767px': '95vw' }" [header]="titleForm" [draggable]="false"
@@ -93,14 +210,57 @@
               <!-- Correo -->
               <div class="col-lg-4 col-md-6 col-sm-12">
                 <div class="p-md">
-                  <p-floatLabel variant="on">
-                    <input type="email" pInputText id="email" autocomplete="off" class="w-full"
-                      formControlName="email" />
-                    <label for="email">Correo Electrónico</label>
-                  </p-floatLabel>
+                  <div class="field-with-action">
+                    <p-floatLabel variant="on" class="flex-1">
+                      <input type="email" pInputText id="email" autocomplete="off" class="w-full"
+                        formControlName="email" (input)="onEmailInput($event)" />
+                      <label for="email">Correo Electrónico</label>
+                    </p-floatLabel>
+                    <p-button icon="pi pi-search" severity="secondary" [outlined]="true" [rounded]="true"
+                      title="Verificar disponibilidad del correo" ariaLabel="Verificar correo"
+                      (click)="checkEmailNow()" [disabled]="emailStatus === 'checking'" />
+                  </div>
                   <div class="message-validation">
                     @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
                     <span>{{ getErrorMessage('email') }}</span>
+                    }
+                    @if (emailStatus === 'checking') {
+                    <span class="availability-checking"><i class="pi pi-spin pi-spinner"></i> Verificando...</span>
+                    } @else if (emailAvailabilityMessage) {
+                    <span [class.availability-ok]="emailStatus === 'available'"
+                      [class.availability-taken]="emailStatus === 'taken'">
+                      <i class="pi"
+                        [ngClass]="emailStatus === 'available' ? 'pi-check-circle' : 'pi-times-circle'"></i>
+                      {{ emailAvailabilityMessage }}
+                    </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Usuario -->
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <div class="field-with-action">
+                    <p-floatLabel variant="on" class="flex-1">
+                      <input type="text" pInputText id="username" autocomplete="off" class="w-full"
+                        formControlName="username" (input)="onUsernameInput($event)" />
+                      <label for="username">Usuario</label>
+                    </p-floatLabel>
+                    <p-button icon="pi pi-search" severity="secondary" [outlined]="true" [rounded]="true"
+                      title="Verificar disponibilidad del usuario" ariaLabel="Verificar usuario"
+                      (click)="checkUsernameNow()" [disabled]="usernameStatus === 'checking'" />
+                  </div>
+                  <div class="message-validation">
+                    @if (usernameStatus === 'checking') {
+                    <span class="availability-checking"><i class="pi pi-spin pi-spinner"></i> Verificando...</span>
+                    } @else if (usernameAvailabilityMessage) {
+                    <span [class.availability-ok]="usernameStatus === 'available'"
+                      [class.availability-taken]="usernameStatus === 'taken'">
+                      <i class="pi"
+                        [ngClass]="usernameStatus === 'available' ? 'pi-check-circle' : 'pi-times-circle'"></i>
+                      {{ usernameAvailabilityMessage }}
+                    </span>
                     }
                   </div>
                 </div>
@@ -114,7 +274,7 @@
                   <p-floatLabel variant="on">
                     <p-autocomplete inputId="company" [dropdown]="true" [suggestions]="itemsAutocomplete"
                       (completeMethod)="findByAutoComplete($event)" optionLabel="name" optionValue="name"
-                      formControlName="company" class="w-full" styleClass="w-full" />
+                      formControlName="company" class="w-full" appendTo="body" />
                     <label for="company">Empresa</label>
                   </p-floatLabel>
                 </div>
@@ -145,9 +305,83 @@
                     <p-checkbox inputId="isSuperAdmin" formControlName="isSuperAdmin" [binary]="true" />
                     <label for="isSuperAdmin" class="cursor-pointer font-medium p-xs">Super Usuario</label>
                   </div>
+                  @if (!isSuperAdminUser) {
+                  <div class="message-validation">
+                    <span>Solo un SuperAdmin puede asignar este rol</span>
+                  </div>
+                  }
                 </div>
               </div>
             </div>
+
+            <div class="row mt-lg">
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="text" pInputText id="tags" autocomplete="off" class="w-full"
+                      formControlName="tags" />
+                    <label for="tags">Etiquetas (separadas por coma)</label>
+                  </p-floatLabel>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <p-floatLabel variant="on">
+                    <input type="text" pInputText id="groups" autocomplete="off" class="w-full"
+                      formControlName="groups" />
+                    <label for="groups">Grupos (separados por coma)</label>
+                  </p-floatLabel>
+                </div>
+              </div>
+              @if (!isEditForm) {
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="invite" formControlName="invite" [binary]="true" />
+                    <label for="invite" class="cursor-pointer font-medium p-xs">Enviar invitación por correo</label>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+
+            @if (customFieldDefs.length) {
+            <div class="row mt-lg" formGroupName="customFields">
+              @for (def of customFieldDefs; track def.key) {
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="p-md">
+                  <label class="block mb-1 font-medium p-xs">
+                    {{ def.label }}{{ def.required ? ' *' : '' }}
+                  </label>
+                  @switch (def.type) {
+                    @case ('boolean') {
+                      <div class="flex items-center gap-2">
+                        <p-checkbox [inputId]="'cf-' + def.key" [binary]="true"
+                          [formControlName]="def.key" />
+                      </div>
+                    }
+                    @case ('date') {
+                      <p-datepicker dateFormat="yy-mm-dd" appendTo="body"
+                        [formControlName]="def.key" class="w-full" />
+                    }
+                    @case ('select') {
+                      <p-select [options]="def.options || []" optionLabel="label"
+                        optionValue="value" appendTo="body"
+                        [formControlName]="def.key" class="w-full" />
+                    }
+                    @case ('number') {
+                      <input pInputText type="number" [formControlName]="def.key"
+                        class="w-full" />
+                    }
+                    @default {
+                      <input pInputText [formControlName]="def.key" class="w-full" />
+                    }
+                  }
+                </div>
+              </div>
+              }
+            </div>
+            }
           </p-tabpanel>
 
           <!-- Pestaña 1: Roles -->
@@ -215,15 +449,16 @@
                   <p-accordion-header>
                     <div class="flex items-center justify-between w-full route-header">
                       <div class="flex items-center gap-3">
-                        <i class="pi pi-box mr-sm text-primary-500 text-xl"></i>
+                        <i class="pi pi-box mr-sm text-primary-500 text-xl" aria-hidden="true"></i>
                         <span class="font-bold capitalize text-primary-900">{{ module.name }}</span>
                       </div>
-                      <div class="flex items-center mr-2" (click)="$event.stopPropagation()">
+                      <div class="flex items-center mr-2">
                         <span class="text-xs font-bold mr-sm tracking-wider"
                           [class.text-primary-600]="module.isActive">{{
                           module.isActive ? 'ACTIVO' : 'INACTIVO' }}</span>
                         <p-toggleSwitch [ngModel]="module.isActive" (onChange)="toggleModule(module, $event)"
-                          [ngModelOptions]="{standalone: true}" class="mr-sm" />
+                          (click)="$event.stopPropagation()" [ngModelOptions]="{standalone: true}"
+                          [attr.aria-label]="'Activar módulo ' + module.name" class="mr-sm" />
                       </div>
                     </div>
                   </p-accordion-header>
@@ -247,13 +482,14 @@
                               class="flex items-center justify-between p-md bg-white border-1 border-gray-100 border-round shadow-1 mb-sm hover:border-primary-200 transition-colors route-header">
                               <div class="flex items-center gap-3">
                                 <div class="p-sm bg-primary-50 border-round flex items-center justify-center">
-                                  <i [class]="getRouteIcon(route.icon) + ' text-primary-500'"></i>
+                                  <i [class]="getRouteIcon(route.icon) + ' text-primary-500'" aria-hidden="true"></i>
                                 </div>
                                 <span class="font-bold text-sm text-gray-800 ml-2">{{ route.name }}</span>
                               </div>
                               <div class="flex items-center gap-3">
                                 <p-toggleSwitch [ngModel]="route.isActive" (onChange)="toggleRoute(route, $event)"
-                                  [ngModelOptions]="{standalone: true}" [disabled]="!module.isActive" />
+                                  [ngModelOptions]="{standalone: true}" [disabled]="!module.isActive"
+                                  [attr.aria-label]="'Activar ruta ' + route.name" />
                               </div>
                             </div>
 
@@ -268,15 +504,16 @@
                                     <div
                                       class="p-sm bg-gray-50 border-round flex items-center justify-center group-hover:bg-primary-50 transition-colors">
                                       <i
-                                        [class]="getRouteIcon(child.icon) + ' text-gray-500 group-hover:text-primary-500 transition-colors'"></i>
+                                        [class]="getRouteIcon(child.icon) + ' text-gray-500 group-hover:text-primary-500 transition-colors'"
+                                        aria-hidden="true"></i>
                                     </div>
                                     <span class="text-xs font-semibold text-gray-700 ml-2">{{ child.name }}</span>
                                   </div>
                                   <div class="pl-2">
                                     <p-toggleSwitch [ngModel]="child.isActive"
-                                      (onChange)="child.isActive = $event.checked" size="small"
-                                      [ngModelOptions]="{standalone: true}"
-                                      [disabled]="!route.isActive || !module.isActive" />
+                                      (onChange)="toggleChild(route, child, $event)" size="small"
+                                      [ngModelOptions]="{standalone: true}" [disabled]="!module.isActive"
+                                      [attr.aria-label]="'Activar subpermiso ' + child.name" />
                                   </div>
                                 </div>
                               </div>
@@ -306,8 +543,260 @@
     <ng-template #footer>
       <div class="mt-md flex justify-end">
         <p-button label="Cancelar" [text]="true" severity="secondary" (click)="closeDialog()" class="mr-md" />
-        <p-button label="Guardar" [disabled]="userForm.invalid || disabledButton" [outlined]="true" severity="primary"
+        <p-button label="Guardar" [disabled]="isSaveDisabled" [outlined]="true" severity="primary"
           (click)="onSubmit()" />
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Sección Carga Masiva -->
+  <div class="massive-upload-section">
+    <div class="massive-upload-card">
+      <div class="massive-upload-header">
+        <div class="massive-upload-icon-wrapper">
+          <i class="pi pi-users"></i>
+        </div>
+        <div>
+          <h2 class="massive-upload-title">Carga Masiva de Usuarios</h2>
+          <p class="massive-upload-subtitle">Crea múltiples usuarios desde un archivo Excel</p>
+        </div>
+      </div>
+
+      <div class="massive-upload-body">
+        <p class="massive-upload-description">
+          Descarga la plantilla, diligencia la información de los usuarios que deseas crear y
+          selecciona el archivo para iniciar el proceso. El sistema validará la información y
+          mostrará un reporte con los usuarios creados, los que ya existen y los que presentaron errores.
+        </p>
+
+        <div class="massive-upload-rules">
+          <span class="massive-upload-rules-title">
+            <i class="pi pi-info-circle"></i> Reglas importantes
+          </span>
+          <ul class="massive-upload-rules-list">
+            @if (isSuperAdminUser) {
+              <li>Debes indicar una <strong>Empresa</strong> y un <strong>TenantId</strong> válidos en el archivo.</li>
+              <li>Obligatorios: <strong>Nombres, Apellidos, Correo, TenantId y Empresa</strong>.</li>
+            } @else {
+              <li>La <strong>Empresa</strong> y el <strong>TenantId</strong> se toman automáticamente de tu usuario; solo un SuperAdmin puede cargar usuarios de otras empresas.</li>
+              <li>Obligatorios: <strong>Nombres, Apellidos y Correo</strong>.</li>
+            }
+            <li>El <strong>teléfono</strong> es opcional.</li>
+            <li>El <strong>usuario</strong> (campo Usuario) es opcional, pero si se indica debe ser <strong>único global</strong>.</li>
+            <li>Los <strong>correos</strong> deben ser <strong>únicos</strong> y no repetidos.</li>
+            <li>Roles, Permisos y Módulos son opcionales y van separados por <strong>;</strong>.</li>
+            <li>Si un rol, permiso o módulo no existe, se <strong>omite</strong> y el usuario se crea igual (puedes asignarlo luego).</li>
+            <li>El límite máximo es de <strong>50 usuarios</strong> por archivo.</li>
+            <li>Se respeta el <strong>máximo de usuarios</strong> configurado para la empresa (0 = ilimitado).</li>
+            <li>Los correos ya existentes serán omitidos.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="massive-upload-actions">
+        <input type="file" #massiveFileInput (change)="onMassiveFileSelected($event)"
+          accept=".xlsx, .xls" style="display: none;" />
+        <p-button label="Descargar Plantilla" icon="pi pi-file-excel" severity="secondary" [outlined]="true"
+          (click)="downloadTemplate()" />
+        <p-button label="Seleccionar y Subir Excel" icon="pi pi-cloud-upload" severity="primary"
+          (click)="massiveFileInput.click()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Diálogo de Previsualización, Progreso y Reporte -->
+  <p-dialog [(visible)]="isMassiveUploadDialogVisible" [modal]="true" [closable]="!isUploading"
+    [closeOnEscape]="!isUploading" [dismissableMask]="false" [draggable]="false" [resizable]="false"
+    [style]="{ width: '78vw', maxWidth: '1050px' }" [header]="'Carga Masiva de Usuarios'">
+
+    @if (isUploading) {
+      <div class="upload-progress">
+        <div class="upload-progress-spinner">
+          <i class="pi pi-spin pi-spinner"></i>
+        </div>
+        <h3>Procesando usuarios...</h3>
+        <p>Este proceso puede tardar unos segundos. No cierres esta ventana.</p>
+      </div>
+    } @else if (isPreviewing) {
+      <div class="preview-section">
+        <h4 class="section-title">
+          <i class="pi pi-eye"></i> Previsualización de datos
+        </h4>
+
+        @if (previewErrors.length > 0) {
+          <div class="preview-errors">
+            <span class="preview-errors-title">
+              <i class="pi pi-exclamation-triangle"></i> Errores de validación
+            </span>
+            <ul class="preview-errors-list">
+              @for (err of previewErrors; track $index) {
+                <li>{{ err }}</li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <div class="preview-success">
+            <i class="pi pi-check-circle"></i>
+            <span>Los datos parecen correctos. Puedes proceder con la carga.</span>
+          </div>
+        }
+
+        <div class="preview-table-wrapper">
+          <p-table [value]="previewData" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+            <ng-template #previewHeader pTemplate="header">
+              <tr>
+                <th>Fila</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Usuario</th>
+                <th>Empresa</th>
+                <th>TenantId</th>
+                <th>Estado</th>
+              </tr>
+            </ng-template>
+            <ng-template #previewBody pTemplate="body" let-item>
+              <tr>
+                <td>{{ item.row }}</td>
+                <td>{{ item.nombres }}</td>
+                <td>{{ item.apellidos }}</td>
+                <td>{{ item.email }}</td>
+                <td>{{ item.telefono }}</td>
+                <td>{{ item.usuario }}</td>
+                <td>{{ item.empresa }}</td>
+                <td>{{ item.tenantId }}</td>
+                <td>
+                  @if (item.status === 'OK') {
+                    <span class="status-ok"><i class="pi pi-check-circle"></i> OK</span>
+                  } @else {
+                    <span class="status-error" [title]="item.errors"><i class="pi pi-times-circle"></i> ERROR</span>
+                  }
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="preview-actions">
+          <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [outlined]="true"
+            (click)="cancelMassiveUpload()" />
+          <p-button label="Confirmar y Subir" icon="pi pi-cloud-upload" severity="primary"
+            [loading]="isUploading"
+            [disabled]="previewErrors.length > 0 || isUploading"
+            (click)="confirmMassiveUpload()" />
+        </div>
+      </div>
+    } @else if (uploadReport) {
+      <div class="report-section">
+        @for (msg of reportMessages; track $index) {
+          <div class="report-message" [ngClass]="'report-message--' + msg.severity">
+            <i class="pi" [ngClass]="{
+              'pi-check-circle': msg.severity === 'success',
+              'pi-exclamation-triangle': msg.severity === 'warn',
+              'pi-times-circle': msg.severity === 'error',
+              'pi-info-circle': msg.severity === 'info'
+            }"></i>
+            <span>{{ msg.detail }}</span>
+          </div>
+        }
+
+        <div class="report-header">
+          <div class="report-header-left">
+            <i class="pi pi-chart-bar"></i>
+            <h3>Reporte final</h3>
+          </div>
+          <p-button label="Descargar Reporte Excel" icon="pi pi-file-excel" severity="success" [outlined]="true"
+            (click)="downloadMassiveReport()" />
+        </div>
+
+        <div class="report-summary">
+          <span class="report-summary-item">Total: <strong>{{ uploadReport.total }}</strong></span>
+          <span class="report-summary-item report-summary-item--success">Creados: <strong>{{ uploadReport.created }}</strong></span>
+          <span class="report-summary-item report-summary-item--warn">Existentes: <strong>{{ uploadReport.existing }}</strong></span>
+          <span class="report-summary-item report-summary-item--error">Fallidos: <strong>{{ uploadReport.failed }}</strong></span>
+        </div>
+
+        <div class="report-block">
+          <h4 class="report-block-title report-block-title--success">
+            <i class="pi pi-check-circle"></i> Usuarios creados ({{ uploadReport.created }})
+          </h4>
+          <p-table [value]="uploadReport.results" styleClass="p-datatable-sm">
+            <ng-template #createdHeader pTemplate="header">
+              <tr>
+                <th>Nombres</th>
+                <th>Correo</th>
+                <th>Detalle</th>
+              </tr>
+            </ng-template>
+            <ng-template #createdBody pTemplate="body" let-item>
+              @if (item.status === 'created') {
+                <tr>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.email }}</td>
+                  <td class="text-green">{{ item.message }}</td>
+                </tr>
+              }
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="report-block">
+          <h4 class="report-block-title report-block-title--warn">
+            <i class="pi pi-info-circle"></i> Usuarios existentes ({{ uploadReport.existing }})
+          </h4>
+          <p-table [value]="uploadReport.results" styleClass="p-datatable-sm">
+            <ng-template #existingHeader pTemplate="header">
+              <tr>
+                <th>Nombres</th>
+                <th>Correo</th>
+                <th>Motivo</th>
+              </tr>
+            </ng-template>
+            <ng-template #existingBody pTemplate="body" let-item>
+              @if (item.status === 'existing') {
+                <tr>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.email }}</td>
+                  <td class="text-orange">{{ item.message }}</td>
+                </tr>
+              }
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="report-block">
+          <h4 class="report-block-title report-block-title--error">
+            <i class="pi pi-times-circle"></i> Usuarios fallidos ({{ uploadReport.failed }})
+          </h4>
+          <p-table [value]="uploadReport.results" styleClass="p-datatable-sm">
+            <ng-template #failedHeader pTemplate="header">
+              <tr>
+                <th>Fila</th>
+                <th>Nombres</th>
+                <th>Correo</th>
+                <th>Error</th>
+              </tr>
+            </ng-template>
+            <ng-template #failedBody pTemplate="body" let-item>
+              @if (item.status === 'failed') {
+                <tr>
+                  <td>{{ item.row }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.email }}</td>
+                  <td class="text-red">{{ item.message }}</td>
+                </tr>
+              }
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    }
+
+    <ng-template #footer>
+      <div class="mt-md flex justify-end">
+        <p-button label="Cerrar" icon="pi pi-times" [text]="true" severity="secondary"
+          (click)="closeMassiveDialog()" [disabled]="isUploading" />
       </div>
     </ng-template>
   </p-dialog>

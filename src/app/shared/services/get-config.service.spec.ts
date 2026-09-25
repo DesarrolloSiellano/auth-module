@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { GetConfigAppService } from './get-config.service';
-import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../environments/environment';
 
 describe('GetConfigAppService', () => {
   let service: GetConfigAppService;

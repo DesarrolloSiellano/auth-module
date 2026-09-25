@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { SidebarComponent } from './sidebar.component';
 import { GetConfigAppService } from '../../shared/services/get-config.service';
 
@@ -50,5 +50,64 @@ describe('SidebarComponent', () => {
     expect(component.routes[0].open).toBe(false);
     component.toggleSubmenu(component.routes[0]);
     expect(component.routes[0].open).toBe(true);
+  });
+
+  it('should build a single-slash child link', () => {
+    const route = { path: '/pages' } as any;
+    expect(component.getChildLink(route, { path: '/users' } as any)).toBe(
+      '/pages/users',
+    );
+    expect(component.getChildLink(route, { path: 'users' } as any)).toBe(
+      '/pages/users',
+    );
+  });
+
+  it('should consider a parent visible when any child is active', () => {
+    const route = {
+      isActive: null,
+      children: [{ isActive: false }, { isActive: true }],
+    } as any;
+    expect(component.isRouteVisible(route)).toBe(true);
+    expect(component.hasActiveChildren(route)).toBe(true);
+  });
+
+  it('should fall back to the first active child when initPath is missing', () => {
+    const route = {
+      path: '/pages',
+      isActive: null,
+      children: [
+        { path: '/users', isActive: false },
+        { path: '/roles', isActive: true },
+      ],
+    } as any;
+    expect(component.getRouteLink(route)).toBe('/pages/roles');
+  });
+
+  it('should detect a parent node (has active children)', () => {
+    expect(
+      component.isParent({
+        children: [{ isActive: true }],
+      } as any),
+    ).toBe(true);
+    expect(component.isParent({ children: [] } as any)).toBe(false);
+    expect(component.isParent({} as any)).toBe(false);
+  });
+
+  it('should mark the parent active when the current url matches a child', () => {
+    const router = TestBed.inject(Router);
+    Object.defineProperty(router, 'url', {
+      configurable: true,
+      get: () => '/pages/users',
+    });
+
+    expect(
+      component.isParentActive({
+        path: '/pages',
+        children: [
+          { path: '/users', isActive: true },
+          { path: '/roles', isActive: true },
+        ],
+      } as any),
+    ).toBe(true);
   });
 });

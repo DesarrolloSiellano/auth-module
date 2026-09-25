@@ -43,7 +43,7 @@ export const PERMISSION_FORM: FormFieldConfig[] = [
     weight: 5,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -88,7 +88,7 @@ export const PERMISSION_FORM: FormFieldConfig[] = [
     weight: 5,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
   },
 
 ];

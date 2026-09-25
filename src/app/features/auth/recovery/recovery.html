@@ -23,8 +23,8 @@
 
       <ng-template #footer>
         <div class="flex justify-center m-md">
-          <p-button severity="primary" class="w-full" [outlined]="true" styleClass="w-full" (click)="recovery()"
-            [disabled]="formComponent?.formGroup?.invalid">
+          <p-button severity="primary" [fluid]="true" class="w-full" [outlined]="true" (click)="recovery()"
+            [disabled]="formComponent?.formGroup?.invalid || isSubmitting()">
             Recuperar cuenta <i class="pi pi-sign-in"></i></p-button>
         </div>
       </ng-template>

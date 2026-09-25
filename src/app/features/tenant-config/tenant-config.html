@@ -1,0 +1,102 @@
+<div class="content tenant-config">
+  <div class="tc-header">
+    <div class="tc-title">
+      <span class="tc-icon"><i class="pi pi-list"></i></span>
+      <div>
+        <h2>Catálogo de políticas</h2>
+        <p>Crea y edita las políticas parametrizables que consumen las demás aplicaciones.</p>
+      </div>
+    </div>
+    <p-button label="Nueva política" icon="pi pi-plus" (click)="openCreateDefinition()" />
+  </div>
+
+  <div class="tc-panel">
+    <p-table [value]="catalog" styleClass="p-datatable-sm p-datatable-sticky-actions" [paginator]="true" [rows]="15"
+      [scrollable]="true" [scrollHeight]="'max(10rem, calc(100vh - 28rem))'"
+      [tableStyle]="{ 'min-width': '60rem' }">
+      <ng-template #catHeader pTemplate="header">
+        <tr>
+          <th>Clave</th>
+          <th>Etiqueta</th>
+          <th>Grupo</th>
+          <th>Tipo</th>
+          <th>Valor por defecto</th>
+          <th>Unidad</th>
+          <th>Orden</th>
+          <th>Activa</th>
+          <th style="width: 12rem; min-width: 12rem">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template #catBody pTemplate="body" let-item>
+        <tr>
+          <td><code>{{ item.key }}</code></td>
+          <td>{{ item.label }}</td>
+          <td><span class="tc-badge">{{ item.group }}</span></td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.defaultValue }}</td>
+          <td>{{ item.unit }}</td>
+          <td>{{ item.order }}</td>
+          <td>
+            <i class="pi"
+              [ngClass]="item.isActive ? 'pi-check-circle tc-ok' : 'pi-times-circle tc-off'"></i>
+          </td>
+          <td>
+            <p-button icon="pi pi-pencil" [text]="true" severity="secondary"
+              (click)="openEditDefinition(item)" />
+            <p-button icon="pi pi-trash" [text]="true" severity="danger"
+              [disabled]="processing" (click)="deleteDefinition(item)" />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #catEmpty pTemplate="emptymessage">
+        <tr><td colspan="9">No hay políticas definidas.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog [(visible)]="definitionDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
+    appendTo="body" styleClass="tc-def-dialog" [style]="{ width: '42rem' }"
+    [header]="isEditingDefinition ? 'Editar política' : 'Nueva política'">
+    <div class="tc-def-form">
+      <div class="tc-def-field">
+        <label>Clave (dotted)</label>
+        <input pInputText [(ngModel)]="definitionForm.key" [disabled]="isEditingDefinition"
+          placeholder="features.pbx" />
+      </div>
+      <div class="tc-def-field">
+        <label>Etiqueta</label>
+        <input pInputText [(ngModel)]="definitionForm.label" />
+      </div>
+      <div class="tc-def-field">
+        <label>Grupo</label>
+        <input pInputText [(ngModel)]="definitionForm.group" placeholder="features" />
+      </div>
+      <div class="tc-def-field">
+        <label>Tipo</label>
+        <p-select [options]="definitionTypes" optionLabel="label" optionValue="value"
+          [(ngModel)]="definitionForm.type" appendTo="body" />
+      </div>
+      <div class="tc-def-field">
+        <label>Valor por defecto</label>
+        <input pInputText [(ngModel)]="definitionForm.defaultValue" />
+      </div>
+      <div class="tc-def-field">
+        <label>Unidad</label>
+        <input pInputText [(ngModel)]="definitionForm.unit" />
+      </div>
+      <div class="tc-def-field">
+        <label>Orden</label>
+        <p-inputNumber [(ngModel)]="definitionForm.order" />
+      </div>
+      <div class="tc-def-field">
+        <label>Activa</label>
+        <p-toggleSwitch [(ngModel)]="definitionForm.isActive" />
+      </div>
+    </div>
+    <ng-template #footer>
+      <p-button label="Cancelar" [text]="true" severity="secondary" (click)="definitionDialogVisible = false" />
+      <p-button label="Guardar" [outlined]="true" severity="primary"
+        [loading]="saving" [disabled]="saving" (click)="saveDefinition()" />
+    </ng-template>
+  </p-dialog>
+</div>

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Response } from '../../../shared/interfaces/response.interface';
 import { ProfileResponse } from '../../../shared/interfaces/profile.interface';
-import { ENVIROMENT } from '../../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -29,37 +29,64 @@ export interface ChangePassword {
   newPassword: string;
 }
 
+export interface RefreshResponse {
+  accessToken: string;
+  refreshToken?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
-  constructor(private http: HttpClient) { }
+  private readonly http = inject(HttpClient);
 
-  login(loginRequest: LoginRequest, redirectUri?: any): Observable<Response<any>> {
-
-    return this.http.post<Response<any>>(
+  login(
+    loginRequest: LoginRequest,
+    redirectUri?: string | null,
+  ): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
       `${ENVIROMENT.urlApi}/auth/login/?redirectUri=${redirectUri}`,
       loginRequest
     );
   }
 
-  changePassword(changePassword: ChangePassword): Observable<Response<any>> {
-    return this.http.post<Response<any>>(
+  changePassword(changePassword: ChangePassword): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
       `${ENVIROMENT.urlApi}/auth/change-password`,
       changePassword,
     );
   }
 
+  setPasswordWithToken(
+    token: string,
+    password: string,
+  ): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
+      `${ENVIROMENT.urlApi}/auth/set-password-token`,
+      { token, password },
+    );
+  }
 
-  recoveryPassword(email: string, redirectUri?: any): Observable<Response<any>> {
-    return this.http.post<Response<any>>(
+
+  recoveryPassword(
+    email: string,
+    redirectUri?: string | null,
+  ): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
       `${ENVIROMENT.urlApi}/auth/recovery-password/?redirectUri=${redirectUri}`,
       { email }
     );
   }
 
-  refreshToken(refreshToken: string): Observable<any> {
-    return this.http.post<any>(
+  logout(refreshToken?: string | null): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
+      `${ENVIROMENT.urlApi}/auth/logout`,
+      { refreshToken }
+    );
+  }
+
+  refreshToken(refreshToken: string): Observable<RefreshResponse> {
+    return this.http.post<RefreshResponse>(
       `${ENVIROMENT.urlApi}/auth/refresh`,
       { refreshToken }
     );

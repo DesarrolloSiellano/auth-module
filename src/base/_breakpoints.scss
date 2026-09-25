@@ -1,0 +1,44 @@
+@use "sass:map";
+
+/* ----------------------------------------
+   BREAKPOINTS (mobile-first)
+   xs 320 / sm 576 / md 768 / lg 992 / xl 1200
+------------------------------------------- */
+
+$bp-xs: 320px;
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 992px;
+$bp-xl: 1200px;
+
+$breakpoints: (
+  xs: $bp-xs,
+  sm: $bp-sm,
+  md: $bp-md,
+  lg: $bp-lg,
+  xl: $bp-xl,
+);
+
+/* min-width >= breakpoint */
+@mixin up($bp) {
+  $value: map.get($breakpoints, $bp);
+  @if $value {
+    @media (min-width: $value) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint desconocido: #{$bp}";
+  }
+}
+
+/* max-width < breakpoint */
+@mixin down($bp) {
+  $value: map.get($breakpoints, $bp);
+  @if $value {
+    @media (max-width: ($value - 0.02px)) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint desconocido: #{$bp}";
+  }
+}

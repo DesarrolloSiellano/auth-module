@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MenuItem } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -12,9 +12,13 @@ import { TooltipModule } from 'primeng/tooltip';
 
 
 
+export interface ListColumn {
+  field: string;
+  header: string;
+}
+
 @Component({
   selector: 'app-list-template',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -31,43 +35,56 @@ import { TooltipModule } from 'primeng/tooltip';
 })
 export class ListTemplateComponent {
 
-  @Input() periodoInicio: any;
-  @Input() rowsNumber: number = 100;
-  @Input() title: String = '';
-  @Input() showTitle: boolean = false;
-  @Input() periodoFin: any;
-  @Input() options: boolean = true;
-  @Input() toAdd: boolean = true;
-  @Input() cols: any[] = [];
-  @Input() data: any[] = [];
-  @Input() lazy: boolean = false;
-  @Input() showCalendarOptions: boolean = false;
-  @Input() totalRecords: number = 0;
-  @Input() isButtonUpdate: boolean = true;
-  @Input() loading: boolean = false;
-  @Input() filtersGlobal: boolean = true;
-  @Input() items: MenuItem[] = [];
-  @Input() updateItem!: (rowData: any) => void; // Recibe la función update
-  @Input() deleteItem!: (rowData: any) => void;
+  readonly periodoInicio = input<Date | null>();
+  readonly rowsNumber = input<number>(100);
+  readonly title = input<string>('');
+  readonly showTitle = input<boolean>(false);
+  readonly periodoFin = input<Date | null>();
+  readonly options = input<boolean>(true);
+  readonly toAdd = input<boolean>(true);
+  readonly cols = input<ListColumn[]>([]);
+  readonly data = input<unknown[]>([]);
+  readonly lazy = input<boolean>(false);
+  readonly showCalendarOptions = input<boolean>(false);
+  readonly totalRecords = input<number>(0);
+  readonly isButtonUpdate = input<boolean>(true);
+  readonly loading = input<boolean>(false);
+  readonly filtersGlobal = input<boolean>(true);
+  readonly items = input<MenuItem[]>([]);
+  readonly updateItem = input<unknown>();
+  readonly deleteItem = input<unknown>();
+  readonly extraActions = input<
+    { key: string; icon: string; tooltip?: string; severity?: string }[]
+  >([]);
+  readonly rowActionsFn = input<
+    ((row: any) => { key: string; icon: string; tooltip?: string; severity?: string }[]) | null
+  >(null);
+  readonly showEdit = input<boolean>(true);
+  readonly showDelete = input<boolean>(true);
+  readonly actionsDisabled = input<boolean>(false);
+  readonly bulkSelectable = input<boolean>(false);
+  readonly bulkActions = input<
+    { key: string; label: string; icon: string; severity?: string }[]
+  >([]);
 
   selected: any;
   inputVisible: boolean = false;
 
-
-
-
-  @Output() selectionChange = new EventEmitter<any>();
-  @Output() onRowSelectionChange = new EventEmitter<any>();
-  @Output() loadLazy = new EventEmitter<TableLazyLoadEvent>();
-  @Output() dateQuery = new EventEmitter<any>();
-  @Output() create = new EventEmitter<void>();
-  @Output() update = new EventEmitter<any>();
-  @Output() delete = new EventEmitter<any>();
-  @Output() view = new EventEmitter<any>();
-  @Output() exportTotal = new EventEmitter<void>();
-  @Output() exportPage = new EventEmitter<void>();
-  @Output() exportFiltered = new EventEmitter<Table>();
-  @Output() reload = new EventEmitter<void>();
+  readonly selectionChange = output<unknown>();
+  readonly onRowSelectionChange = output<unknown>();
+  readonly bulkSelectionChange = output<unknown[]>();
+  readonly loadLazy = output<TableLazyLoadEvent>();
+  readonly dateQuery = output<{ initial?: Date | null; final?: Date | null }>();
+  readonly create = output<void>();
+  readonly update = output<unknown>();
+  readonly delete = output<unknown>();
+  readonly view = output<unknown>();
+  readonly exportTotal = output<void>();
+  readonly exportPage = output<void>();
+  readonly exportFiltered = output<Table>();
+  readonly reload = output<void>();
+  readonly extraAction = output<{ key: string; row: unknown }>();
+  readonly bulkAction = output<{ key: string; rows: any[] }>();
 
 
 
@@ -76,7 +93,7 @@ export class ListTemplateComponent {
   }
 
   queryDate() {
-    this.dateQuery.emit({initial: this.periodoInicio, final: this.periodoFin});
+    this.dateQuery.emit({ initial: this.periodoInicio(), final: this.periodoFin() });
   }
 
   onCreate() {
@@ -88,19 +105,58 @@ export class ListTemplateComponent {
   }
 
   onRowSelect() {
+    if (this.bulkSelectable()) {
+      this.bulkSelectionChange.emit(
+        Array.isArray(this.selected) ? this.selected : [],
+      );
+      return;
+    }
     this.onRowSelectionChange.emit(this.selected);
   }
 
-  onUpdate(rowData: any) {
+  selectedCount(): number {
+    return Array.isArray(this.selected) ? this.selected.length : 0;
+  }
+
+  onBulkAction(key: string) {
+    this.bulkAction.emit({
+      key,
+      rows: Array.isArray(this.selected) ? this.selected : [],
+    });
+  }
+
+  onRowUnselect() {
+    if (this.bulkSelectable()) {
+      this.bulkSelectionChange.emit(
+        Array.isArray(this.selected) ? this.selected : [],
+      );
+    }
+  }
+
+  onUpdate(rowData: unknown) {
     this.update.emit(rowData);
   }
 
-  onDelete(rowData: any) {
+  onDelete(rowData: unknown) {
     this.delete.emit(rowData);
   }
 
-  onView(rowData: any) {
+  onView(rowData: unknown) {
     this.view.emit(rowData);
+  }
+
+  onExtraAction(key: string, rowData: unknown) {
+    this.extraAction.emit({ key, row: rowData });
+  }
+
+  actionsFor(row: unknown): {
+    key: string;
+    icon: string;
+    tooltip?: string;
+    severity?: string;
+  }[] {
+    const fn = this.rowActionsFn();
+    return fn ? fn(row) : this.extraActions();
   }
 
 
