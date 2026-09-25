@@ -48,7 +48,7 @@ describe('SessionBootstrapService', () => {
     });
   });
 
-  it('should process the token from the URL and navigate to /pages/users', (done) => {
+  it('should process the token from the URL and navigate to /pages/dashboard', (done) => {
     history.pushState({}, '', '/?access_token=abc&refresh_token=xyz');
 
     spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
@@ -59,7 +59,7 @@ describe('SessionBootstrapService', () => {
         'abc',
         'xyz',
       );
-      expect(router.navigate).toHaveBeenCalledWith(['/pages/users']);
+      expect(router.navigate).toHaveBeenCalledWith(['/pages/dashboard']);
       expect(window.location.search).not.toContain('access_token');
       done();
     });

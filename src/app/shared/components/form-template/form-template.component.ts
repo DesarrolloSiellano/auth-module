@@ -1,12 +1,10 @@
 import {
   Component,
-  EventEmitter,
-  Input,
-  OnChanges,
+  effect,
+  inject,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges,
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -39,7 +37,6 @@ import { FormFieldConfig } from '../../forms/form-field.model';
 
 @Component({
   selector: 'app-form-template',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -60,32 +57,43 @@ import { FormFieldConfig } from '../../forms/form-field.model';
   templateUrl: './form-template.component.html',
   styleUrl: './form-template.component.scss',
 })
-export class FormTemplateComponent implements OnInit, OnChanges {
-  @Input() isVisible: boolean = false;
-  @Input() form: FormFieldConfig[] = [];
-  @Input() formValidations: any;
-  @Input() initialData: any;
-  @Input() id: string = '';
-  @Input() titleForm: string = '';
-  @Input() width: string = '30rem';
-  @Input() isEdit: boolean = false;
-  @Input() title: string = '';
-  @Input() colClass: string = 'col-lg-4 col-md-6 col-sm-12';
-  @Input() submitButtonText: string = 'Guardar';
-  @Input() cancelButtonText: string = 'Cancelar';
-  @Input() submitForm!: Function;
-  @Input() cancelForm!: Function;
+export class FormTemplateComponent implements OnInit, OnDestroy {
+  readonly isVisible = input<boolean>(false);
+  readonly form = input<FormFieldConfig[]>([]);
+  readonly formValidations = input<unknown>();
+  readonly initialData = input<unknown>();
+  readonly id = input<string>('');
+  readonly titleForm = input<string>('');
+  readonly width = input<string>('30rem');
+  readonly isEdit = input<boolean>(false);
+  readonly title = input<string>('');
+  readonly colClass = input<string>('col-lg-4 col-md-6 col-sm-12');
+  readonly submitButtonText = input<string>('Guardar');
+  readonly cancelButtonText = input<string>('Cancelar');
+  readonly submitForm = input<() => void>();
+  readonly cancelForm = input<() => void>();
 
   formGroup!: FormGroup;
+  fields: FormFieldConfig[] = [];
   private subscriptions = new Subscription();
+  private readonly formBuilder = inject(FormBuilder);
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor() {
+    effect(() => {
+      const data = this.initialData();
+      if (data && this.formGroup) {
+        this.formGroup.patchValue(data);
+        this.updateFieldStateDisabled();
+        this.updateFieldStatesDisabledByDepends();
+      }
+    });
+  }
 
   ngOnInit() {
-    this.form = filterAndSort(this.form);
+    this.fields = filterAndSort(this.form());
 
     this.formGroup = this.formBuilder.group(
-      this.form.reduce<Record<string, any>>((group, item) => {
+      this.fields.reduce<Record<string, unknown>>((group, item) => {
         const isCheckbox = item.type === 'checkbox'; // Verificar si es un checkbox
 
         group[item.name] = [
@@ -130,7 +138,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       }),
     );
 
-    this.form.forEach((item) => {
+    this.fields.forEach((item) => {
       if (item.dependsOn) {
         this.subscriptions.add(
           this.formGroup.get(item.dependsOn)?.valueChanges.subscribe(() => {
@@ -159,18 +167,6 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     this.subscriptions.unsubscribe();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['initialData'] &&
-      changes['initialData'].currentValue &&
-      this.formGroup
-    ) {
-      this.formGroup.patchValue(changes['initialData'].currentValue);
-      this.updateFieldStateDisabled();
-      this.updateFieldStatesDisabledByDepends();
-    }
-  }
-
   get passwordMismatch(): boolean {
     return !!this.formGroup.errors?.['passwordMismatch'];
   }
@@ -179,12 +175,14 @@ export class FormTemplateComponent implements OnInit, OnChanges {
     return FormValidationUtils.passwordMismatchMessage();
   }
 
-  compareObjects(o1: any, o2: any): boolean {
-    return o1 && o2 ? o1.name === o2.name : o1 === o2;
+  compareObjects(o1: unknown, o2: unknown): boolean {
+    const a = o1 as { name?: unknown } | null | undefined;
+    const b = o2 as { name?: unknown } | null | undefined;
+    return a && b ? a.name === b.name : o1 === o2;
   }
 
   updateFieldStatesDisabledByDepends(): void {
-    this.form.forEach((item) => {
+    this.fields.forEach((item) => {
       if (item.dependsOn && item.disabledCondition) {
         const control = this.formGroup.get(item.name);
         const shouldDisable = item.disabledCondition(this.formGroup);
@@ -202,7 +200,7 @@ export class FormTemplateComponent implements OnInit, OnChanges {
   }
 
   updateFieldStateDisabled(): void {
-    this.form.forEach((item) => {
+    this.fields.forEach((item) => {
       if (
         item.type === 'checkbox' &&
         item.controls &&
@@ -235,7 +233,10 @@ export class FormTemplateComponent implements OnInit, OnChanges {
       return 'Ningún ítem seleccionado';
     } else if (selectedValues.length <= 3) {
       return selectedValues
-        .map((item: any) => item.name || item.nombre || item)
+        .map(
+          (item: Record<string, unknown>) =>
+            item['name'] || item['nombre'] || item,
+        )
         .join(', ');
     } else {
       return `Has seleccionado ${selectedValues.length} items`;
@@ -248,9 +249,6 @@ export class FormTemplateComponent implements OnInit, OnChanges {
   }
 
   reset(): void {
-    this.isEdit = false;
     this.formGroup.reset();
-    this.initialData = null;
-    this.title = '';
   }
 }

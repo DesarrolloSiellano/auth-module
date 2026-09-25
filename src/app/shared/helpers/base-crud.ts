@@ -1,23 +1,37 @@
 import { ChangeDetectorRef } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { TableLazyLoadEvent } from 'primeng/table';
-import { DataLoaderService } from '../services/data-load.service';
-
-import { ConfirmService } from '../services/confirm-dialog.service';
-import { ExcelExportService } from '../services/excel-export.service';
+import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { MenuItem } from 'primeng/api';
 import moment from 'moment';
 
+import { DataLoaderService } from '../services/data-load.service';
+import { ConfirmService } from '../services/confirm-dialog.service';
+import { ExcelExportService } from '../services/excel-export.service';
+import { FormFieldConfig } from '../forms/form-field.model';
+
 export interface IBaseService<T> {
-  findAll(): any;
-  findById(id: any): any;
-  findByPage(...args: any[]): any; // Observable esperado
-  findByDate(...args: any[]): any; // Opcional
-  create(item: T): any;
-  update(id: any, item: T): any;
-  delete(id: any): any;
+  findAll(): Observable<unknown>;
+  findById(id: string): Observable<unknown>;
+  findByPage(
+    from?: number,
+    limit?: number,
+    global?: string,
+    filters?: string,
+  ): Observable<unknown>;
+  findByDate?(startDate?: string, endDate?: string): Observable<unknown>;
+  create(item: T): Observable<unknown>;
+  update(id: string, item: T): Observable<unknown>;
+  delete(id: string): Observable<unknown>;
 }
 
-export abstract class BaseCrud<T> {
+export interface Identifiable {
+  _id?: string;
+  name?: string;
+}
+
+export abstract class BaseCrud<T extends Identifiable> {
   data: T[] = [];
   totalRecords = 0;
   loading = false;
@@ -34,14 +48,12 @@ export abstract class BaseCrud<T> {
   toAdd: boolean = true;
   options: boolean = false;
 
-  selected!: any;
+  selected?: T;
   items: MenuItem[] = [];
-  filterExcel: any[] = [];
+  filterExcel: T[] = [];
   isSearchPopulation: boolean = false;
-  protected form: any = {} as any;
-  //create - update
-
-  protected formComponent?: { formGroup: any; reset: () => void };
+  protected form: FormFieldConfig[] = [];
+  protected formComponent?: { formGroup: FormGroup; reset: () => void };
   disabledButton: boolean = false;
 
   constructor(
@@ -55,12 +67,12 @@ export abstract class BaseCrud<T> {
   load(event?: TableLazyLoadEvent) {
     this.loading = true;
     this.dataLoader
-      .loadData(this.service.findByPage.bind(this.service), event)
-      .subscribe((response: any) => {
-        const result = this.dataLoader.handleResponse(response);
+      .loadData(this.service.findByPage.bind(this.service), event ?? {})
+      .subscribe((response: unknown) => {
+        const result = this.dataLoader.handleResponse<T>(response);
         if (result.ok) {
           this.totalRecords = result.totalResults ?? 0;
-          this.data = (result.data ?? []) as T[];
+          this.data = result.data ?? [];
           this.loading = false;
         } else {
           this.loading = false;
@@ -76,12 +88,17 @@ export abstract class BaseCrud<T> {
     this.isEditForm = false;
   }
 
-  update(selected: any) {
+  update(selected: T) {
     this.onSelectionChange(selected);
   }
-  async delete(selected: any) {
+
+  async delete(selected: T) {
+    // Evita disparar dos veces (doble clic / doble confirmación).
+    if (this.disabledButton) return;
+    this.disabledButton = true;
+
     const isConfirm = await this.confirmService.confirm(
-      selected.name,
+      selected.name ?? '',
       `Eliminación de ${this.title}`,
       'Estas seguro de eliminar el registro',
       'pi pi-exclamation-triangle',
@@ -96,12 +113,16 @@ export abstract class BaseCrud<T> {
         'Cancelado',
         `El ${this.subtitle} no se ha eliminado correctamente`,
       );
+      this.disabledButton = false;
+      return;
     }
 
-    if (isConfirm) {
-      this.service.delete(selected._id).subscribe({
-        next: (response: any) => {
-          const status = response?.statusCode;
+    this.service
+      .delete(selected._id ?? '')
+      .pipe(finalize(() => (this.disabledButton = false)))
+      .subscribe({
+        next: (response: unknown) => {
+          const status = (response as { statusCode?: number } | null)?.statusCode;
           if (status === 200 || status === 201 || status === 204) {
             this.confirmService.showMessage(
               'success',
@@ -110,18 +131,20 @@ export abstract class BaseCrud<T> {
             );
           }
         },
-        error: (err: any) => {
-          console.error(err.error);
+        error: (err: unknown) => {
+          console.error(err);
         },
         complete: () => this.rechargeTable(),
       });
-    }
   }
 
   save() {
+    // Evita reenvíos mientras hay una petición en curso.
+    if (this.disabledButton) return;
+
     this.disabledButton = true;
     let id = '';
-    if (this.isEditForm) id = (this.initialData as any)?._id;
+    if (this.isEditForm) id = this.initialData?._id ?? '';
 
     const formValues = this.getFormattedFormValues();
     const request$ = this.isEditForm
@@ -129,8 +152,9 @@ export abstract class BaseCrud<T> {
       : this.service.create(formValues);
 
     request$.subscribe({
-      next: (response: any) => {
-        if (response.statusCode === 200 || response.statusCode === 201) {
+      next: (response: unknown) => {
+        const status = (response as { statusCode?: number } | null)?.statusCode;
+        if (status === 200 || status === 201) {
           this.closeDialog();
           this.confirmService.showMessage(
             'info',
@@ -140,11 +164,13 @@ export abstract class BaseCrud<T> {
               ' correctamente',
           );
           this.rechargeTable();
+        } else {
+          this.disabledButton = false;
         }
       },
-      error: (err: any) => {
+      error: (err: unknown) => {
         // El error se notifica de forma global vía el errorInterceptor
-        console.error(err.error);
+        console.error(err);
         this.disabledButton = false;
       },
     });
@@ -163,11 +189,11 @@ export abstract class BaseCrud<T> {
         globalFilter: '',
         filters: {},
       })
-      .subscribe((response) => {
-        const result = this.dataLoader.handleResponse(response);
+      .subscribe((response: unknown) => {
+        const result = this.dataLoader.handleResponse<T>(response);
         if (result.ok) {
           this.totalRecords = result.totalResults ?? 0;
-          this.data = (result.data ?? []) as T[];
+          this.data = result.data ?? [];
           this.loading = false;
         } else {
           this.loading = false;
@@ -176,31 +202,37 @@ export abstract class BaseCrud<T> {
     this.cdr.detectChanges();
   }
 
-  queryDate(event: any): void {
+  queryDate(event: { initial?: Date | null; final?: Date | null }): void {
     this.loading = true;
     this.filtersGlobal = false;
-    this.service
-      .findByDate(
-        moment(event.initial).format('YYYY-MM-DD'),
-        moment(event.final).format('YYYY-MM-DD'),
-      )
-      .subscribe((data: any) => {
-        const result = this.dataLoader.handleResponse(data);
-        if (result.ok) {
-          this.totalRecords = result.totalResults ?? 0;
-          this.data = (result.data ?? []) as T[];
-          this.loading = false;
-        } else {
-          this.loading = false;
-        }
-      });
+
+    const request$ = this.service.findByDate?.(
+      moment(event.initial ?? undefined).format('YYYY-MM-DD'),
+      moment(event.final ?? undefined).format('YYYY-MM-DD'),
+    );
+
+    if (!request$) {
+      this.loading = false;
+      return;
+    }
+
+    request$.subscribe((response: unknown) => {
+      const result = this.dataLoader.handleResponse<T>(response);
+      if (result.ok) {
+        this.totalRecords = result.totalResults ?? 0;
+        this.data = result.data ?? [];
+        this.loading = false;
+      } else {
+        this.loading = false;
+      }
+    });
   }
 
   exportAsXLSX(): void {
     this.excelexport.exportAsExcelFile(this.data, 'totalLeaders');
   }
 
-  onSelectionChange(selectedItem: any) {
+  onSelectionChange(selectedItem: T) {
     if (selectedItem) {
       this.isEditForm = true;
       this.titleForm = 'Edición de ' + this.subtitle;
@@ -214,9 +246,8 @@ export abstract class BaseCrud<T> {
     }
   }
 
-  getFormattedFormValues(): any {
-    const values = { ...this.formComponent?.formGroup?.value };
-    return values;
+  getFormattedFormValues(): T {
+    return (this.formComponent?.formGroup?.value ?? {}) as T;
   }
 
   closeDialog() {

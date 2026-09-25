@@ -30,15 +30,15 @@ describe('ListTemplateComponent', () => {
   });
 
   it('should emit dateQuery with the period', () => {
-    component.periodoInicio = new Date('2026-01-01');
-    component.periodoFin = new Date('2026-01-31');
+    fixture.componentRef.setInput('periodoInicio', new Date('2026-01-01'));
+    fixture.componentRef.setInput('periodoFin', new Date('2026-01-31'));
     let emitted: any;
     component.dateQuery.subscribe((e) => (emitted = e));
 
     component.queryDate();
 
-    expect(emitted.initial).toEqual(component.periodoInicio);
-    expect(emitted.final).toEqual(component.periodoFin);
+    expect(emitted.initial).toEqual(component.periodoInicio());
+    expect(emitted.final).toEqual(component.periodoFin());
   });
 
   it('should emit create/update/delete events', () => {

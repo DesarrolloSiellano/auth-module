@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   Observable,
@@ -22,11 +22,9 @@ export class TokenRefreshService {
     string | null
   >(null);
 
-  constructor(
-    private readonly auth: Auth,
-    private readonly processAuthData: ProcessAuthData,
-    private readonly session: SessionStore,
-  ) {}
+  private readonly auth = inject(Auth);
+  private readonly processAuthData = inject(ProcessAuthData);
+  private readonly session = inject(SessionStore);
 
   refresh(): Observable<string> {
     const refreshToken = this.session.getRefreshToken();

@@ -1,8 +1,8 @@
-<div class="flex">
-  <form [formGroup]="formGroup">
+<div class="flex w-full">
+  <form [formGroup]="formGroup" class="w-full">
     <div class="row">
-      @for(item of form; track item) {
-      <div class="{{colClass}} ">
+      @for(item of fields; track item) {
+      <div [class]="colClass()">
         @if (item.type === 'text') {
         <div class="p-md w-full">
           <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
@@ -132,7 +132,7 @@
               formControlName="{{item.name}}"
               [options]="item.options"
               optionLabel="{{item.optionName}}"
-              optionValue="{{item.optionValue}}" />
+              optionValue="{{item.optionValue}}" appendTo="body" />
             <label for="{{item.name}}">{{item.label}}</label>
           </p-floatlabel>
           <div class="message-validation">
@@ -175,7 +175,7 @@
           <p-floatlabel variant="on">
             <p-datepicker id="{{item.name}}" class="w-full"
               [dateFormat]="item.dateFormat" formControlName="{{item.name}}"
-              required="{{item.required}}" locale="es" />
+              required="{{item.required}}" locale="es" appendTo="body" />
             <label for="{{item.name}}">{{item.label}}</label>
           </p-floatlabel>
           <div class="message-validation">

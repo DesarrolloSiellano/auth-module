@@ -8,7 +8,7 @@ import { Rol } from '../../features/roles/interface/rol.interface';
 import { Auth } from '../../features/auth/service/auth';
 import { ProcessAuthData } from '../../features/auth/service/process-auth-data';
 import { SessionStore } from '../services/session.store';
-import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../environments/environment';
 
 export const authGuard: CanActivateFn = () => {
   const router = inject(Router);

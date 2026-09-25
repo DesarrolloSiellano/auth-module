@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { PermissionService } from './permission.service';
-import { ENVIROMENT } from '../../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../../environments/environment';
 
 describe('PermissionService', () => {
   let service: PermissionService;

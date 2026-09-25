@@ -1,15 +1,13 @@
 // confirm-dialog.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConfirmService {
-  constructor(
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService
-  ) {}
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly messageService = inject(MessageService);
 
   confirm(
     itemName: string,

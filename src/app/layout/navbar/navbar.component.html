@@ -1,18 +1,23 @@
 <header class="navbar">
   <div class="nabvar-title-wrapper">
-    <div class="btn btn-link btn-sm" (click)="toggleSidebar()">
-      <i class="pi" [ngClass]="isSidebarOpen ? 'pi-bars' : 'pi-times'"></i>
+    <div class="btn btn-link btn-sm" role="button" tabindex="0" aria-label="Alternar menú lateral"
+      (click)="toggleSidebar()" (keydown.enter)="toggleSidebar()"
+      (keydown.space)="toggleSidebar(); $event.preventDefault()">
+      <i class="pi" [class]="isSidebarOpen ? 'pi-bars' : 'pi-times'" aria-hidden="true"></i>
     </div>
     <span class="navbar-title">{{ moduleConfig.description }}</span>
   </div>
   <div class="navbar-right">
 
-    <div #cogIcon class="navbar-icon-option" (click)="toggleDropdown(cogIcon)">
-      <i class="pi pi-cog"></i>
+    <div #cogIcon class="navbar-icon-option" role="button" tabindex="0" aria-label="Configuración"
+      (click)="toggleDropdown(cogIcon)" (keydown.enter)="toggleDropdown(cogIcon)"
+      (keydown.space)="toggleDropdown(cogIcon); $event.preventDefault()">
+      <i class="pi pi-cog" aria-hidden="true"></i>
     </div>
 
-    <div class="navbar-icon-option" (click)="logout()">
-      <i class="pi pi-sign-out"></i>
+    <div class="navbar-icon-option" role="button" tabindex="0" aria-label="Cerrar sesión" (click)="logout()"
+      (keydown.enter)="logout()" (keydown.space)="logout(); $event.preventDefault()">
+      <i class="pi pi-sign-out" aria-hidden="true"></i>
     </div>
 
   </div>

@@ -21,18 +21,20 @@ describe('IconDropdownComponent', () => {
 
   it('should execute the option action and close', () => {
     let executed = false;
-    component.options = [
+    fixture.componentRef.setInput('options', [
       { label: 'Acción', action: () => (executed = true) },
-    ];
+    ]);
 
-    component.execute(component.options[0].action);
+    component.execute(component.options()[0].action);
 
     expect(executed).toBe(true);
     expect((component as any).overlayRef).toBeUndefined();
   });
 
   it('should open an overlay attached to the dropdown template', () => {
-    component.options = [{ label: 'A', action: () => undefined }];
+    fixture.componentRef.setInput('options', [
+      { label: 'A', action: () => undefined },
+    ]);
     const trigger = document.createElement('button');
 
     component.open(trigger);

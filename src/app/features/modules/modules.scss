@@ -40,6 +40,17 @@
   margin-top: 8px;
 }
 
+@media (max-width: 767.98px) {
+  .route-block {
+    padding: 0.85rem;
+  }
+
+  .child-route {
+    margin-left: 0.25rem;
+    padding: 0.65rem;
+  }
+}
+
 link-info{
   color: var(--color-info) !important;
   text-decoration: underline;

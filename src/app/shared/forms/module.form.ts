@@ -28,7 +28,7 @@ export const MODULE_FORM: FormFieldConfig[] = [
     weight: 6,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -43,7 +43,7 @@ export const MODULE_FORM: FormFieldConfig[] = [
     weight: 3,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
   },
 
 ];

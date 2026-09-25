@@ -1,9 +1,14 @@
 .footer {
-  height: 48px;
+  min-height: 48px;
   background: var(--backgraund-surface);
-
   text-align: center;
-  padding: 12px 0;
+  padding: 12px 1rem;
   color: #767c8c;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 10px 0.75rem;
+  }
 }

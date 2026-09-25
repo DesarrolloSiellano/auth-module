@@ -3,19 +3,27 @@ export interface HttpErrorInfo {
   message: string;
 }
 
+interface NormalizedError {
+  status?: number;
+  statusCode?: number;
+  message?: unknown;
+  error?: unknown;
+}
+
 export function getHttpErrorInfo(
-  err: any,
+  err: unknown,
   fallback = 'Ha ocurrido un error inesperado',
 ): HttpErrorInfo {
-  const status =
-    err?.status ?? err?.error?.statusCode ?? err?.statusCode ?? 0;
+  const e = (err ?? {}) as NormalizedError;
+  const nested = (e.error ?? {}) as NormalizedError;
 
-  const raw = err?.error?.message ?? err?.message ?? err?.error ?? '';
+  const status = e.status ?? nested.statusCode ?? e.statusCode ?? 0;
+  const raw = nested.message ?? e.message ?? e.error ?? '';
 
   let message = '';
   if (Array.isArray(raw)) {
     message = raw
-      .map((m: any) => (typeof m === 'string' ? m : JSON.stringify(m)))
+      .map((m: unknown) => (typeof m === 'string' ? m : JSON.stringify(m)))
       .filter(Boolean)
       .join('. ');
   } else if (typeof raw === 'string' && raw.trim()) {

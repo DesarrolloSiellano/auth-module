@@ -3,7 +3,7 @@ import { FormFieldConfig } from './form-field.model';
 export const LOGIN_FORM: FormFieldConfig[] = [
   {
     name: 'email',
-    label: 'Correo Electronico',
+    label: 'Correo o usuario',
     type: 'text',
     show: true,
     required: true,
@@ -13,9 +13,7 @@ export const LOGIN_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
-    pattern: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/,
-
+    pKeyFilter: undefined,
   },
   {
     name: 'password',
@@ -30,7 +28,7 @@ export const LOGIN_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     //pattern: /^[a-zA-ZáéíóúÁÉÍÓÜñÜ\s]+$/,
   },
 ];
@@ -49,7 +47,7 @@ export const RECOVERY_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/,
   },
 ];

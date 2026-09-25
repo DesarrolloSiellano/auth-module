@@ -13,7 +13,13 @@ import { RolesServices } from '../roles/services/roles';
 import { ModuleService } from '../modules/services/module.service';
 import { PermissionService } from '../permissions/services/permission.service';
 import { CompaniesService } from '../companies/services/companies.service';
-import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { Permission } from '../permissions/interfaces/permission.interface';
+import { Rol } from '../roles/interface/rol.interface';
+import { Module } from '../modules/interfaces/module.interface';
+import { User } from './interfaces/user.interface';
+import { Companies } from '../companies/interfaces/companies.interface';
+import { ENVIROMENT } from '../../../environments/environment';
+import { SessionStore } from '../../core/services/session.store';
 
 describe('Users', () => {
   let component: Users;
@@ -26,23 +32,70 @@ describe('Users', () => {
   let companiesServiceMock: jasmine.SpyObj<CompaniesService>;
   let dataLoaderMock: jasmine.SpyObj<DataLoaderService>;
   let confirmServiceMock: jasmine.SpyObj<ConfirmService>;
+  let sessionStoreMock: { getClaims: jasmine.Spy };
 
-  const permission = { _id: 'p1', name: 'Crear', action: 'create', isActive: true };
-  const role = { _id: 'r1', name: 'Admin', codeRol: 'ADM', isActive: true };
-  const moduleItem = {
+  const permission: Permission = {
+    _id: 'p1',
+    name: 'Crear',
+    description: 'Permite crear',
+    action: 'create',
+    resource: 'users',
+    type: 'global',
+    created: new Date(),
+    modified: new Date(),
+    isActive: true,
+  };
+  const role: Rol = {
+    _id: 'r1',
+    name: 'Admin',
+    codeRol: 'ADM',
+    description: 'Administrador',
+    created: new Date(),
+    modiefied: new Date(),
+    isActive: true,
+    isInheritPermissions: false,
+    permissions: [],
+  };
+  const moduleItem: Module = {
     _id: 'm1',
     name: ENVIROMENT.storageKey,
+    description: 'Admin module',
+    created: new Date(),
     isActive: true,
     routes: [
-      { name: 'Pages', path: '/pages', icon: 'layout' },
+      {
+        name: 'Pages',
+        path: '/pages',
+        initPath: '/pages/users',
+        icon: 'layout',
+        isActive: true,
+        children: [],
+      },
     ],
   };
+
+  const selectUser = (user: Record<string, unknown>) =>
+    component.onSelectionChange(user as unknown as User);
 
   beforeEach(async () => {
     userServiceMock = jasmine.createSpyObj('UserService', [
       'findAll', 'findByPage', 'findById', 'create', 'update', 'delete',
+      'uploadMassive', 'checkAvailability', 'search', 'exportUsers', 'bulk',
+      'resendInvite', 'block', 'unblock', 'setTagsGroups', 'hardDelete',
+      'listSavedFilters', 'createSavedFilter', 'deleteSavedFilter',
+      'listCustomFields', 'createCustomField', 'updateCustomField',
+      'deleteCustomField',
     ]);
     userServiceMock.findByPage.and.returnValue(
+      of({ data: [], meta: { totalData: 0 } } as any),
+    );
+    userServiceMock.checkAvailability.and.returnValue(
+      of({ data: { emailExists: false, usernameExists: false }, meta: {} } as any),
+    );
+    userServiceMock.listSavedFilters.and.returnValue(
+      of({ data: [], meta: { totalData: 0 } } as any),
+    );
+    userServiceMock.listCustomFields.and.returnValue(
       of({ data: [], meta: { totalData: 0 } } as any),
     );
 
@@ -83,6 +136,14 @@ describe('Users', () => {
     ]);
     confirmServiceMock.confirm.and.returnValue(Promise.resolve(true));
 
+    sessionStoreMock = {
+      getClaims: jasmine.createSpy('getClaims').and.returnValue({
+        isSuperAdmin: true,
+        company: 'BPONET',
+        tenantId: '000000',
+      }),
+    };
+
     await TestBed.configureTestingModule({
       imports: [Users],
       providers: [
@@ -92,6 +153,7 @@ describe('Users', () => {
         MessageService,
         ConfirmationService,
         { provide: CompaniesService, useValue: companiesServiceMock },
+        { provide: SessionStore, useValue: sessionStoreMock },
       ],
     })
       .overrideComponent(Users, {
@@ -122,6 +184,26 @@ describe('Users', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('mantiene los filtros avanzados al cambiar de página', () => {
+    component.advancedFilters['estado'] = 'true';
+    component.applyAdvancedFilters();
+    expect(userServiceMock.findByPage).toHaveBeenCalledWith(
+      0,
+      100,
+      '',
+      JSON.stringify({ estado: 'true' }),
+    );
+
+    userServiceMock.findByPage.calls.reset();
+    component.load({ first: 100, rows: 100 } as any);
+    expect(userServiceMock.findByPage).toHaveBeenCalledWith(
+      100,
+      100,
+      '',
+      JSON.stringify({ estado: 'true' }),
+    );
   });
 
   it('should load options on init', () => {
@@ -171,7 +253,9 @@ describe('Users', () => {
   it('should load company autocomplete options', () => {
     component.findByAutoComplete({ query: 'bpo' });
     expect(companiesServiceMock.findByAutoComplete).toHaveBeenCalledWith('bpo');
-    expect(component.itemsAutocomplete).toEqual([{ _id: 'c1', name: 'BPO' }]);
+    expect(component.itemsAutocomplete).toEqual([
+      { _id: 'c1', name: 'BPO' },
+    ] as unknown as Companies[]);
   });
 
   it('should map selection data when editing', () => {
@@ -191,7 +275,7 @@ describe('Users', () => {
       modules: [{ name: moduleItem.name, isActive: true, routes: [] }],
     };
 
-    component.onSelectionChange(selected);
+    component.onSelectionChange(selected as unknown as User);
 
     expect(component.isEditForm).toBe(true);
     expect(component.userForm.get('name')?.value).toBe('John');
@@ -211,7 +295,12 @@ describe('Users', () => {
   });
 
   it('should toggle route children', () => {
-    const route = { isActive: false, children: [{ isActive: false }] };
+    const route = {
+      name: 'Pages',
+      path: '/pages',
+      isActive: false,
+      children: [{ name: 'Users', path: '/users', isActive: false }],
+    };
     component.toggleRoute(route, { checked: true });
     expect(route.isActive).toBe(true);
     expect(route.children[0].isActive).toBe(true);
@@ -252,7 +341,7 @@ describe('Users', () => {
 
   it('should show modules as inactive when the user has none', () => {
     component.create();
-    component.onSelectionChange({
+    selectUser({
       _id: 'u2',
       name: 'Jane',
       lastName: 'Doe',
@@ -289,7 +378,7 @@ describe('Users', () => {
 
   it('should render the edit dialog with populated data', () => {
     component.create();
-    component.onSelectionChange({
+    selectUser({
       _id: 'u1',
       name: 'John',
       lastName: 'Doe',
@@ -376,7 +465,7 @@ describe('Users', () => {
 
   it('should map selection with undefined arrays and foreign items', () => {
     component.create();
-    component.onSelectionChange({
+    selectUser({
       _id: 'u3',
       name: 'A',
       lastName: 'B',
@@ -397,7 +486,7 @@ describe('Users', () => {
 
   it('should match modules and routes by id/path when names differ', () => {
     component.create();
-    component.onSelectionChange({
+    selectUser({
       _id: 'u1',
       name: 'A',
       lastName: 'B',
@@ -436,5 +525,463 @@ describe('Users', () => {
 
     const modules = component.userForm.get('modules')?.value;
     expect(modules[0].routes).toEqual([]);
+  });
+
+  it('should derive the parent route state from its children when parent is null', () => {
+    component.modulesOptions = [
+      {
+        _id: 'm1',
+        name: 'adminUserModule',
+        isActive: true,
+        routes: [
+          {
+            name: 'Pages',
+            path: '/pages',
+            isActive: null,
+            children: [
+              { name: 'Users', path: '/users', isActive: true },
+              { name: 'Roles', path: '/roles', isActive: true },
+            ],
+          },
+        ],
+      },
+    ];
+    component.create();
+    selectUser({
+      _id: 'u1',
+      name: 'A',
+      lastName: 'B',
+      email: 'a@b.com',
+      isActived: true,
+      isAdmin: true,
+      isSuperAdmin: false,
+      company: 'BPO',
+      modules: [
+        {
+          name: 'adminUserModule',
+          isActive: true,
+          routes: [
+            {
+              name: 'Pages',
+              path: '/pages',
+              isActive: null,
+              children: [
+                { name: 'Users', path: '/users', isActive: true },
+                { name: 'Roles', path: '/roles', isActive: false },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const modules = component.userForm.get('modules')?.value;
+    const route = modules[0].routes[0];
+    expect(route.isActive).toBe(true);
+    expect(route.children.find((c: any) => c.name === 'Users').isActive).toBe(true);
+    expect(route.children.find((c: any) => c.name === 'Roles').isActive).toBe(false);
+  });
+
+  it('should keep user modules and routes that are not in the catalog', () => {
+    component.modulesOptions = [
+      { _id: 'm1', name: 'adminUserModule', isActive: true, routes: [] },
+    ];
+    component.create();
+    selectUser({
+      _id: 'u1',
+      name: 'A',
+      lastName: 'B',
+      email: 'a@b.com',
+      isActived: true,
+      isAdmin: true,
+      isSuperAdmin: false,
+      company: 'BPO',
+      modules: [
+        {
+          _id: 'm2',
+          name: 'crmCampaign',
+          isActive: true,
+          routes: [
+            {
+              name: 'Opciones',
+              path: '/pages',
+              isActive: true,
+              children: [{ name: 'Dashboard', path: '/dashboard', isActive: true }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const modules = component.userForm.get('modules')?.value;
+    const crm = modules.find((m: any) => m.name === 'crmCampaign');
+    expect(crm).toBeTruthy();
+    expect(crm.isActive).toBe(true);
+    expect(crm.routes[0].children[0].isActive).toBe(true);
+  });
+
+  it('should recompute the parent route when a child is toggled', () => {
+    const route = {
+      name: 'Pages',
+      path: '/pages',
+      isActive: false,
+      children: [
+        { name: 'Users', path: '/users', isActive: false },
+        { name: 'Roles', path: '/roles', isActive: false },
+      ],
+    };
+    component.toggleChild(route, route.children[0], { checked: true });
+    expect(route.isActive).toBe(true);
+
+    component.toggleChild(route, route.children[0], { checked: false });
+    expect(route.isActive).toBe(false);
+  });
+
+  it('should enable all routes and children when the module is activated', () => {
+    const mod = {
+      name: 'adminUserModule',
+      isActive: false,
+      routes: [
+        {
+          name: 'Pages',
+          path: '/pages',
+          isActive: false,
+          children: [
+            { name: 'Users', path: '/users', isActive: false },
+            { name: 'Roles', path: '/roles', isActive: false },
+          ],
+        },
+      ],
+    };
+    component.toggleModule(mod, { checked: true });
+    expect(mod.isActive).toBe(true);
+    expect(mod.routes[0].isActive).toBe(true);
+    expect(mod.routes[0].children.every((c: any) => c.isActive)).toBe(true);
+  });
+
+  describe('carga masiva - validaciones', () => {
+    const header = [
+      'Nombres',
+      'Apellidos',
+      'Correo Electrónico',
+      'Teléfono',
+      'TenantId',
+      'Empresa',
+      'Usuario',
+      'Roles',
+      'Permisos',
+      'Módulos',
+    ];
+
+    const validRow = (i = 0) => ({
+      'Nombres': `Nombre${i}`,
+      'Apellidos': `Apellido${i}`,
+      'Correo Electrónico': `user${i}@mail.com`,
+      'Teléfono': `300000000${i}`,
+      'TenantId': '000000',
+      'Empresa': 'BPONET',
+      'Usuario': `user${i}`,
+      'Roles': '',
+      'Permisos': '',
+      'Módulos': '',
+    });
+
+    const buildPreview = (rows: Record<string, unknown>[]) =>
+      (component as any).buildPreview(header, rows);
+
+    beforeEach(() => {
+      confirmServiceMock.showMessage.calls.reset();
+    });
+
+    it('rechaza más de 50 usuarios y muestra el mensaje', () => {
+      const rows = Array.from({ length: 51 }, (_, i) => validRow(i));
+      buildPreview(rows);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('límite máximo')),
+      ).toBe(true);
+      expect(
+        component.previewErrors.some((e) => e.includes('51 usuarios')),
+      ).toBe(true);
+      expect(confirmServiceMock.showMessage).toHaveBeenCalled();
+    });
+
+    it('acepta exactamente 50 usuarios', () => {
+      const rows = Array.from({ length: 50 }, (_, i) => validRow(i));
+      buildPreview(rows);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('límite máximo')),
+      ).toBe(false);
+    });
+
+    it('ignora filas vacías o con solo espacios (no las cuenta)', () => {
+      const rows = Array.from({ length: 50 }, (_, i) => validRow(i));
+      const emptyRow = {
+        'Nombres': ' ',
+        'Apellidos': '',
+        'Correo Electrónico': ' ',
+        'Teléfono': '',
+        'Usuario': '',
+        'Empresa': '',
+        'TenantId': '',
+      };
+
+      buildPreview([...rows, emptyRow]);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('límite máximo')),
+      ).toBe(false);
+      expect(component.previewData.length).toBe(50);
+    });
+
+    it('muestra mensaje cuando el archivo está vacío', () => {
+      buildPreview([]);
+      expect(component.previewErrors).toContain('El archivo Excel está vacío.');
+      expect(confirmServiceMock.showMessage).toHaveBeenCalled();
+    });
+
+    it('muestra mensaje cuando faltan columnas obligatorias', () => {
+      (component as any).buildPreview(['Nombres'], [validRow()]);
+      expect(
+        component.previewErrors.some((e) =>
+          e.includes('Faltan columnas obligatorias'),
+        ),
+      ).toBe(true);
+    });
+
+    it('muestra mensaje por campos obligatorios vacíos (teléfono ya no es obligatorio)', () => {
+      buildPreview([{ ...validRow(), 'Nombres': '', 'Teléfono': '' }]);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('Falta Nombres')),
+      ).toBe(true);
+      expect(
+        component.previewErrors.some((e) => e.includes('Falta Teléfono')),
+      ).toBe(false);
+      expect(confirmServiceMock.showMessage).toHaveBeenCalled();
+    });
+
+    it('detecta correos duplicados dentro del archivo', () => {
+      buildPreview([validRow(1), { ...validRow(2), 'Correo Electrónico': 'user1@mail.com' }]);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('Correo duplicado')),
+      ).toBe(true);
+    });
+
+    it('permite teléfonos duplicados (phone no es único)', () => {
+      buildPreview([
+        validRow(1),
+        { ...validRow(2), 'Teléfono': '3000000001' },
+      ]);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('Teléfono duplicado')),
+      ).toBe(false);
+    });
+
+    it('detecta usuarios duplicados dentro del archivo (global)', () => {
+      buildPreview([
+        validRow(1),
+        { ...validRow(2), 'Usuario': 'user1' },
+      ]);
+
+      expect(
+        component.previewErrors.some((e) => e.includes('Usuario duplicado')),
+      ).toBe(true);
+    });
+
+    it('no reporta errores con datos válidos', () => {
+      buildPreview([validRow(1), validRow(2)]);
+      expect(component.previewErrors.length).toBe(0);
+      expect(component.previewData.every((r) => r.status === 'OK')).toBe(true);
+    });
+
+    it('SuperAdmin: exige Empresa y TenantId en el archivo', () => {
+      buildPreview([{ ...validRow(), 'Empresa': '', 'TenantId': '' }]);
+
+      expect(
+        component.previewErrors.some(
+          (e) => e.includes('Falta Empresa') && e.includes('Falta TenantId'),
+        ),
+      ).toBe(true);
+    });
+
+    it('admin no-Super: no exige Empresa/TenantId y usa los de su sesión', () => {
+      sessionStoreMock.getClaims.and.returnValue({
+        isSuperAdmin: false,
+        company: 'MIEMP',
+        tenantId: 'MIEMP-ID',
+      });
+
+      const adminHeader = [
+        'Nombres',
+        'Apellidos',
+        'Correo Electrónico',
+        'Teléfono',
+        'Usuario',
+        'Roles',
+        'Permisos',
+        'Módulos',
+      ];
+      const adminRow = {
+        'Nombres': 'Ana',
+        'Apellidos': 'Gómez',
+        'Correo Electrónico': 'ana@mail.com',
+        'Teléfono': '3200000000',
+        'Usuario': 'ana',
+        'Roles': '',
+        'Permisos': '',
+        'Módulos': '',
+      };
+
+      (component as any).buildPreview(adminHeader, [adminRow]);
+
+      expect(component.previewErrors.length).toBe(0);
+      expect(component.previewData[0].empresa).toBe('MIEMP');
+      expect(component.previewData[0].tenantId).toBe('MIEMP-ID');
+    });
+  });
+
+  describe('disponibilidad de email/username', () => {
+    it('la lupa de correo marca disponible', () => {
+      userServiceMock.checkAvailability.and.returnValue(
+        of({ data: { emailExists: false, usernameExists: false }, meta: {} } as any),
+      );
+      component.create();
+      component.userForm.get('email')?.setValue('nuevo@mail.com');
+
+      component.checkEmailNow();
+
+      expect(userServiceMock.checkAvailability).toHaveBeenCalledWith({
+        email: 'nuevo@mail.com',
+        excludeId: undefined,
+      });
+      expect(component.emailStatus).toBe('available');
+      expect(component.hasAvailabilityConflict).toBe(false);
+    });
+
+    it('marca conflicto si el correo existe y bloquea guardar', () => {
+      userServiceMock.checkAvailability.and.returnValue(
+        of({ data: { emailExists: true, usernameExists: false }, meta: {} } as any),
+      );
+      component.create();
+      component.userForm.get('email')?.setValue('existe@mail.com');
+
+      component.checkEmailNow();
+
+      expect(component.emailStatus).toBe('taken');
+      expect(component.hasAvailabilityConflict).toBe(true);
+      expect(component.isSaveDisabled).toBe(true);
+    });
+
+    it('no consulta cuando el correo es inválido', () => {
+      component.create();
+      userServiceMock.checkAvailability.calls.reset();
+      component.userForm.get('email')?.setValue('no-es-correo');
+
+      component.checkEmailNow();
+
+      expect(component.emailStatus).toBe('idle');
+      expect(userServiceMock.checkAvailability).not.toHaveBeenCalled();
+    });
+
+    it('la lupa de usuario detecta conflicto global', () => {
+      userServiceMock.checkAvailability.and.returnValue(
+        of({ data: { emailExists: false, usernameExists: true }, meta: {} } as any),
+      );
+      component.create();
+      component.userForm.get('username')?.setValue('juanp');
+
+      component.checkUsernameNow();
+
+      expect(component.usernameStatus).toBe('taken');
+      expect(component.hasAvailabilityConflict).toBe(true);
+    });
+
+    it('bloquea onSubmit ante un conflicto de disponibilidad', () => {
+      component.create();
+      component.emailStatus = 'taken';
+      const saveSpy = spyOn(component, 'save');
+
+      component.onSubmit();
+
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+
+    it('normaliza email y username a minúsculas al guardar', () => {
+      component.create();
+      component.userForm.patchValue({
+        username: 'JuanP',
+        email: 'A@B.com',
+      });
+
+      const values: any = component.getFormattedFormValues();
+
+      expect(values.username).toBe('juanp');
+      expect(values.email).toBe('a@b.com');
+    });
+  });
+
+  describe('plantillas de carga masiva por rol', () => {
+    it('SuperAdmin: incluye TenantId y Empresa', () => {
+      sessionStoreMock.getClaims.and.returnValue({
+        isSuperAdmin: true,
+        company: 'BPONET',
+        tenantId: '000000',
+      });
+
+      const { rows, fileName } = component.buildMassiveTemplateData();
+
+      expect(fileName).toContain('SuperAdmin');
+      expect(Object.keys(rows[0])).toContain('TenantId');
+      expect(Object.keys(rows[0])).toContain('Empresa');
+      expect(rows[0]['Empresa']).toBe('BPONET');
+      expect(rows[0]['TenantId']).toBe('000000');
+    });
+
+    it('Admin no-Super: no incluye TenantId ni Empresa', () => {
+      sessionStoreMock.getClaims.and.returnValue({
+        isSuperAdmin: false,
+        company: 'MIEMP',
+        tenantId: 'MIEMP-ID',
+      });
+
+      const { rows, fileName } = component.buildMassiveTemplateData();
+
+      expect(fileName).toContain('Admin');
+      expect(fileName).not.toContain('SuperAdmin');
+      expect(Object.keys(rows[0])).not.toContain('TenantId');
+      expect(Object.keys(rows[0])).not.toContain('Empresa');
+    });
+  });
+
+  describe('regla de rol SuperAdmin', () => {
+    it('deshabilita y omite isSuperAdmin para un admin no-Super', () => {
+      sessionStoreMock.getClaims.and.returnValue({
+        isSuperAdmin: false,
+        company: 'MIEMP',
+        tenantId: 'MIEMP-ID',
+      });
+
+      component.create();
+
+      expect(component.userForm.get('isSuperAdmin')?.disabled).toBe(true);
+      const values: any = component.getFormattedFormValues();
+      expect(values.isSuperAdmin).toBeUndefined();
+    });
+
+    it('habilita isSuperAdmin para un SuperAdmin', () => {
+      sessionStoreMock.getClaims.and.returnValue({
+        isSuperAdmin: true,
+        company: 'BPONET',
+        tenantId: '000000',
+      });
+
+      component.create();
+
+      expect(component.userForm.get('isSuperAdmin')?.disabled).toBe(false);
+    });
   });
 });

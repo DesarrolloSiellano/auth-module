@@ -13,7 +13,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -28,7 +28,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -43,7 +43,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -58,7 +58,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -88,7 +88,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/,
   },
   {
@@ -103,7 +103,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -118,7 +118,7 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
     {
@@ -133,6 +133,6 @@ export const COMPANIES_FORM: FormFieldConfig[] = [
     weight: 3,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
   },
 ];

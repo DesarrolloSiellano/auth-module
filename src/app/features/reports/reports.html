@@ -1,0 +1,135 @@
+<div class="content reports">
+  <div class="rep-header">
+    <div class="rep-title">
+      <span class="rep-icon"><i class="pi pi-chart-bar"></i></span>
+      <div>
+        <h2>Reportes y exportaciones</h2>
+        <p>Genera vistas previas y descarga en Excel, CSV o PDF.</p>
+      </div>
+    </div>
+    <p-button icon="pi pi-refresh" severity="secondary" [text]="true"
+      ariaLabel="Recargar catálogo" (click)="loadCatalog()" />
+  </div>
+
+  <div class="rep-layout">
+    <aside class="rep-catalog">
+      <h3>Catálogo</h3>
+      @if (loadingCatalog) {
+        <p class="rep-muted">Cargando…</p>
+      } @else if (catalog.length === 0) {
+        <p class="rep-muted">No hay reportes disponibles.</p>
+      } @else {
+        <ul>
+          @for (report of catalog; track report.id) {
+            <li>
+              <button type="button" class="rep-item"
+                [class.active]="selected?.id === report.id"
+                (click)="selectReport(report)">
+                <span class="rep-item-name">{{ report.nombre }}</span>
+                <span class="rep-item-cat">{{ report.category }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <section class="rep-detail">
+      @if (!selected) {
+        <div class="rep-empty">
+          <i class="pi pi-file-excel"></i>
+          <p>Selecciona un reporte del catálogo para comenzar.</p>
+        </div>
+      } @else {
+        <div class="rep-detail-head">
+          <div>
+            <h3>{{ selected.nombre }}</h3>
+            <p>{{ selected.descripcion }}</p>
+          </div>
+          <div class="rep-actions">
+            <p-button label="Vista previa" icon="pi pi-eye" [loading]="loading"
+              (click)="runPreview()" />
+            <p-button label="Excel" icon="pi pi-file-excel" severity="success"
+              [outlined]="true" [loading]="exporting"
+              (click)="exportReport('xlsx')" />
+            <p-button label="CSV" icon="pi pi-file" severity="secondary"
+              [outlined]="true" [loading]="exporting"
+              (click)="exportReport('csv')" />
+            <p-button label="PDF" icon="pi pi-file-pdf" severity="danger"
+              [outlined]="true" [loading]="exporting"
+              (click)="exportReport('pdf')" />
+          </div>
+        </div>
+
+        @if (visibleFilters().length) {
+          <div class="rep-filters">
+            @for (filter of visibleFilters(); track filter.key) {
+              <div class="rep-field">
+                <label [for]="'rep-' + filter.key">{{ filter.label }}</label>
+                @switch (filter.type) {
+                  @case ('select') {
+                    <p-select [inputId]="'rep-' + filter.key"
+                      [options]="filter.options || []" optionLabel="label"
+                      optionValue="value" appendTo="body"
+                      [placeholder]="filter.placeholder || filter.label"
+                      [(ngModel)]="filters[filter.key]" />
+                  }
+                  @case ('date') {
+                    <p-datepicker [inputId]="'rep-' + filter.key"
+                      dateFormat="yy-mm-dd" appendTo="body"
+                      [showIcon]="true" [showButtonBar]="true"
+                      [(ngModel)]="filters[filter.key]" />
+                  }
+                  @default {
+                    <input pInputText [id]="'rep-' + filter.key"
+                      [placeholder]="filter.placeholder || filter.label"
+                      [(ngModel)]="filters[filter.key]" />
+                  }
+                }
+              </div>
+            }
+            <div class="rep-field rep-field-actions">
+              <p-button label="Limpiar" icon="pi pi-filter-slash"
+                severity="secondary" [text]="true" (click)="clearFilters()" />
+            </div>
+          </div>
+        }
+
+        @if (preview) {
+          <div class="rep-summary">
+            @for (item of preview.summary; track item.label) {
+              <p-tag [value]="item.label + ': ' + item.value" severity="info" />
+            }
+            <span class="rep-total">{{ preview.total }} registro(s)</span>
+          </div>
+
+          <p-table [value]="preview.rows" [paginator]="true" [rows]="10"
+            styleClass="p-datatable-sm"
+            [tableStyle]="{ 'min-width': '48rem' }">
+            <ng-template pTemplate="header">
+              <tr>
+                @for (col of preview.columns; track col.key) {
+                  <th [style.text-align]="col.align || 'left'">{{ col.label }}</th>
+                }
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                @for (col of preview.columns; track col.key) {
+                  <td [style.text-align]="col.align || 'left'">{{ row[col.key] }}</td>
+                }
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td [attr.colspan]="preview.columns.length || 1">
+                  Sin datos para los filtros seleccionados.
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        }
+      }
+    </section>
+  </div>
+</div>

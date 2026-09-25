@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
 import { BaseCrud } from '../../shared/helpers/base-crud';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
@@ -7,9 +7,8 @@ import { ModuleService } from './services/module.service';
 import { Module, Route } from './interfaces/module.interface';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { DialogModule } from 'primeng/dialog';
+import { Button } from 'primeng/button';
+import { Dialog } from 'primeng/dialog';
 import {
   AbstractControl,
   FormArray,
@@ -18,32 +17,28 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { CheckboxModule } from 'primeng/checkbox';
-import { FloatLabelModule } from 'primeng/floatlabel';
+import { Checkbox } from 'primeng/checkbox';
+import { FloatLabel } from 'primeng/floatlabel';
 import { FormValidationUtils } from '../../shared/validations/validations-message';
-import { TextareaModule } from 'primeng/textarea';
-import { InputTextModule } from 'primeng/inputtext';
-import { DividerModule } from 'primeng/divider';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
+import { Textarea } from 'primeng/textarea';
+import { InputText } from 'primeng/inputtext';
+import { Divider } from 'primeng/divider';
+import { Message } from 'primeng/message';
 
 @Component({
   selector: 'app-modules',
-  standalone: true,
   imports: [
     ListTemplateComponent,
     CommonModule,
-    ButtonModule,
-    ToastModule,
-    DialogModule,
+    Button,
+    Dialog,
     ReactiveFormsModule,
-    CheckboxModule,
-    FloatLabelModule,
-    TextareaModule,
-    InputTextModule,
-    DividerModule,
-    CardModule,
-    MessageModule,
+    Checkbox,
+    FloatLabel,
+    Textarea,
+    InputText,
+    Divider,
+    Message,
   ],
   templateUrl: './modules.html',
   styleUrl: './modules.scss',
@@ -66,15 +61,16 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
   override title = 'Módulos';
   override subtitle = 'Módulo';
 
-  constructor(
-    protected override service: ModuleService,
-    protected override cdr: ChangeDetectorRef,
-    protected override dataLoader: DataLoaderService,
-    protected override excelexport: ExcelExportService,
-    protected override confirmService: ConfirmService,
-    private fb: FormBuilder
-  ) {
-    super(service, cdr, dataLoader, excelexport, confirmService);
+  private readonly fb = inject(FormBuilder);
+
+  constructor() {
+    super(
+      inject(ModuleService),
+      inject(ChangeDetectorRef),
+      inject(DataLoaderService),
+      inject(ExcelExportService),
+      inject(ConfirmService),
+    );
   }
 
   ngOnInit(): void {
@@ -153,12 +149,12 @@ export class ModulesComponent extends BaseCrud<Module> implements OnInit {
   }
 
   // Opcional: cargar datos para editar
-  override getFormattedFormValues(): any {
+  override getFormattedFormValues(): Module {
     const values = { ...this.moduleForm?.value };
     return values;
   }
 
-  override onSelectionChange(selectedItem: any) {
+  override onSelectionChange(selectedItem: Module & { router?: Route[] }) {
     if (selectedItem) {
       this.isEditForm = true;
       this.titleForm = 'Edición de ' + this.title;

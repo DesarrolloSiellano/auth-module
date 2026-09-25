@@ -2,36 +2,35 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   OnInit,
   Renderer2,
   ViewChild,
 } from '@angular/core';
-import { AvatarModule } from 'primeng/avatar';
+
 import { SidebarService } from '../services/sidebar.service';
 import { ModuleConfig } from '../../shared/interfaces/module-config.interface';
 import { GetConfigAppService } from '../../shared/services/get-config.service';
 import { Router } from '@angular/router';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 import { IconDropdownComponent } from '../../shared/components/dropdown/dropdown.component';
-import { DialogModule } from 'primeng/dialog';
+import { Dialog } from 'primeng/dialog';
 import { CHANGE_PASSWORD_FORM } from '../../shared/forms/change-password.form';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
-import { ButtonModule } from 'primeng/button';
+import { Button } from 'primeng/button';
 import { Auth, ChangePassword } from '../../features/auth/service/auth';
 import { SessionStore } from '../../core/services/session.store';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true,
   imports: [
     CommonModule,
-    AvatarModule,
     IconDropdownComponent,
-    DialogModule,
+    Dialog,
     FormTemplateComponent,
-    ButtonModule,
+    Button,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -61,16 +60,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isDisplayChangePassword: boolean = false;
   changePasswordForm = CHANGE_PASSWORD_FORM;
 
-  constructor(
-    private sidebarService: SidebarService,
-    private getConfigApp: GetConfigAppService,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private router: Router,
-    private confirmService: ConfirmService,
-    private authService: Auth,
-    private session: SessionStore,
-  ) {}
+  private readonly sidebarService = inject(SidebarService);
+  private readonly getConfigApp = inject(GetConfigAppService);
+  private readonly renderer = inject(Renderer2);
+  private readonly el = inject(ElementRef);
+  private readonly router = inject(Router);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly authService = inject(Auth);
+  private readonly session = inject(SessionStore);
 
   ngOnInit(): void {
     this.moduleConfig = this.getConfigApp.getModule();
@@ -195,12 +192,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
       );
 
       if (isConfirm) {
-        this.session.clear();
-        this.router.navigate(['/login']);
+        const refreshToken = this.session.getRefreshToken();
+        this.authService.logout(refreshToken).subscribe({
+          next: () => this.finishLogout(),
+          error: () => this.finishLogout(),
+        });
       }
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private finishLogout(): void {
+    this.session.clear();
+    this.router.navigate(['/login']);
   }
 
   changePassword() {
@@ -212,6 +217,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   save() {
+    // Evita reenviar el formulario mientras la petición está en curso.
+    if (this.disabledButton) return;
+
     const changePassword: ChangePassword = {
       id: localStorage.getItem('_id') as string,
       currentPassword:

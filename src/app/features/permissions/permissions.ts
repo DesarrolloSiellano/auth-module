@@ -2,31 +2,29 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  inject,
   ViewChild,
 } from '@angular/core';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
-import { DialogModule } from 'primeng/dialog';
+import { Dialog } from 'primeng/dialog';
 import { PermissionService } from './services/permission.service';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { PERMISSION_FORM } from '../../shared/forms/permission.form';
-import { ButtonModule } from 'primeng/button';
+import { Button } from 'primeng/button';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
-import { ToastModule } from 'primeng/toast';
 import { Permission } from './interfaces/permission.interface';
 import { BaseCrud } from '../../shared/helpers/base-crud';
 
 @Component({
   selector: 'app-permissions',
-  standalone: true,
   imports: [
     CommonModule,
     ListTemplateComponent,
-    DialogModule,
+    Dialog,
     FormTemplateComponent,
-    ButtonModule,
-    ToastModule,
+    Button,
   ],
   templateUrl: './permissions.html',
   styleUrl: './permissions.scss',
@@ -53,14 +51,14 @@ export class PermissionsComponent extends BaseCrud<Permission> {
 
   protected override form = PERMISSION_FORM;
 
-  constructor(
-    protected override service: PermissionService,
-    protected override cdr: ChangeDetectorRef,
-    protected override dataLoader: DataLoaderService,
-    protected override excelexport: ExcelExportService,
-    protected override confirmService: ConfirmService
-  ) {
-    super(service, cdr, dataLoader, excelexport, confirmService);
+  constructor() {
+    super(
+      inject(PermissionService),
+      inject(ChangeDetectorRef),
+      inject(DataLoaderService),
+      inject(ExcelExportService),
+      inject(ConfirmService),
+    );
   }
 
 

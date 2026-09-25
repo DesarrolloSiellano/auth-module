@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { RolesServices } from './roles';
-import { ENVIROMENT } from '../../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../../environments/environment';
 
 describe('RolesServices', () => {
   let service: RolesServices;

@@ -2,41 +2,35 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  inject,
   OnDestroy,
   OnInit,
   signal,
   ViewChild,
 } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { PasswordModule } from 'primeng/password';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
+import { Button } from 'primeng/button';
+import { Card } from 'primeng/card';
 import { FormTemplateComponent } from '../../../shared/components/form-template/form-template.component';
 import { Auth } from '../service/auth';
-import { MessageModule } from 'primeng/message';
+import { Message } from 'primeng/message';
 import { ProcessAuthData } from '../service/process-auth-data';
 import { Router, RouterModule } from '@angular/router';
 import { LOGIN_FORM } from '../../../shared/forms/login.form';
 import { ActivatedRoute } from '@angular/router';
 import { UAParser } from 'ua-parser-js';
-import { Toast, ToastModule } from 'primeng/toast';
+import { Toast } from 'primeng/toast';
 import { Subscription } from 'rxjs';
 import { getHttpErrorInfo } from '../../../core/helpers/http-error';
 
 @Component({
   selector: 'app-login',
   imports: [
-    CardModule,
-    PasswordModule,
-    ToastModule,
-    ButtonModule,
-    InputTextModule,
-    FloatLabelModule,
-    FormTemplateComponent,
-    MessageModule,
-    RouterModule,
+    Card,
     Toast,
+    Button,
+    FormTemplateComponent,
+    Message,
+    RouterModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -50,18 +44,18 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
   errorStatus = signal(0);
   showMessageSuccess = signal(false);
   messageSuccess = signal('');
+  isSubmitting = signal(false);
 
   redirectUri: string | null = null;
   parser: UAParser = new UAParser();
   private subscriptions: Subscription = new Subscription();
+  private timers: ReturnType<typeof setTimeout>[] = [];
 
-  constructor(
-    private auth: Auth,
-    private processAuthData: ProcessAuthData,
-    private router: Router,
-    private cdRef: ChangeDetectorRef,
-    private route: ActivatedRoute,
-  ) {}
+  private readonly auth = inject(Auth);
+  private readonly processAuthData = inject(ProcessAuthData);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.subscriptions.add(
@@ -73,6 +67,8 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.timers.forEach((timer) => clearTimeout(timer));
+    this.timers = [];
   }
 
   ngAfterViewInit(): void {
@@ -80,6 +76,11 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
   }
 
   login() {
+    // Evita reenviar el formulario mientras la petición está en curso.
+    if (this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+
     const info = this.parser.getResult();
     const data = {
       meta: {
@@ -102,20 +103,34 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
         const token = res.meta.accessToken || res.meta.token;
+        const mustChangePassword =
+          (res.meta as any)?.mustChangePassword === true;
         this.processAuthData.proccesAuthData(token, res.meta.refreshToken)
           .subscribe({
             next: () => {
+              this.isSubmitting.set(false);
               this.formComponent?.formGroup?.reset();
+              localStorage.setItem(
+                'mustChangePassword',
+                String(mustChangePassword),
+              );
               this.messageSuccess.set('Inicio de sesión exitoso');
               this.showMessageSuccess.set(true);
               this.showMessageError.set(false);
               this.cdRef.detectChanges();
 
-              setTimeout(() => {
-                this.router.navigate(['/pages/users']);
-              }, 800);
+              this.timers.push(
+                setTimeout(() => {
+                  this.router.navigate([
+                    mustChangePassword
+                      ? '/change-password'
+                      : '/pages/dashboard',
+                  ]);
+                }, 800),
+              );
             },
             error: (profileError) => {
+              this.isSubmitting.set(false);
               console.error(profileError);
               this.showMessageSuccess.set(false);
               this.errorStatus.set(profileError?.status || res.statusCode || 0);
@@ -129,6 +144,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
           });
       },
       error: (err) => {
+        this.isSubmitting.set(false);
         console.error(err);
         this.showMessageSuccess.set(false);
         this.errorStatus.set(err.status);
@@ -138,10 +154,12 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
         this.showMessageError.set(true);
         this.cdRef.detectChanges();
 
-        setTimeout(() => {
-          this.showMessageError.set(false);
-          this.cdRef.detectChanges();
-        }, 5000);
+        this.timers.push(
+          setTimeout(() => {
+            this.showMessageError.set(false);
+            this.cdRef.detectChanges();
+          }, 5000),
+        );
       },
       complete: () => {
         this.cdRef.detectChanges();
@@ -149,7 +167,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private extractErrorMessage(err: any): string {
+  private extractErrorMessage(err: unknown): string {
     return getHttpErrorInfo(err).message;
   }
 

@@ -1,11 +1,11 @@
 import {
   Component,
-  ElementRef,
-  Input,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
   OnDestroy,
+  inject,
+  input,
 } from '@angular/core';
 import {
   Overlay,
@@ -26,8 +26,9 @@ interface DropdownOption {
   imports: [CommonModule, OverlayModule, PortalModule],
   template: `
     <ng-template #dropdownTemplate>
-      <div class="dropdown-panel" (click)="$event.stopPropagation()">
-        @for (option of options; track option) {
+      <div class="dropdown-panel" (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()">
+        @for (option of options(); track option) {
         <button type="button" (click)="execute(option.action)">
           {{ option.label }}
         </button>
@@ -36,19 +37,15 @@ interface DropdownOption {
     </ng-template>
   `,
   styleUrls: ['./dropdown.component.scss'],
-  standalone: true,
 })
-export class IconDropdownComponent {
-  @Input() options: DropdownOption[] = [];
-  @ViewChild('dropdownTemplate') dropdownTemplate!: TemplateRef<any>;
+export class IconDropdownComponent implements OnDestroy {
+  readonly options = input<DropdownOption[]>([]);
+  @ViewChild('dropdownTemplate') dropdownTemplate!: TemplateRef<unknown>;
 
   private overlayRef?: OverlayRef;
-
-  constructor(
-    private overlay: Overlay,
-    private positionBuilder: OverlayPositionBuilder,
-    private viewContainerRef: ViewContainerRef
-  ) {}
+  private readonly overlay = inject(Overlay);
+  private readonly positionBuilder = inject(OverlayPositionBuilder);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
   open(triggerElement: HTMLElement) {
     // Si ya existe overlay, ciérralo antes
@@ -56,11 +53,30 @@ export class IconDropdownComponent {
 
     const positionStrategy = this.positionBuilder
       .flexibleConnectedTo(triggerElement)
+      .withFlexibleDimensions(false)
+      .withPush(true)
+      .withViewportMargin(8)
       .withPositions([
         {
           originX: 'end',
           originY: 'bottom',
           overlayX: 'end',
+          overlayY: 'top',
+          offsetX: 0,
+          offsetY: 4,
+        },
+        {
+          originX: 'end',
+          originY: 'top',
+          overlayX: 'end',
+          overlayY: 'bottom',
+          offsetX: 0,
+          offsetY: -4,
+        },
+        {
+          originX: 'start',
+          originY: 'bottom',
+          overlayX: 'start',
           overlayY: 'top',
           offsetX: 0,
           offsetY: 4,

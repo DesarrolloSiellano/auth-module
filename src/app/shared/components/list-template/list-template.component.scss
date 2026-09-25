@@ -108,6 +108,50 @@
   margin: 2px;
 }
 
+.row-actions {
+  gap: 0.25rem;
+  align-items: center;
+}
+
+/* La barra superior (título + buscador + botones) puede partir en varias
+   líneas en pantallas estrechas. */
+@media (max-width: 820px) {
+  .card .p-datatable .p-datatable-caption-content,
+  .card .p-datatable > .p-datatable-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* Barra de acciones masivas: separación clara entre botones */
+.bulk-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--p-surface-100, #eef2f7);
+
+  .bulk-info {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--p-surface-600, #64748b);
+    margin-right: 0.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .bulk-toolbar {
+    gap: 0.4rem;
+
+    p-button,
+    ::ng-deep .p-button {
+      flex: 1 1 auto;
+    }
+  }
+}
+
 
 @media (max-width: 820px) {
   .flex.items-center.justify-between {

@@ -1,0 +1,107 @@
+<div class="content custom-fields">
+  <div class="cf-header">
+    <div class="cf-title">
+      <span class="cf-icon"><i class="pi pi-list"></i></span>
+      <div>
+        <h2>Campos personalizados</h2>
+        <p>Define campos adicionales de usuario por empresa (solo SuperAdmin).</p>
+      </div>
+    </div>
+    <div class="cf-actions">
+      <input pInputText placeholder="Empresa (tenant)" [(ngModel)]="companyFilter"
+        (keyup.enter)="load()" />
+      <p-button label="Buscar" icon="pi pi-search" severity="secondary"
+        [outlined]="true" (click)="load()" />
+      <p-button label="Nuevo campo" icon="pi pi-plus" (click)="openCreate()" />
+    </div>
+  </div>
+
+  <div class="cf-panel">
+    <p-table [value]="fields" [loading]="loading" [paginator]="true" [rows]="10"
+      [scrollable]="true" [scrollHeight]="'max(10rem, calc(100vh - 30rem))'"
+      styleClass="p-datatable-sm p-datatable-sticky-actions" [tableStyle]="{ 'min-width': '44rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Etiqueta</th>
+          <th>Key</th>
+          <th>Tipo</th>
+          <th>Obligatorio</th>
+          <th>Orden</th>
+          <th>Estado</th>
+          <th style="width: 12rem; min-width: 12rem">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-field>
+        <tr>
+          <td>{{ field.label }}</td>
+          <td><code>{{ field.key }}</code></td>
+          <td>{{ field.type }}</td>
+          <td>{{ field.required ? 'Sí' : 'No' }}</td>
+          <td>{{ field.order }}</td>
+          <td>
+            <p-tag [value]="field.isActive ? 'Activo' : 'Inactivo'"
+              [severity]="field.isActive ? 'success' : 'secondary'" />
+          </td>
+          <td>
+            <p-button icon="pi pi-pencil" [text]="true" severity="primary"
+              ariaLabel="Editar" (click)="openEdit(field)" />
+            <p-button icon="pi pi-trash" [text]="true" severity="danger"
+              ariaLabel="Eliminar" [disabled]="processing"
+              (click)="remove(field)" />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="7">No hay campos personalizados.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog [(visible)]="dialogVisible" [modal]="true"
+    [style]="{ width: '520px' }" [header]="editing ? 'Editar campo' : 'Nuevo campo'"
+    [draggable]="false">
+    <form [formGroup]="form" class="cf-form">
+      <div class="cf-field">
+        <label>Etiqueta</label>
+        <input pInputText formControlName="label" class="w-full" />
+      </div>
+      <div class="cf-field">
+        <label>Key (clave interna)</label>
+        <input pInputText formControlName="key" class="w-full" [readonly]="editing" />
+      </div>
+      <div class="cf-field">
+        <label>Tipo</label>
+        <p-select [options]="typeOptions" optionLabel="label" optionValue="value"
+          formControlName="type" appendTo="body" class="w-full" />
+      </div>
+      @if (form.get('type')?.value === 'select') {
+        <div class="cf-field">
+          <label>Opciones (formato etiqueta:valor, separadas por coma)</label>
+          <input pInputText formControlName="optionsText" class="w-full" />
+        </div>
+      }
+      <div class="cf-row">
+        <div class="cf-field">
+          <label>Orden</label>
+          <input pInputText type="number" formControlName="order" class="w-full" />
+        </div>
+        <div class="cf-inline">
+          <p-checkbox inputId="cfRequired" formControlName="required"
+            [binary]="true" />
+          <label for="cfRequired">Obligatorio</label>
+        </div>
+        <div class="cf-inline">
+          <p-checkbox inputId="cfActive" formControlName="isActive"
+            [binary]="true" />
+          <label for="cfActive">Activo</label>
+        </div>
+      </div>
+    </form>
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" severity="secondary" [text]="true"
+        (click)="dialogVisible = false" />
+      <p-button label="Guardar" (click)="save()" [loading]="saving"
+        [disabled]="form.invalid || saving" />
+    </ng-template>
+  </p-dialog>
+</div>
