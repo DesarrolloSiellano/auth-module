@@ -9,6 +9,7 @@ import { ModuleService } from './services/module.service';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
+import { Module, Route } from './interfaces/module.interface';
 
 describe('ModulesComponent', () => {
   let component: ModulesComponent;
@@ -138,9 +139,16 @@ describe('ModulesComponent', () => {
       description: 'Desc',
       isActive: true,
       routes: [
-        { name: 'Pages', path: '/pages', icon: 'layout', isActive: true, children: [] },
+        {
+          name: 'Pages',
+          path: '/pages',
+          initPath: '/pages/users',
+          icon: 'layout',
+          isActive: true,
+          children: [],
+        },
       ],
-    });
+    } as unknown as Module & { router?: Route[] });
 
     expect(component.isEditForm).toBe(true);
     expect(component.moduleForm.get('name')?.value).toBe('adminUserModule');
@@ -162,9 +170,16 @@ describe('ModulesComponent', () => {
       description: 'Desc',
       isActive: true,
       router: [
-        { name: 'Pages', path: '/pages', icon: 'layout', isActive: true, children: [] },
+        {
+          name: 'Pages',
+          path: '/pages',
+          initPath: '/pages/users',
+          icon: 'layout',
+          isActive: true,
+          children: [],
+        },
       ],
-    });
+    } as unknown as Module & { router?: Route[] });
 
     expect(component.routes.length).toBe(1);
     expect(component.routes.at(0).get('name')?.value).toBe('Pages');

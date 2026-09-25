@@ -1,0 +1,80 @@
+<div class="content sessions">
+  <div class="sess-header">
+    <div class="sess-title">
+      <span class="sess-icon"><i class="pi pi-desktop"></i></span>
+      <div>
+        <h2>Sesiones activas</h2>
+        <p>
+          @if (isSuperAdmin) {
+            Administra las sesiones de todas las empresas.
+          } @else {
+            Administra las sesiones de tu empresa.
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="sess-actions">
+      <p-button label="Revocar seleccionadas ({{ selected.length }})" icon="pi pi-times-circle"
+        severity="danger" [outlined]="true" [disabled]="selected.length === 0 || processing"
+        (click)="revokeSelected()" />
+      <p-button label="Revocar todas" icon="pi pi-ban" severity="danger" [disabled]="processing"
+        (click)="revokeAll()" />
+    </div>
+  </div>
+
+  <div class="sess-panel">
+    <div class="sess-filters">
+      <input pInputText placeholder="Buscar por correo" [(ngModel)]="emailFilter"
+        (keyup.enter)="load()" />
+      <p-button label="Buscar" icon="pi pi-search" (click)="load()" />
+      <p-button label="Limpiar" icon="pi pi-filter-slash" severity="secondary" [text]="true"
+        (click)="clearFilters()" />
+      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" ariaLabel="Recargar"
+        (click)="load()" />
+    </div>
+
+    <p-table [value]="sessions" [(selection)]="selected" dataKey="_id" [loading]="loading"
+      [paginator]="true" [rows]="10" [scrollable]="true"
+      [scrollHeight]="'max(12rem, calc(100vh - 24rem))'"
+      styleClass="p-datatable-sm p-datatable-sticky-actions"
+      [tableStyle]="{ 'min-width': '64rem' }">
+      <ng-template #sessHeader pTemplate="header">
+        <tr>
+          <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+          <th>Usuario</th>
+          <th>Correo</th>
+          <th>Empresa</th>
+          <th>Dispositivo</th>
+          <th>IP</th>
+          <th>Creada</th>
+          <th>Última actividad</th>
+          <th style="width: 12rem; min-width: 12rem">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template #sessBody pTemplate="body" let-item>
+        <tr>
+          <td><p-tableCheckbox [value]="item" /></td>
+          <td>{{ item.user }}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.company }}</td>
+          <td>{{ deviceLabel(item) }}</td>
+          <td>{{ item.ip || '—' }}</td>
+          <td>{{ item.created || '—' }}</td>
+          <td>{{ item.lastActivityAt || '—' }}</td>
+          <td>
+            <p-button icon="pi pi-times-circle" [text]="true" severity="danger"
+              ariaLabel="Revocar sesión" [disabled]="processing"
+              (click)="revoke(item)" />
+            <p-button icon="pi pi-user-minus" [text]="true" severity="warn"
+              ariaLabel="Revocar todas del usuario" [disabled]="processing"
+              (click)="revokeUser(item)" />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #sessEmpty pTemplate="emptymessage">
+        <tr><td colspan="9">No hay sesiones activas.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

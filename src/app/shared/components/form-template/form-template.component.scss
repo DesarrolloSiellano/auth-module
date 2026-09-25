@@ -1,5 +1,6 @@
-.p-dialog{
-  width: 50vm;
+:host {
+  display: block;
+  width: 100%;
 }
 
 ::ng-deep .p-password-input{
@@ -11,7 +12,7 @@
   padding: auto;
   span {
     color: var(--color-danger);
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -25,9 +26,19 @@ input {
   padding-left: 5px;
 }
 
+/* El ancho de los diálogos se controla globalmente (styles.scss) para que
+   sean responsive; aquí solo se asegura el apilado correcto del formulario. */
+:host ::ng-deep .row {
+  row-gap: 0.25rem;
+}
 
-/* @media (max-width: 592px) {
-  .p-dialog {
-    width: 80vm;
+@media (max-width: 767.98px) {
+  :host ::ng-deep .col-lg-4,
+  :host ::ng-deep .col-lg-3,
+  :host ::ng-deep .col-lg-2,
+  :host ::ng-deep .col-md-6,
+  :host ::ng-deep .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
-} */
+}

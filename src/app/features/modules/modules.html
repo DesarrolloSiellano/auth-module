@@ -1,8 +1,9 @@
 <div class="content">
   <app-list-template [title]="'Lista de Módulos'" [showTitle]="true" [toAdd]="toAdd" [options]="true" [cols]="cols"
+    [actionsDisabled]="disabledButton"
     [data]="data" [lazy]="true" [totalRecords]="totalRecords" [loading]="loading" [filtersGlobal]="filtersGlobal"
     [updateItem]="update.bind(this)" [deleteItem]="delete.bind(this)" (loadLazy)="load($any($event))"
-    (dateQuery)="queryDate($event)" (create)="create()" (update)="update($event)" (delete)="delete($event)"
+    (dateQuery)="queryDate($event)" (create)="create()" (update)="update($any($event))" (delete)="delete($any($event))"
     (exportPage)="exportAsXLSX()" (reload)="rechargeTable()" (onRowSelectionChange)="onSelectionChange($any($event))">
   </app-list-template>
 
@@ -29,10 +30,9 @@
 
         <div class="col-lg-6 col-md-6 col-sm-12 w-full ">
           <div class="p-md">
-            <p-floatlabel variant="on" class=" ">
-              <textarea rows="5" cols="30" autocomplete="off" pTextarea id="moduleDescription" formControlName="description"
-                class="h-full w-full">
-                </textarea>
+            <p-floatlabel variant="on">
+              <textarea rows="5" autocomplete="off" pTextarea id="moduleDescription" formControlName="description"
+                class="w-full" placeholder=" "></textarea>
               <label for="moduleDescription">Descripción</label>
             </p-floatlabel>
             <div class="message-validation">
@@ -209,7 +209,7 @@
 
                 <div class="col-lg-1 col-md-6 col-sm-12 w-full m-button-delete">
                   <p-button type="button" icon="pi pi-trash" severity="danger" [outlined]="true"
-                    (click)="removeRouteChild(i, j)"></p-button>
+                    ariaLabel="Eliminar ruta hija" (click)="removeRouteChild(i, j)"></p-button>
                 </div>
               </div>
 
@@ -217,20 +217,19 @@
             </div>
             }
           </div>
-          <div class="flex justify-end gap-2">
-            <button pButton type="button" label="Agregar hijo" class="p-button-secondary mr-md"
-              (click)="addRouteChild(i)"></button>
+          <div class="flex flex-wrap justify-end gap-md">
+            <p-button type="button" label="Agregar hijo" severity="secondary" [outlined]="true"
+              (click)="addRouteChild(i)" />
 
-            <button pButton type="button" label="Eliminar ruta" class="p-button-danger p-mt-3"
-              (click)="removeRoute(i)"></button>
+            <p-button type="button" label="Eliminar ruta" severity="danger" [outlined]="true"
+              (click)="removeRoute(i)" />
 
           </div>
         </div>
         }
 
-        <div class="flex justify-end">
-          <button pButton type="button" label="Agregar ruta" class="p-button-primary p-mt-3"
-            (click)="addRoute()"></button>
+        <div class="flex flex-wrap justify-end">
+          <p-button type="button" label="Agregar ruta" icon="pi pi-plus" (click)="addRoute()" />
         </div>
       </div>
 

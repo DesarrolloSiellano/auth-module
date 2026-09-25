@@ -1,4 +1,4 @@
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { BaseCrud } from './base-crud';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -103,8 +103,25 @@ describe('BaseCrud', () => {
     spyOn(console, 'error');
 
     crud.isEditForm = false;
-    crud.disabledButton = true;
     crud.save();
+
+    expect(crud.disabledButton).toBe(false);
+  });
+
+  it('should not send a second request while saving', () => {
+    const pending = new Subject<{ statusCode: number }>();
+    service.create.and.returnValue(pending.asObservable());
+    crud.isEditForm = false;
+
+    crud.save();
+    expect(service.create).toHaveBeenCalledTimes(1);
+    expect(crud.disabledButton).toBe(true);
+
+    crud.save();
+    expect(service.create).toHaveBeenCalledTimes(1);
+
+    pending.next({ statusCode: 201 });
+    pending.complete();
 
     expect(crud.disabledButton).toBe(false);
   });
@@ -183,7 +200,7 @@ describe('BaseCrud', () => {
       formGroup: { value: { name: 'X' } },
       reset: () => {},
     };
-    expect(crud.getFormattedFormValues()).toEqual({ name: 'X' });
+    expect(crud.getFormattedFormValues()).toEqual({ name: 'X' } as Item);
   });
 
   it('should close the dialog and reset state', () => {

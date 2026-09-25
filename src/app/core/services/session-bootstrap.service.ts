@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProcessAuthData } from '../../features/auth/service/process-auth-data';
 import { SessionStore } from './session.store';
@@ -7,11 +7,9 @@ import { SessionStore } from './session.store';
   providedIn: 'root',
 })
 export class SessionBootstrapService {
-  constructor(
-    private processAuthData: ProcessAuthData,
-    private session: SessionStore,
-    private router: Router,
-  ) {}
+  private readonly processAuthData = inject(ProcessAuthData);
+  private readonly session = inject(SessionStore);
+  private readonly router = inject(Router);
 
   load(): Promise<boolean> {
     const params = new URLSearchParams(window.location.search);
@@ -29,7 +27,7 @@ export class SessionBootstrapService {
         .proccesAuthData(accessToken, refreshToken || undefined)
         .subscribe({
           next: () => {
-            this.router.navigate(['/pages/users']);
+            this.router.navigate(['/pages/dashboard']);
             resolve(true);
           },
           error: () => {

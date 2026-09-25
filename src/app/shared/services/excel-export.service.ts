@@ -12,22 +12,20 @@ const EXCEL_EXTENSION = '.xlsx';
   providedIn: 'root',
 })
 export class ExcelExportService {
-  constructor() {}
-
-  public exportAsExcelFile(json: any[], excelFileName: string): void {
+  public exportAsExcelFile(json: unknown[], excelFileName: string): void {
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
     const workbook: XLSX.WorkBook = {
       Sheets: { data: worksheet },
       SheetNames: ['data'],
     };
-    const excelBuffer: any = XLSX.write(workbook, {
+    const excelBuffer = XLSX.write(workbook, {
       bookType: 'xlsx',
       type: 'array',
-    });
+    }) as ArrayBuffer;
     this.saveAsExcelFile(excelBuffer, excelFileName);
   }
 
-  private saveAsExcelFile(buffer: any, fileName: string): void {
+  private saveAsExcelFile(buffer: ArrayBuffer, fileName: string): void {
     const data: Blob = new Blob([buffer], { type: EXCEL_TYPE });
     FileSaver.saveAs(
       data,
@@ -36,7 +34,7 @@ export class ExcelExportService {
   }
 
   public async exportAsExcelFileWithImages(
-    json: any[],
+    json: Record<string, unknown>[],
     excelFileName: string,
     base64Images: string[]
   ): Promise<void> {

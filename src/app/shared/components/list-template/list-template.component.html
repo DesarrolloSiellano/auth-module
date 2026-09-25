@@ -3,26 +3,29 @@
 <div class="card">
 
   <p-table #dt [scrollable]="true" filter="true" filterDelay="500"
-    [columns]="cols" [value]="data" [lazy]="lazy"
-    (onLazyLoad)="loadDataLazy($event)" [paginator]="true" [rows]="rowsNumber"
-    [totalRecords]="totalRecords" [loading]="loading"
+    styleClass="p-datatable-sticky-actions"
+    [columns]="cols()" [value]="data()" [lazy]="lazy()"
+    (onLazyLoad)="loadDataLazy($event)" [paginator]="true" [rows]="rowsNumber()"
+    [totalRecords]="totalRecords()" [loading]="loading()"
     [showCurrentPageReport]="true"
-    scrollHeight="300px" scrollWidth="500px" selectionMode="single"
+    [scrollHeight]="'max(12rem, calc(100vh - 26rem))'"
+    [selectionMode]="bulkSelectable() ? 'multiple' : 'single'"
     [(contextMenuSelection)]="selected" [contextMenu]="cm"
     (contextMenuSelectionChange)="onContextMenuSelect()"
     [(selection)]="selected" (onRowSelect)="onRowSelect()"
+    (onRowUnselect)="onRowUnselect()"
     currentPageReportTemplate="Vista {first} a {last} de {totalRecords} registros"
-    [rowsPerPageOptions]="[100,150,200]"
-    [tableStyle]="{ 'min-width': '50rem' }"
+    [rowsPerPageOptions]="[10, 25, 50, 100]"
+    [tableStyle]="{ 'min-width': '48rem' }"
     [resizableColumns]="true"  [rowHover]="true"
     >
 
     <ng-template #caption pTemplate="caption">
-      @if (filtersGlobal === true) {
+      @if (filtersGlobal() === true) {
         <div class="flex items-center justify-between">
-          @if (showTitle) {
+          @if (showTitle()) {
             <div class="titleHeader">
-              <h4 >{{title}}</h4>
+              <h4 >{{title()}}</h4>
             </div>
           }
 
@@ -32,13 +35,15 @@
                 <input pInputText type="text"
                   (input)="dt.filterGlobal($any($event.target).value || '', 'contains')"
                   placeholder="Buscar..."
-                  [ngClass]="{'show': inputVisible, 'hide': !inputVisible}"
+                  [class.show]="inputVisible" [class.hide]="!inputVisible"
                   (focus)="inputVisible = true"
                   (blur)="inputVisible = false" />
-                <i class="pi pi-search search-icon" (click)="toggleInput()"></i>
+                <i class="pi pi-search search-icon" role="button" tabindex="0" aria-label="Buscar"
+                  (click)="toggleInput()" (keydown.enter)="toggleInput()"
+                  (keydown.space)="toggleInput(); $event.preventDefault()"></i>
               </span>
             </div>
-            @if(toAdd){
+            @if(toAdd()){
               <p-button label="Agregar" severity="secondary" icon="pi pi-plus" class="p-xs" (click)="onCreate()" ></p-button>
             }
             <p-button label="Recargar" severity="secondary" icon="pi pi-refresh" class="p-xs" (click)="recharge()" ></p-button>
@@ -46,42 +51,73 @@
           </div>
         </div>
       }
+      @if (bulkSelectable()) {
+        <div class="bulk-toolbar p-xs">
+          <span class="bulk-info">Seleccionados: {{ selectedCount() }}</span>
+          @for (action of bulkActions(); track action.key) {
+            <p-button [label]="action.label" [icon]="action.icon"
+              [severity]="$any(action.severity) || 'secondary'" [outlined]="true"
+              size="small" [disabled]="actionsDisabled()"
+              (click)="onBulkAction(action.key)" />
+          }
+        </div>
+      }
     </ng-template>
 
     <ng-template #colgroup pTemplate="colgroup" let-columns>
       <colgroup>
         @for (col of columns; track col) {
-          <col style="width:250px" />
+          <col style="min-width:150px" />
         }
       </colgroup>
     </ng-template>
 
     <ng-template #header pTemplate="header" let-columns>
       <tr>
+        @if (bulkSelectable()) {
+          <th style="width:3rem"><p-tableHeaderCheckbox /></th>
+        }
         @for (col of columns; track col) {
           <th id="col-{{col.field}}" [pSortableColumn]="col.field">
             {{col.header}}
             <p-sortIcon [field]="col.field"></p-sortIcon>
           </th>
         }
-        @if (options) {
-          <th id="options" style="width:200px">Opciones</th>
+        @if (options()) {
+          <th id="options" style="width:260px; min-width:260px">Opciones</th>
         }
       </tr>
     </ng-template>
 
     <ng-template #body pTemplate="body" let-rowData let-columns="columns">
       <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData">
+        @if (bulkSelectable()) {
+          <td><p-tableCheckbox [value]="rowData" /></td>
+        }
         @for (col of columns; track col) {
           <td>
             {{ rowData[col.field] }}
           </td>
         }
-        @if (options) {
-          <td style="width:200px;">
-            <div class="flex justify-start">
-              <p-button icon="pi pi-pencil" severity="primary" outlined class="mr-xs" pTooltip="Editar" (click)="onUpdate(rowData)" />
-              <p-button icon="pi pi-trash" severity="danger" outlined pTooltip="Eliminar"  (click)="onDelete(rowData)" />
+        @if (options()) {
+          <td style="width:260px; min-width:260px;">
+            <div class="flex flex-wrap justify-start row-actions">
+              @for (action of actionsFor(rowData); track action.key) {
+                <p-button [icon]="action.icon" [severity]="$any(action.severity) || 'secondary'" outlined
+                  class="mr-xs" [pTooltip]="action.tooltip || action.key"
+                  [ariaLabel]="action.tooltip || action.key" [disabled]="actionsDisabled()"
+                  (click)="onExtraAction(action.key, rowData)" />
+              }
+              @if (showEdit()) {
+                <p-button icon="pi pi-pencil" severity="primary" outlined class="mr-xs"
+                  pTooltip="Editar usuario" ariaLabel="Editar usuario"
+                  [disabled]="actionsDisabled()" (click)="onUpdate(rowData)" />
+              }
+              @if (showDelete()) {
+                <p-button icon="pi pi-trash" severity="danger" outlined pTooltip="Eliminar usuario"
+                  ariaLabel="Eliminar usuario" [disabled]="actionsDisabled()"
+                  (click)="onDelete(rowData)" />
+              }
             </div>
           </td>
         }
@@ -91,13 +127,13 @@
 
     <ng-template #empty pTemplate="emptymessage">
       <tr>
-        <td [attr.colspan]="cols.length + 1">Registros no encontrados.</td>
+        <td [attr.colspan]="cols().length + 1">Registros no encontrados.</td>
       </tr>
     </ng-template>
 
   </p-table>
 
-  <p-contextMenu #cm [model]="items"></p-contextMenu>
+  <p-contextMenu #cm [model]="items()"></p-contextMenu>
 
 </div>
 

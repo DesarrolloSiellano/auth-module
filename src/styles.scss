@@ -10,31 +10,34 @@ body {
   padding: 0;
 }
 
+/* El scroll es de la PÁGINA (ventana). El sidebar queda estático a 100vh. */
 .dashboard-root {
   display: flex;
 }
 
 .dashboard-main {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Clave: sin min-width:0 un flex-item con contenido ancho (tablas con
+     min-width) desborda el viewport y se monta sobre el sidebar. */
+  min-width: 0;
   overflow-x: hidden;
 }
 
 .dashboard-content {
-  flex: 1; /* que tome todo espacio disponible */
-  padding: 5rem 2rem;
+  flex: 1; /* crece y la ventana hace el scroll */
+  padding: 5rem 2rem 2rem;
   background: var(--backgraund-surface);
-  overflow-y: auto;
-  min-height: 0;
+  min-width: 0;
   overflow-x: hidden;
 
   @media (max-width: 1200px) {
-    padding: 5rem 2rem; /* menos padding en móvil */
+    padding: 5rem 2rem 1.75rem; /* menos padding en móvil */
   }
   @media (max-width: 768px) {
-    padding: 5rem 1rem; /* menos padding en móvil */
+    padding: 5rem 1rem 1.5rem; /* menos padding en móvil */
   }
 }
 
@@ -67,9 +70,12 @@ body {
   width: 100vw !important;
 }
 
+/* En móvil/tablet el navbar ocupa SIEMPRE el ancho completo: se evita el
+   overflow horizontal (antes quedaba en 16rem + 100vw al expandir el sidebar). */
 @media (max-width: 1024px) {
-  .navbar.sidebar-expanded {
-    left: 16rem;
+  .navbar.sidebar-expanded,
+  .navbar.sidebar-collapsed {
+    left: 0 !important;
     width: 100vw !important;
   }
 }
@@ -130,12 +136,13 @@ body {
 .glitch-soft {
   position: relative;
   display: inline-block;
-  font-size: 8rem;
+  font-size: clamp(3.5rem, 18vw, 8rem);
   font-weight: bold;
   color: #2d3142;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   margin-bottom: 18px;
   text-align: center;
+  max-width: 100%;
 
   &::before,
   &::after {
@@ -246,18 +253,18 @@ body {
 }
 
 .error-title {
-  font-size: 2.1rem;
+  font-size: clamp(1.4rem, 6vw, 2.1rem);
   color: #434552;
-  margin: 36px 0 8px 0;
+  margin: clamp(18px, 5vw, 36px) 0 8px 0;
 }
 .error-desc {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 4vw, 1.1rem);
   color: #9ea1b8;
   margin-bottom: 18px;
 }
 .back-link {
   color: #2452ea;
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 4vw, 1.1rem);
   text-decoration: underline;
   display: inline-block;
   transition: color 0.2s;
@@ -271,5 +278,110 @@ body {
   span {
     color: var(--color-danger);
     font-size: 10px;
+  }
+}
+
+/* Diálogos de configuración de tenant.
+   Se adjuntan a <body> (appendTo), por eso sus estilos deben ser globales. */
+.tenant-policies-dialog,
+.tc-def-dialog {
+  .p-dialog-header {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--p-surface-100);
+  }
+
+  .p-dialog-content {
+    padding: 1.25rem 1.5rem;
+    background: var(--p-surface-50, #f8fafc);
+  }
+
+  .p-dialog-footer {
+    padding: 0.9rem 1.5rem;
+    border-top: 1px solid var(--p-surface-100);
+  }
+}
+
+.tenant-policies-dialog {
+  .p-tablist {
+    background: transparent;
+  }
+
+  .p-tabpanels {
+    background: transparent;
+    padding: 1.25rem 0 0;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE GLOBAL (mobile-first)
+   ========================================================================== */
+
+html,
+body {
+  max-width: 100%;
+}
+
+/* Tablas: scroll táctil horizontal consistente en todas las vistas */
+.p-datatable-table-container {
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Columna de acciones fija (sticky) en pantallas pequeñas.
+   Se activa con la clase `p-datatable-sticky-actions` en el p-table. */
+@media (max-width: 991.98px) {
+  .p-datatable-sticky-actions .p-datatable-table-container {
+    overflow-x: auto;
+  }
+
+  .p-datatable-sticky-actions .p-datatable-thead > tr > th:last-child,
+  .p-datatable-sticky-actions .p-datatable-tbody > tr > td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: var(--p-content-background, #ffffff);
+    box-shadow: -6px 0 8px -8px rgba(15, 23, 42, 0.35);
+  }
+
+  .p-datatable-sticky-actions .p-datatable-thead > tr > th:last-child {
+    z-index: 3;
+  }
+
+  .p-datatable .p-paginator {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+}
+
+/* Diálogos: ancho acotado y scroll interno en pantallas pequeñas */
+@media (max-width: 767.98px) {
+  .p-dialog {
+    width: 92vw !important;
+    max-width: 92vw !important;
+    max-height: 92vh;
+  }
+
+  .p-dialog .p-dialog-content {
+    overflow-y: auto;
+    max-height: calc(92vh - 8rem);
+    padding: 1rem;
+  }
+
+  .p-dialog .p-dialog-header,
+  .p-dialog .p-dialog-footer {
+    padding: 0.85rem 1rem;
+  }
+
+  /* Objetivos táctiles cómodos */
+  .p-button:not(.p-button-text):not(.p-button-link) {
+    min-height: 2.5rem;
+  }
+
+  .message-validation span {
+    font-size: 12px;
+  }
+
+  .text-xs {
+    font-size: 0.8rem !important;
   }
 }

@@ -13,7 +13,7 @@ export const ROLES_FORM: FormFieldConfig[] = [
     weight: 1,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -43,7 +43,7 @@ export const ROLES_FORM: FormFieldConfig[] = [
     weight: 6,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     pattern: '',
   },
   {
@@ -58,7 +58,7 @@ export const ROLES_FORM: FormFieldConfig[] = [
     weight: 3,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
   },
   {
     name: 'permissions',
@@ -72,7 +72,7 @@ export const ROLES_FORM: FormFieldConfig[] = [
     weight: 4,
     disabled: false,
     placeholder: '',
-    pKeyFilter: '',
+    pKeyFilter: undefined,
     options: [],
     optionName: 'name',
     //optionValue: 'value',

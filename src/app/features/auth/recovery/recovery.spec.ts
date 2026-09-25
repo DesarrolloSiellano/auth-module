@@ -4,10 +4,11 @@ import { provideRouter, Router } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { RecoveryComponent } from './recovery';
 import { Auth } from '../service/auth';
 import { FormTemplateComponent } from '../../../shared/components/form-template/form-template.component';
+import { Response } from '../../../shared/interfaces/response.interface';
 
 @Component({ selector: 'app-form-template', standalone: true, template: '' })
 class MockFormTemplate {
@@ -84,6 +85,21 @@ describe('RecoveryComponent', () => {
     fixture.detectChanges();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   }));
+
+  it('should ignore a second recovery while one is in progress', () => {
+    const pending = new Subject<Response<unknown>>();
+    authMock.recoveryPassword.and.returnValue(pending.asObservable());
+
+    component.recovery();
+    expect(authMock.recoveryPassword).toHaveBeenCalledTimes(1);
+    expect(component.isSubmitting()).toBe(true);
+
+    component.recovery();
+    expect(authMock.recoveryPassword).toHaveBeenCalledTimes(1);
+
+    pending.error(new Error('boom'));
+    expect(component.isSubmitting()).toBe(false);
+  });
 
   it('should show an error message on failure', fakeAsync(() => {
     authMock.recoveryPassword.and.returnValue(

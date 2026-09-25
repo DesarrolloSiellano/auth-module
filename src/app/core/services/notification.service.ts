@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 export type NotificationSeverity = 'success' | 'info' | 'warn' | 'error';
@@ -7,7 +7,7 @@ export type NotificationSeverity = 'success' | 'info' | 'warn' | 'error';
   providedIn: 'root',
 })
 export class NotificationService {
-  constructor(private readonly messageService: MessageService) {}
+  private readonly messageService = inject(MessageService);
 
   show(
     severity: NotificationSeverity,

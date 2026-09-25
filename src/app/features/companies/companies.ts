@@ -1,29 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, ViewChild } from '@angular/core';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
-import { DialogModule } from 'primeng/dialog';
+import { Dialog } from 'primeng/dialog';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
 import { DataLoaderService } from '../../shared/services/data-load.service';
 import { ExcelExportService } from '../../shared/services/excel-export.service';
 import { PERMISSION_FORM } from '../../shared/forms/permission.form';
-import { ButtonModule } from 'primeng/button';
+import { Button } from 'primeng/button';
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
-import { ToastModule } from 'primeng/toast';
 import { BaseCrud } from '../../shared/helpers/base-crud';
 import { Companies } from './interfaces/companies.interface';
 import { CompaniesService } from './services/companies.service';
 import { COMPANIES_FORM } from '../../shared/forms/companies.form';
+import { TenantPoliciesDialogComponent } from '../tenant-config/tenant-policies-dialog';
 
 @Component({
   selector: 'app-companies',
-  standalone: true,
   imports: [
     CommonModule,
     ListTemplateComponent,
-    DialogModule,
+    Dialog,
     FormTemplateComponent,
-    ButtonModule,
-    ToastModule,
+    Button,
+    TenantPoliciesDialogComponent,
   ],
   templateUrl: './companies.html',
   styleUrl: './companies.scss',
@@ -53,13 +52,30 @@ export class CompaniesComponent extends BaseCrud<Companies> {
 
   protected override form = COMPANIES_FORM;
 
-  constructor(
-    protected override service: CompaniesService,
-    protected override cdr: ChangeDetectorRef,
-    protected override dataLoader: DataLoaderService,
-    protected override excelexport: ExcelExportService,
-    protected override confirmService: ConfirmService,
-  ) {
-    super(service, cdr, dataLoader, excelexport, confirmService);
+  extraActions = [
+    { key: 'policies', icon: 'pi pi-shield', tooltip: 'Políticas', severity: 'secondary' },
+    { key: 'usage', icon: 'pi pi-chart-bar', tooltip: 'Uso', severity: 'secondary' },
+  ];
+
+  policiesDialogVisible = false;
+  policiesDialogTab: 'policies' | 'usage' = 'policies';
+  selectedCompanyForPolicies: Companies | null = null;
+
+  constructor() {
+    super(
+      inject(CompaniesService),
+      inject(ChangeDetectorRef),
+      inject(DataLoaderService),
+      inject(ExcelExportService),
+      inject(ConfirmService),
+    );
+  }
+
+  onExtraAction(event: { key: string; row: unknown }): void {
+    const company = event.row as Companies;
+    this.selectedCompanyForPolicies = company;
+    this.policiesDialogTab = event.key === 'usage' ? 'usage' : 'policies';
+    this.policiesDialogVisible = true;
+    this.cdr.detectChanges();
   }
 }

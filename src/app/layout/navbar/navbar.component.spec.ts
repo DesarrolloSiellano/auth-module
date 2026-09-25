@@ -30,7 +30,8 @@ describe('NavbarComponent', () => {
   let router: Router;
 
   beforeEach(async () => {
-    authMock = jasmine.createSpyObj('Auth', ['changePassword']);
+    authMock = jasmine.createSpyObj('Auth', ['changePassword', 'logout']);
+    authMock.logout.and.returnValue(of({} as any));
     confirmServiceMock = jasmine.createSpyObj('ConfirmService', [
       'showMessage',
       'confirm',

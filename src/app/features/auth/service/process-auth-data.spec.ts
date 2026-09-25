@@ -6,7 +6,7 @@ import {
 import { MessageService } from 'primeng/api';
 import { ProcessAuthData } from './process-auth-data';
 import { SessionStore } from '../../../core/services/session.store';
-import { ENVIROMENT } from '../../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../../environments/environment';
 import { createToken, identityPayload } from '../../../core/testing/jwt.util';
 
 describe('ProcessAuthData', () => {

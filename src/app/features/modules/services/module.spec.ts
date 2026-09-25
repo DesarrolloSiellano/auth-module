@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { ModuleService } from './module.service';
-import { ENVIROMENT } from '../../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../../environments/environment';
 
 describe('ModuleService', () => {
   let service: ModuleService;

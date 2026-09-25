@@ -1,0 +1,110 @@
+<p-dialog [visible]="visible" (visibleChange)="onVisibleChange($event)" [modal]="true" [draggable]="false"
+  [resizable]="false" appendTo="body" [baseZIndex]="10000" [style]="{ width: '92vw', maxWidth: '1100px' }"
+  [breakpoints]="{ '1199px': '96vw' }" styleClass="tenant-policies-dialog">
+  <ng-template #header>
+    <div class="tp-header">
+      <span class="tp-header-icon"><i class="pi pi-building"></i></span>
+      <div class="tp-header-text">
+        <h3>Configuración de la empresa</h3>
+        <p>
+          {{ company?.name }}
+          @if (company?.id) { <span class="tp-tenant">· Tenant {{ company?.id }}</span> }
+        </p>
+      </div>
+    </div>
+  </ng-template>
+
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="policies"><i class="pi pi-sliders-h mr-2"></i> Políticas</p-tab>
+      <p-tab value="usage"><i class="pi pi-chart-bar mr-2"></i> Uso</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Políticas -->
+      <p-tabpanel value="policies">
+        @if (catalogGroups.length === 0) {
+          <div class="tp-empty">No hay políticas en el catálogo.</div>
+        } @else {
+          <div class="tp-groups">
+            @for (group of catalogGroups; track group.group) {
+              <section class="tp-group">
+                <header class="tp-group-title">
+                  <i class="pi pi-circle-fill"></i>
+                  <span>{{ group.group }}</span>
+                </header>
+                <div class="tp-grid">
+                  @for (item of group.items; track item.key) {
+                    <div class="tp-item">
+                      <label [for]="'tp-' + item.key">
+                        {{ item.label }}
+                        @if (item.unit) { <small class="tp-unit">{{ item.unit }}</small> }
+                      </label>
+                      @switch (item.type) {
+                        @case ('boolean') {
+                          <p-toggleSwitch [inputId]="'tp-' + item.key" [(ngModel)]="configValues[item.key]" />
+                        }
+                        @case ('number') {
+                          <p-inputNumber [inputId]="'tp-' + item.key" [(ngModel)]="configValues[item.key]"
+                            [min]="item.min ?? 0" styleClass="w-full" />
+                        }
+                        @case ('select') {
+                          <p-select [inputId]="'tp-' + item.key" [options]="item.options || []"
+                            optionLabel="label" optionValue="value" [(ngModel)]="configValues[item.key]"
+                            appendTo="body" />
+                        }
+                        @case ('json') {
+                          <textarea pTextarea [id]="'tp-' + item.key" rows="2"
+                            [(ngModel)]="configValues[item.key]"></textarea>
+                        }
+                        @default {
+                          <input pInputText [id]="'tp-' + item.key" [(ngModel)]="configValues[item.key]" />
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              </section>
+            }
+          </div>
+        }
+      </p-tabpanel>
+
+      <!-- Uso -->
+      <p-tabpanel value="usage">
+        <div class="tp-toolbar">
+          <input pInputText placeholder="Período (YYYY-MM)" [(ngModel)]="usagePeriod" />
+          <p-button label="Consultar" icon="pi pi-search" (click)="loadUsage()" />
+        </div>
+
+        @if (usage.length === 0) {
+          <div class="tp-empty">Sin datos de consumo. Selecciona un período y consulta.</div>
+        } @else {
+          @for (item of usage; track item._id) {
+            <section class="tp-usage-block">
+              <h4><i class="pi pi-calendar mr-2"></i> Período {{ item.period }}</h4>
+              <p-table [value]="usageRows(item)" styleClass="p-datatable-sm">
+                <ng-template #usageHeader pTemplate="header">
+                  <tr><th>Métrica</th><th style="width: 12rem">Consumo</th></tr>
+                </ng-template>
+                <ng-template #usageBody pTemplate="body" let-row>
+                  <tr><td>{{ row.metric }}</td><td><strong>{{ row.value }}</strong></td></tr>
+                </ng-template>
+              </p-table>
+            </section>
+          }
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  <ng-template #footer>
+    <div class="tp-footer">
+      <p-button label="Cerrar" [text]="true" severity="secondary" (click)="onVisibleChange(false)" />
+      @if (activeTab === 'policies') {
+        <p-button label="Guardar cambios" icon="pi pi-save" (click)="saveConfig()"
+          [loading]="isSavingConfig" [disabled]="isSavingConfig" />
+      }
+    </div>
+  </ng-template>
+</p-dialog>

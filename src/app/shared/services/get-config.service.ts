@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ModuleConfig, RoutesModuleConfig } from '../interfaces/module-config.interface';
-import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../environments/environment';
 
 
 @Injectable({
@@ -8,8 +8,6 @@ import { ENVIROMENT } from '../../../enviroments/enviroment';
 })
 export class GetConfigAppService {
   private readonly storageKey = ENVIROMENT.storageKey;
-
-  constructor() {}
 
   getModule(): ModuleConfig  {
     const moduleJson = localStorage.getItem(this.storageKey);

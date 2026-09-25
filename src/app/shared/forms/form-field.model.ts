@@ -1,4 +1,5 @@
-import { ValidatorFn } from '@angular/forms';
+import { FormGroup, ValidatorFn } from '@angular/forms';
+import { KeyFilterPattern } from 'primeng/keyfilter';
 
 export type FormFieldType =
   | 'text'
@@ -19,20 +20,20 @@ export interface FormFieldConfig {
   type: FormFieldType;
   show?: boolean;
   required?: boolean;
-  value?: any;
+  value?: unknown;
   maxLength?: string;
   minLength?: string;
   weight?: number;
   disabled?: boolean;
   placeholder?: string;
-  pKeyFilter?: any;
+  pKeyFilter?: RegExp | KeyFilterPattern;
   pattern?: string | RegExp;
   feedback?: boolean;
-  options?: any[];
+  options?: unknown[];
   optionName?: string;
   optionValue?: string;
   dependsOn?: string;
-  disabledCondition?: (formGroup: any) => boolean;
+  disabledCondition?: (formGroup: FormGroup) => boolean;
   controls?: string[];
   extraValidators?: ValidatorFn[];
   mask?: string;

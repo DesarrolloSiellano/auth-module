@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
 import { ListTemplateComponent } from '../../shared/components/list-template/list-template.component';
 import { FormTemplateComponent } from '../../shared/components/form-template/form-template.component';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
+import { Dialog } from 'primeng/dialog';
+import { Button } from 'primeng/button';
 import { RolesServices } from './services/roles';
 import { Rol } from './interface/rol.interface';
 import { DataLoaderService } from '../../shared/services/data-load.service';
@@ -13,19 +12,19 @@ import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 
 import { BaseCrud } from '../../shared/helpers/base-crud'; // Ajusta la ruta
 import { ROLES_FORM } from '../../shared/forms/roles.form';
+import { FormFieldConfig } from '../../shared/forms/form-field.model';
 import { PermissionService } from '../permissions/services/permission.service';
+import { Permission } from '../permissions/interfaces/permission.interface';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-roles',
-  standalone: true,
   imports: [
     CommonModule,
     ListTemplateComponent,
     FormTemplateComponent,
-    DialogModule,
-    ButtonModule,
-    ToastModule,
+    Dialog,
+    Button,
   ],
   templateUrl: './roles.html',
   styleUrl: './roles.scss',
@@ -41,7 +40,7 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
   @ViewChild(FormTemplateComponent) declare formComponent:
     | FormTemplateComponent
     | undefined;
-  updatedFormFields: any[] = [];
+  updatedFormFields: FormFieldConfig[] = [];
 
   cols = [
     { field: 'name', header: 'Nombre' },
@@ -56,15 +55,16 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
   protected override form = ROLES_FORM;
 
 
-  constructor(
-    protected override service: RolesServices,
-    protected override cdr: ChangeDetectorRef,
-    protected override dataLoader: DataLoaderService,
-    protected override excelexport: ExcelExportService,
-    protected override confirmService: ConfirmService,
-    private permissionService: PermissionService
-  ) {
-    super(service, cdr, dataLoader, excelexport, confirmService);
+  private readonly permissionService = inject(PermissionService);
+
+  constructor() {
+    super(
+      inject(RolesServices),
+      inject(ChangeDetectorRef),
+      inject(DataLoaderService),
+      inject(ExcelExportService),
+      inject(ConfirmService),
+    );
   }
 
   ngOnInit(): void {
@@ -75,8 +75,7 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
     forkJoin({
       permissionData: this.permissionService.findAll(),
     }).subscribe(({ permissionData }) => {
-      const types =
-        permissionData.data.filter((perm: any) => perm.isActive) || [];
+      const types = (permissionData.data || []).filter((perm) => perm.isActive);
       const typeOptions = types.map((item) => ({
         name: item.name,
         value: item,
@@ -95,18 +94,21 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
     });
   }
 
-  override onSelectionChange(selectedItem: any) {
+  override onSelectionChange(selectedItem: Rol | undefined) {
     if (selectedItem) {
       // Buscar el campo permissions en this.form para obtener options
       const permissionsField = this.form.find(
-        (field: any) => field.name === 'permissions'
+        (field) => field.name === 'permissions'
       );
-      const options = permissionsField ? permissionsField.options : [];
+      const options = (permissionsField?.options ?? []) as {
+        name: string;
+        value: Permission;
+      }[];
 
       // Mapear los permisos seleccionados para reemplazarlos por referencias de options
       const selectedPermissions = (selectedItem.permissions || []).map(
-        (perm: any) => {
-          return options?.find((opt: any) => opt.name === perm.name) || perm;
+        (perm) => {
+          return options.find((opt) => opt.name === perm.name) || perm;
         }
       );
 
@@ -115,7 +117,7 @@ export class RolesComponent extends BaseCrud<Rol> implements OnInit {
         ...this.initialData,
         ...selectedItem,
         permissions: selectedPermissions,
-      };
+      } as Rol;
 
       this.isEditForm = true;
       this.titleForm = 'Edición de ' + this.title;

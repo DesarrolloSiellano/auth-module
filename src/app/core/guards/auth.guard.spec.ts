@@ -5,7 +5,7 @@ import { authGuard } from './auth.guard';
 import { Auth } from '../../features/auth/service/auth';
 import { ProcessAuthData } from '../../features/auth/service/process-auth-data';
 import { SessionStore } from '../services/session.store';
-import { ENVIROMENT } from '../../../enviroments/enviroment';
+import { ENVIROMENT } from '../../../environments/environment';
 import { createToken, identityPayload } from '../testing/jwt.util';
 
 describe('authGuard', () => {

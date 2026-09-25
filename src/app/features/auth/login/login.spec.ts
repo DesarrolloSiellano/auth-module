@@ -4,11 +4,12 @@ import { provideRouter, Router } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Login } from './login';
 import { Auth } from '../service/auth';
 import { ProcessAuthData } from '../service/process-auth-data';
 import { FormTemplateComponent } from '../../../shared/components/form-template/form-template.component';
+import { Response } from '../../../shared/interfaces/response.interface';
 
 @Component({ selector: 'app-form-template', standalone: true, template: '' })
 class MockFormTemplate {
@@ -96,8 +97,23 @@ describe('Login', () => {
     );
     expect(component.showMessageSuccess()).toBe(true);
     expect(component.messageSuccess()).toBe('Inicio de sesión exitoso');
-    expect(router.navigate).toHaveBeenCalledWith(['/pages/users']);
+    expect(router.navigate).toHaveBeenCalledWith(['/pages/dashboard']);
   }));
+
+  it('should ignore a second login while one is in progress', () => {
+    const pending = new Subject<Response<unknown>>();
+    authMock.login.and.returnValue(pending.asObservable());
+
+    component.login();
+    expect(authMock.login).toHaveBeenCalledTimes(1);
+    expect(component.isSubmitting()).toBe(true);
+
+    component.login();
+    expect(authMock.login).toHaveBeenCalledTimes(1);
+
+    pending.error(new Error('boom'));
+    expect(component.isSubmitting()).toBe(false);
+  });
 
   it('should show an error when login fails', fakeAsync(() => {
     authMock.login.and.returnValue(
