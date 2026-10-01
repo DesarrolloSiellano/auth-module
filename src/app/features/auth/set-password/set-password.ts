@@ -24,7 +24,7 @@ import { Auth } from '../service/auth';
     <div class="sp-wrapper">
       <p-card header="Establecer contraseña">
         @if (!token()) {
-          <p class="sp-error">El enlace de invitación no es válido.</p>
+          <p class="sp-error">El enlace no es válido o expiró.</p>
         } @else {
           <form [formGroup]="form" (ngSubmit)="submit()">
             <div class="sp-field">

@@ -3,6 +3,18 @@
   <div class="dashboard-main">
     <app-navbar id="layoutNavbar"></app-navbar>
     <section class="dashboard-content">
+      @if (showVerifyBanner) {
+        <div class="verify-banner" role="status">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          <span class="verify-banner-text">
+            Tu correo aún no está verificado. Revisa tu bandeja o reenvía el correo de verificación.
+          </span>
+          <button type="button" class="verify-banner-btn" (click)="resendVerification()"
+            [disabled]="sending">
+            {{ sending ? 'Enviando…' : 'Reenviar' }}
+          </button>
+        </div>
+      }
       <router-outlet></router-outlet>
     </section>
     <app-footer></app-footer>

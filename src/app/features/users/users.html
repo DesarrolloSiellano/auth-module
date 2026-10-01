@@ -156,18 +156,20 @@
               <span>Roles</span>
             </div>
           </p-tab>
-          <p-tab value="2">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-key mr-sm text-primary-500"></i>
-              <span>Permisos</span>
-            </div>
-          </p-tab>
-          <p-tab value="3">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-box mr-sm text-primary-500"></i>
-              <span>Módulos</span>
-            </div>
-          </p-tab>
+          @if (isSuperAdminUser) {
+            <p-tab value="2">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-key mr-sm text-primary-500"></i>
+                <span>Permisos</span>
+              </div>
+            </p-tab>
+            <p-tab value="3">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-box mr-sm text-primary-500"></i>
+                <span>Módulos</span>
+              </div>
+            </p-tab>
+          }
         </p-tablist>
 
         <p-tabpanels>

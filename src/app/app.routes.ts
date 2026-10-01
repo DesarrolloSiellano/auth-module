@@ -22,6 +22,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email').then(
+        (m) => m.VerifyEmailComponent,
+      ),
+  },
+  {
     path: 'change-password',
     canActivate: [authGuard],
     loadComponent: () =>

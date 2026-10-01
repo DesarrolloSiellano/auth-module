@@ -11,6 +11,7 @@ export interface JwtPayload {
   isTrial?: boolean;
   trialStartedAt?: string | null;
   trialEndsAt?: string | null;
+  emailVerified?: boolean;
   iat: number;
   exp: number;
 }

@@ -909,6 +909,11 @@ export class Users extends BaseCrud<User> implements OnInit {
     } else {
       values.invite = values.invite === true;
     }
+    // A2b: `permissions`/`modules` solo los gestiona un SuperAdmin.
+    if (!this.isSuperAdminUser) {
+      delete values.permissions;
+      delete values.modules;
+    }
     Object.keys(values).forEach((key) => {
       if (values[key] === undefined) delete values[key];
     });
@@ -943,10 +948,16 @@ export class Users extends BaseCrud<User> implements OnInit {
         row['Empresa'] = data['Empresa'] ?? this.sessionCompany;
       }
       row['Roles'] = '';
-      row['Permisos'] = '';
-      row['Módulos'] = '';
+      if (isSuperAdmin) {
+        row['Permisos'] = '';
+        row['Módulos'] = '';
+      }
       return { ...row, ...data };
     };
+
+    const sampleSuper: Record<string, string> = isSuperAdmin
+      ? { 'Permisos': 'Crear', 'Módulos': this.modulesOptions[0]?.name ?? 'adminUserModule' }
+      : {};
 
     const rows = [
       makeRow({
@@ -956,8 +967,7 @@ export class Users extends BaseCrud<User> implements OnInit {
         'Teléfono': '3001234567',
         'Usuario': 'juanperez',
         'Roles': 'USR',
-        'Permisos': 'Crear',
-        'Módulos': this.modulesOptions[0]?.name ?? 'adminUserModule',
+        ...sampleSuper,
       }),
       makeRow({
         'Nombres': 'María',
