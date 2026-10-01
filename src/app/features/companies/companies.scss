@@ -1,0 +1,23 @@
+.block-hint {
+  margin: 0 0 1rem;
+  color: var(--p-surface-600);
+  font-size: 0.9rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--p-surface-600);
+  }
+
+  textarea,
+  p-datepicker {
+    width: 100%;
+  }
+}

@@ -68,8 +68,36 @@ describe('ProcessAuthData', () => {
     expect(session.getAccessToken()).toBe(token);
     expect(session.getRefreshToken()).toBe('refresh');
     expect(localStorage.getItem('isAdmin')).toBe('true');
+    expect(localStorage.getItem('mustChangePassword')).toBe('false');
     expect(localStorage.getItem(ENVIROMENT.storageKey)).toContain('adminUserModule');
     expect(localStorage.getItem('roles')).toContain('ADM');
+  });
+
+  it('guarda mustChangePassword desde el perfil', () => {
+    const token = createToken(identityPayload);
+    service.proccesAuthData(token).subscribe();
+
+    const req = httpTesting.expectOne(`${ENVIROMENT.urlApi}/users/profile`);
+    req.flush({
+      statusCode: 200,
+      data: {
+        user: {
+          ...identityPayload,
+          isAdmin: false,
+          isNewUser: true,
+          mustChangePassword: true,
+        },
+        modules: [
+          { name: ENVIROMENT.storageKey, isActive: true, routes: [] },
+        ],
+        roles: [],
+        permissions: [],
+      },
+      meta: { totalData: 1, id: '1' },
+    });
+
+    expect(localStorage.getItem('isNewUser')).toBe('true');
+    expect(localStorage.getItem('mustChangePassword')).toBe('true');
   });
 
   it('should error when the user lacks module access', () => {

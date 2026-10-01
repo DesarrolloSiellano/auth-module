@@ -108,6 +108,12 @@ export const routes: Routes = [
           ),
         canActivate: [superAdminGuard],
       },
+      {
+        path: 'api-docs',
+        loadComponent: () =>
+          import('./features/api-docs/api-docs').then((m) => m.ApiDocsComponent),
+        canActivate: [superAdminGuard],
+      },
 
     ]
   },

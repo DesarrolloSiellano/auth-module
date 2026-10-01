@@ -54,11 +54,12 @@ export class ListTemplateComponent {
   readonly updateItem = input<unknown>();
   readonly deleteItem = input<unknown>();
   readonly extraActions = input<
-    { key: string; icon: string; tooltip?: string; severity?: string }[]
+    { key: string; icon: string; tooltip?: string; severity?: string; disabled?: boolean }[]
   >([]);
   readonly rowActionsFn = input<
-    ((row: any) => { key: string; icon: string; tooltip?: string; severity?: string }[]) | null
+    ((row: any) => { key: string; icon: string; tooltip?: string; severity?: string; disabled?: boolean }[]) | null
   >(null);
+  readonly rowSelectableFn = input<((row: any) => boolean) | null>(null);
   readonly showEdit = input<boolean>(true);
   readonly showDelete = input<boolean>(true);
   readonly actionsDisabled = input<boolean>(false);
@@ -154,10 +155,20 @@ export class ListTemplateComponent {
     icon: string;
     tooltip?: string;
     severity?: string;
+    disabled?: boolean;
   }[] {
     const fn = this.rowActionsFn();
     return fn ? fn(row) : this.extraActions();
   }
+
+  isRowSelectable(row: unknown): boolean {
+    const fn = this.rowSelectableFn();
+    return fn ? fn(row) : true;
+  }
+
+  /** Se usa como `rowSelectable` del p-table (incluye el "seleccionar todo"). */
+  tableRowSelectable = (event: { data: any; index: number }): boolean =>
+    this.isRowSelectable(event?.data);
 
 
   exportAsTotalXLSX() {

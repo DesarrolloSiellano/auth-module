@@ -2,7 +2,7 @@
   <app-list-template [title]="'Lista de Compañías'" [showTitle]="true" [toAdd]="toAdd" [options]="true" [cols]="cols"
     [actionsDisabled]="disabledButton"
     [data]="data" [lazy]="true" [totalRecords]="totalRecords" [loading]="loading" [filtersGlobal]="filtersGlobal"
-    [updateItem]="update.bind(this)" [deleteItem]="delete.bind(this)" [extraActions]="extraActions"
+    [updateItem]="update.bind(this)" [deleteItem]="delete.bind(this)" [rowActionsFn]="actionsForCompany"
     (loadLazy)="load($any($event))" (dateQuery)="queryDate($event)" (create)="create()" (update)="update($any($event))"
     (delete)="delete($any($event))" (exportPage)="exportAsXLSX()" (reload)="rechargeTable()"
     (extraAction)="onExtraAction($any($event))" (onRowSelectionChange)="onSelectionChange($any($event))">
@@ -21,4 +21,27 @@
 
   <app-tenant-policies-dialog [(visible)]="policiesDialogVisible" [company]="selectedCompanyForPolicies"
     [initialTab]="policiesDialogTab" />
+
+  <p-dialog [(visible)]="blockDialogVisible" [style]="{width: '32rem'}" header="Bloquear compañía" [modal]="true"
+    [draggable]="false" [resizable]="false" [baseZIndex]="10000">
+    <p class="block-hint">
+      Los usuarios de <strong>{{ blockTarget?.name }}</strong> no podrán iniciar sesión.
+      Deja la fecha vacía para un bloqueo indefinido.
+    </p>
+    <div class="field">
+      <label for="blockReason">Motivo</label>
+      <textarea pTextarea id="blockReason" [(ngModel)]="blockReason" rows="3" [autoResize]="true"
+        placeholder="Motivo del bloqueo"></textarea>
+    </div>
+    <div class="field">
+      <label for="blockUntil">Bloquear hasta (opcional)</label>
+      <p-datepicker inputId="blockUntil" [(ngModel)]="blockUntil" [showTime]="true" [showClear]="true"
+        dateFormat="dd/mm/yy" placeholder="Sin fecha = indefinido" appendTo="body" />
+    </div>
+    <ng-template #footer>
+      <p-button label="Cancelar" [text]="true" severity="secondary" (click)="cancelBlock()" />
+      <p-button label="Bloquear" [outlined]="true" severity="danger" [loading]="isBlocking"
+        (click)="confirmBlock()" />
+    </ng-template>
+  </p-dialog>
 </div>

@@ -10,8 +10,10 @@ describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let tenantServiceMock: jasmine.SpyObj<TenantConfigService>;
+  let claims: Record<string, unknown>;
 
   beforeEach(async () => {
+    claims = { company: 'BPONET', tenantId: '0000000' };
     tenantServiceMock = jasmine.createSpyObj('TenantConfigService', [
       'getCatalog',
       'getMyConfig',
@@ -77,9 +79,7 @@ describe('DashboardComponent', () => {
         provideAnimationsAsync(),
         {
           provide: SessionStore,
-          useValue: {
-            getClaims: () => ({ company: 'BPONET', tenantId: '0000000' }),
-          },
+          useValue: { getClaims: () => claims },
         },
         { provide: TenantConfigService, useValue: tenantServiceMock },
       ],
@@ -113,5 +113,74 @@ describe('DashboardComponent', () => {
     expect(component.totalUsage).toBe(15);
     expect(component.totalsByMetric[0].metric).toBe('sms.sent');
     expect(component.barWidth(10)).toBe('100%');
+  });
+
+  it('no muestra la barra de prueba si el usuario no es de prueba', () => {
+    expect(component.isTrialUser).toBe(false);
+  });
+
+  it('excluye Días de prueba de "Consumo vs límites"', () => {
+    component.catalog = [
+      {
+        key: 'limits.trialDays',
+        label: 'Días de prueba',
+        group: 'limits',
+        type: 'number',
+        defaultValue: 7,
+      },
+      {
+        key: 'limits.maxUsers',
+        label: 'Máx. usuarios',
+        group: 'limits',
+        type: 'number',
+        defaultValue: 10,
+      },
+    ] as any;
+    component.configValues = { 'limits.trialDays': 7, 'limits.maxUsers': 10 };
+
+    expect(component.quotas.map((q) => q.key)).toContain('limits.trialDays');
+    expect(component.quotaBars.map((q) => q.key)).not.toContain(
+      'limits.trialDays',
+    );
+    expect(component.quotaBars.map((q) => q.key)).toContain('limits.maxUsers');
+  });
+
+  it('calcula días, porcentaje y color de la prueba según la config del tenant', () => {
+    claims = {
+      company: 'BPONET',
+      tenantId: '0000000',
+      isTrial: true,
+      trialStartedAt: new Date(Date.now() - 6 * 86_400_000).toISOString(),
+      trialEndsAt: new Date(Date.now() + 4 * 86_400_000).toISOString(),
+    };
+    component.configValues = { 'limits.trialDays': 10 };
+
+    expect(component.isTrialUser).toBe(true);
+    expect(component.trialTotalDays).toBe(10);
+    expect(component.trialElapsedDays).toBe(6);
+    expect(component.trialPercent).toBe(60);
+    expect(component.trialState).toBe('warn'); // 60% → ámbar
+
+    component.configValues = { 'limits.trialDays': 8 };
+    expect(component.trialPercent).toBe(75);
+    expect(component.trialState).toBe('warn');
+
+    component.configValues = { 'limits.trialDays': 7 };
+    expect(component.trialPercent).toBe(86);
+    expect(component.trialState).toBe('danger'); // >= 80% → rojo
+  });
+
+  it('marca la prueba como expirada cuando la fecha venció', () => {
+    claims = {
+      company: 'BPONET',
+      tenantId: '0000000',
+      isTrial: true,
+      trialStartedAt: new Date(Date.now() - 10 * 86_400_000).toISOString(),
+      trialEndsAt: new Date(Date.now() - 86_400_000).toISOString(),
+    };
+    component.configValues = { 'limits.trialDays': 7 };
+
+    expect(component.trialExpired).toBe(true);
+    expect(component.trialState).toBe('expired');
   });
 });

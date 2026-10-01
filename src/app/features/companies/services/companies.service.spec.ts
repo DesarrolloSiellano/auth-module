@@ -38,6 +38,24 @@ describe('CompaniesService', () => {
     req.flush({ data: [], meta: {} });
   });
 
+  it('should block and unblock a company', () => {
+    const body = { reason: 'mora', until: '2026-01-01T00:00:00.000Z' };
+    service.block('1', body).subscribe();
+    const blockReq = httpTesting.expectOne(
+      `${ENVIROMENT.urlApi}/companies/1/block`,
+    );
+    expect(blockReq.request.method).toBe('PATCH');
+    expect(blockReq.request.body).toEqual(body);
+    blockReq.flush({ statusCode: 200, data: {}, meta: {} });
+
+    service.unblock('1').subscribe();
+    const unblockReq = httpTesting.expectOne(
+      `${ENVIROMENT.urlApi}/companies/1/unblock`,
+    );
+    expect(unblockReq.request.method).toBe('PATCH');
+    unblockReq.flush({ statusCode: 200, data: {}, meta: {} });
+  });
+
   it('should create, update and delete companies', () => {
     const company = { name: 'BPO' } as any;
     service.create(company).subscribe();

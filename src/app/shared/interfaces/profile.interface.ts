@@ -15,6 +15,7 @@ export interface ProfileUser {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   isNewUser: boolean;
+  mustChangePassword?: boolean;
 }
 
 export interface ProfileData {

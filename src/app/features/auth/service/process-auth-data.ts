@@ -58,6 +58,10 @@ export class ProcessAuthData {
 
     localStorage.setItem('isAdmin', String(user.isAdmin));
     localStorage.setItem('isNewUser', String(user.isNewUser));
+    localStorage.setItem(
+      'mustChangePassword',
+      String(user.mustChangePassword === true),
+    );
     localStorage.setItem('userName', user.name + ' ' + user.lastName);
 
     this.saveModulesToLocalStorage(profile.modules);

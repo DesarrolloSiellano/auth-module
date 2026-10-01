@@ -94,6 +94,7 @@ import {
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
+import { Textarea } from 'primeng/textarea';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -136,6 +137,7 @@ const MAX_MASSIVE_USERS = 50;
     Select,
     MultiSelect,
     DatePicker,
+    Textarea,
   ],
   templateUrl: './users.html',
   styleUrl: './users.scss',
@@ -268,6 +270,11 @@ export class Users extends BaseCrud<User> implements OnInit {
     return this.session.getClaims()?.isSuperAdmin === true;
   }
 
+  /** Id del usuario autenticado (para impedir auto-bloqueo/auto-eliminación). */
+  get currentUserId(): string {
+    return this.session.getClaims()?._id ?? '';
+  }
+
   get isAdminUser(): boolean {
     return localStorage.getItem('isAdmin') === 'true';
   }
@@ -279,13 +286,17 @@ export class Users extends BaseCrud<User> implements OnInit {
     icon: string;
     tooltip: string;
     severity?: string;
+    disabled?: boolean;
   }[] => {
     const actions: {
       key: string;
       icon: string;
       tooltip: string;
       severity?: string;
+      disabled?: boolean;
     }[] = [];
+
+    const isSelf = !!this.currentUserId && row._id === this.currentUserId;
 
     if (row.mustChangePassword || row.isNewUser) {
       actions.push({
@@ -300,36 +311,52 @@ export class Users extends BaseCrud<User> implements OnInit {
       actions.push({
         key: 'unblock',
         icon: 'pi pi-lock-open',
-        tooltip: 'Desbloquear usuario',
+        tooltip: isSelf
+          ? 'No puedes desbloquearte a ti mismo'
+          : 'Desbloquear usuario',
         severity: 'success',
+        disabled: isSelf,
       });
     } else {
       actions.push({
         key: 'block',
         icon: 'pi pi-lock',
-        tooltip: 'Bloquear usuario temporalmente',
+        tooltip: isSelf
+          ? 'No puedes bloquearte a ti mismo'
+          : 'Bloquear usuario temporalmente',
         severity: 'warn',
+        disabled: isSelf,
       });
     }
 
     actions.push({
       key: 'softDelete',
       icon: 'pi pi-eye-slash',
-      tooltip: 'Dar de baja (recuperable: oculta al usuario, no lo borra)',
+      tooltip: isSelf
+        ? 'No puedes darte de baja a ti mismo'
+        : 'Dar de baja (recuperable: oculta al usuario, no lo borra)',
       severity: 'warn',
+      disabled: isSelf,
     });
 
     if (this.isSuperAdminUser) {
       actions.push({
         key: 'hardDelete',
         icon: 'pi pi-trash',
-        tooltip: 'Eliminar definitivamente (no recuperable)',
+        tooltip: isSelf
+          ? 'No puedes eliminarte a ti mismo'
+          : 'Eliminar definitivamente (no recuperable)',
         severity: 'danger',
+        disabled: isSelf,
       });
     }
 
     return actions;
   };
+
+  /** El usuario logueado no puede seleccionarse para acciones masivas. */
+  rowSelectableFor = (row: User): boolean =>
+    !this.currentUserId || row._id !== this.currentUserId;
 
   get bulkActionsList(): {
     key: string;
@@ -391,6 +418,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       isActived: [true],
       isAdmin: [false],
       isSuperAdmin: [false],
+      isTrial: [false],
       company: [''],
       modules: [[]],
       roles: [[]],
@@ -649,6 +677,16 @@ export class Users extends BaseCrud<User> implements OnInit {
       companiesControl?.setValidators(Validators.required);
     }
     companiesControl?.updateValueAndValidity();
+
+    // La prueba se define al crear. En edición solo un SuperAdmin puede
+    // modificarla; para el resto se deshabilita (un control deshabilitado se
+    // omite de form.value y no altera la prueba).
+    const trialControl = this.userForm.get('isTrial');
+    if (this.isEditForm && !this.isSuperAdminUser) {
+      trialControl?.disable({ emitEvent: false });
+    } else {
+      trialControl?.enable({ emitEvent: false });
+    }
   }
 
   getRouteIcon(iconName: string): string {
@@ -660,6 +698,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       isActived: true,
       isAdmin: false,
       isSuperAdmin: false,
+      isTrial: false,
       username: '',
       permissions: [],
       roles: [],
@@ -819,6 +858,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       email: selectedItem.email,
       isActived: selectedItem.isActived,
       isAdmin: selectedItem.isAdmin,
+      isTrial: selectedItem.isTrial === true,
       company: selectedItem.company,
       isSuperAdmin: selectedItem.isSuperAdmin,
       permissions: mappedPermissions,
@@ -1505,7 +1545,17 @@ export class Users extends BaseCrud<User> implements OnInit {
   }
 
   async onBulkAction(event: { key: string; rows: User[] }): Promise<void> {
-    const rows = event.rows || [];
+    const all = event.rows || [];
+    // El usuario logueado nunca entra en acciones masivas.
+    const rows = all.filter((user) => this.rowSelectableFor(user));
+    if (all.length > 0 && rows.length === 0) {
+      this.confirmService.showMessage(
+        'warn',
+        'Acción no permitida',
+        'No puedes aplicar acciones masivas sobre tu propio usuario',
+      );
+      return;
+    }
     if (rows.length === 0 || this.isBulkProcessing) return;
     if (event.key === 'assignRoles' || event.key === 'assignModules') {
       this.bulkAssignType = event.key;
@@ -1637,6 +1687,20 @@ export class Users extends BaseCrud<User> implements OnInit {
 
   async onExtraAction(event: { key: string; row: User }): Promise<void> {
     const row = event.row;
+    const isSelf = !!this.currentUserId && row._id === this.currentUserId;
+
+    if (
+      isSelf &&
+      ['block', 'unblock', 'softDelete', 'hardDelete'].includes(event.key)
+    ) {
+      this.confirmService.showMessage(
+        'warn',
+        'Acción no permitida',
+        'No puedes bloquear ni eliminar tu propio usuario',
+      );
+      return;
+    }
+
     switch (event.key) {
       case 'resendInvite':
         await this.resendInvite(row);

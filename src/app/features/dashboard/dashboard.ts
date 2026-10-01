@@ -238,7 +238,10 @@ export class DashboardComponent implements OnInit {
   /** Cuotas numéricas con su barra de carga (uso vs límite). */
   get quotaBars(): QuotaBar[] {
     const used = this.usedByMetric;
-    return this.quotas.map((quota) => {
+    // `limits.trialDays` tiene su propia card de prueba en el dashboard.
+    return this.quotas
+      .filter((quota) => quota.key !== 'limits.trialDays')
+      .map((quota) => {
       const limit = Number(quota.value) || 0;
       const unlimited = limit <= 0;
       const metric = QUOTA_USAGE_MAP[quota.key] || '';
@@ -287,6 +290,71 @@ export class DashboardComponent implements OnInit {
     return Array.from(map.entries())
       .map(([metric, value]) => ({ metric, value }))
       .sort((a, b) => b.value - a.value);
+  }
+
+  // ---------------------------------------------------------------- Prueba
+
+  get isTrialUser(): boolean {
+    return this.session.getClaims()?.isTrial === true;
+  }
+
+  /** Días totales de prueba según la config del tenant (fallback 7). */
+  get trialTotalDays(): number {
+    const configured = Number(this.configValues?.['limits.trialDays']);
+    if (Number.isFinite(configured) && configured > 0) return configured;
+    const catalogDefault = Number(
+      this.catalog.find((def) => def.key === 'limits.trialDays')?.defaultValue,
+    );
+    if (Number.isFinite(catalogDefault) && catalogDefault > 0) {
+      return catalogDefault;
+    }
+    return 7;
+  }
+
+  get trialStartedAt(): Date | null {
+    const raw = this.session.getClaims()?.trialStartedAt;
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  get trialEndsAt(): Date | null {
+    const raw = this.session.getClaims()?.trialEndsAt;
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  /** Días transcurridos de la prueba (se llena con el paso de los días). */
+  get trialElapsedDays(): number {
+    const start = this.trialStartedAt;
+    const total = this.trialTotalDays;
+    if (!start) return 0;
+    const elapsed = Math.floor((Date.now() - start.getTime()) / 86_400_000);
+    return Math.min(Math.max(elapsed, 0), total);
+  }
+
+  get trialRemainingDays(): number {
+    return Math.max(0, this.trialTotalDays - this.trialElapsedDays);
+  }
+
+  get trialPercent(): number {
+    const total = this.trialTotalDays;
+    if (total <= 0) return 100;
+    return Math.min(100, Math.round((this.trialElapsedDays / total) * 100));
+  }
+
+  get trialExpired(): boolean {
+    const end = this.trialEndsAt;
+    return !!end && end.getTime() <= Date.now();
+  }
+
+  /** Color de la barra: cambia al 60% y al 80% del período. */
+  get trialState(): 'ok' | 'warn' | 'danger' | 'expired' {
+    if (this.trialExpired || this.trialPercent >= 100) return 'expired';
+    if (this.trialPercent >= 80) return 'danger';
+    if (this.trialPercent >= 60) return 'warn';
+    return 'ok';
   }
 
   get totalUsage(): number {
