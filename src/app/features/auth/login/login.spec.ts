@@ -136,6 +136,33 @@ describe('Login', () => {
     expect(component.showMessageError()).toBe(false);
   }));
 
+  it('should show all validation messages from the login error', fakeAsync(() => {
+    authMock.login.and.returnValue(
+      throwError(() => ({
+        status: 403,
+        error: {
+          message: 'Tu empresa está bloqueada.',
+          code: 'COMPANY_BLOCKED',
+          errors: [
+            { code: 'COMPANY_BLOCKED', message: 'Tu empresa está bloqueada.' },
+            { code: 'TRIAL_EXPIRED', message: 'Tu período de prueba finalizó.' },
+          ],
+        },
+      })),
+    );
+
+    component.login();
+    tick();
+    fixture.detectChanges();
+
+    expect(component.showMessageError()).toBe(true);
+    expect(component.errorMessages()).toEqual([
+      'Tu empresa está bloqueada.',
+      'Tu período de prueba finalizó.',
+    ]);
+    expect(component.errorStatus()).toBe(403);
+  }));
+
   it('should show an error when the profile load fails', fakeAsync(() => {
     authMock.login.and.returnValue(
       of({ message: 'Login successful', meta: { accessToken: 'access' }, data: null } as any),

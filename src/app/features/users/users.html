@@ -74,23 +74,34 @@
     (dateQuery)="queryDate($event)" (create)="create()" (update)="update($any($event))" (delete)="delete($any($event))"
     (exportPage)="exportAsXLSX()" (reload)="rechargeTable()" (onRowSelectionChange)="onSelectionChange($any($event))"
     [bulkSelectable]="true" [bulkActions]="bulkActionsList" [rowActionsFn]="rowActionsFor"
+    [rowSelectableFn]="rowSelectableFor"
     [showDelete]="false" [actionsDisabled]="actionBusy || isBulkProcessing"
     (bulkAction)="onBulkAction($any($event))" (extraAction)="onExtraAction($any($event))">
   </app-list-template>
 
-  <p-dialog [(visible)]="blockDialogVisible" [modal]="true" [style]="{ width: '440px' }"
-    header="Bloquear usuario" [draggable]="false">
+  <p-dialog [(visible)]="blockDialogVisible" [modal]="true" [style]="{ width: '32rem' }"
+    header="Bloquear usuario" [draggable]="false" [resizable]="false">
     @if (blockTarget) {
-      <p class="m-0 mb-3">Usuario: <strong>{{ blockTarget.email }}</strong></p>
-      <input pInputText class="w-full mb-3" placeholder="Motivo del bloqueo"
-        [(ngModel)]="blockReason" />
-      <p-datepicker [showTime]="true" appendTo="body" class="w-full"
-        [(ngModel)]="blockUntil" placeholder="Bloquear hasta (opcional)" />
+      <p class="block-hint">
+        El usuario <strong>{{ blockTarget.email }}</strong> no podrá iniciar sesión.
+        Deja la fecha vacía para un bloqueo indefinido.
+      </p>
+      <div class="field">
+        <label for="blockReason">Motivo</label>
+        <textarea pTextarea id="blockReason" [(ngModel)]="blockReason" rows="3"
+          [autoResize]="true" placeholder="Motivo del bloqueo"></textarea>
+      </div>
+      <div class="field">
+        <label for="blockUntil">Bloquear hasta (opcional)</label>
+        <p-datepicker inputId="blockUntil" [showTime]="true" [showClear]="true"
+          dateFormat="dd/mm/yy" appendTo="body" [(ngModel)]="blockUntil"
+          placeholder="Sin fecha = indefinido" />
+      </div>
     }
     <ng-template pTemplate="footer">
       <p-button label="Cancelar" severity="secondary" [text]="true"
         (click)="blockDialogVisible = false" />
-      <p-button label="Bloquear" severity="danger" [loading]="actionBusy"
+      <p-button label="Bloquear" severity="danger" [outlined]="true" [loading]="actionBusy"
         [disabled]="actionBusy" (click)="saveBlock()" />
     </ng-template>
   </p-dialog>
@@ -145,18 +156,20 @@
               <span>Roles</span>
             </div>
           </p-tab>
-          <p-tab value="2">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-key mr-sm text-primary-500"></i>
-              <span>Permisos</span>
-            </div>
-          </p-tab>
-          <p-tab value="3">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-box mr-sm text-primary-500"></i>
-              <span>Módulos</span>
-            </div>
-          </p-tab>
+          @if (isSuperAdminUser) {
+            <p-tab value="2">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-key mr-sm text-primary-500"></i>
+                <span>Permisos</span>
+              </div>
+            </p-tab>
+            <p-tab value="3">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-box mr-sm text-primary-500"></i>
+                <span>Módulos</span>
+              </div>
+            </p-tab>
+          }
         </p-tablist>
 
         <p-tabpanels>
@@ -310,6 +323,21 @@
                     <span>Solo un SuperAdmin puede asignar este rol</span>
                   </div>
                   }
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="p-md">
+                  <div class="flex items-center gap-2">
+                    <p-checkbox inputId="isTrial" formControlName="isTrial" [binary]="true" />
+                    <label for="isTrial" class="cursor-pointer font-medium p-xs">Usuario de prueba</label>
+                  </div>
+                  <div class="message-validation">
+                    @if (isEditForm && !isSuperAdminUser) {
+                      <span>Solo un SuperAdmin puede modificar la prueba</span>
+                    } @else {
+                      <span>Al vencer el período de prueba no podrá iniciar sesión</span>
+                    }
+                  </div>
                 </div>
               </div>
             </div>

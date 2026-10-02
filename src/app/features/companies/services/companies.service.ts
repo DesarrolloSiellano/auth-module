@@ -19,4 +19,20 @@ export class CompaniesService extends BaseService<Companies, Response<Companies[
     return this.http.get<Response<Companies[]>>(`${ENVIROMENT.urlApi}/companies/findByAutoComplete?name=${encodeURIComponent(name)}`);
   }
 
+  block(
+    id: string,
+    body: { reason?: string; until?: string } = {},
+  ): Observable<Response<Companies>> {
+    return this.http.patch<Response<Companies>>(
+      `${this.baseUrl}/${encodeURIComponent(id)}/block`,
+      body,
+    );
+  }
+
+  unblock(id: string): Observable<Response<Companies>> {
+    return this.http.patch<Response<Companies>>(
+      `${this.baseUrl}/${encodeURIComponent(id)}/unblock`,
+      {},
+    );
+  }
 }

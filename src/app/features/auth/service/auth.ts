@@ -67,6 +67,20 @@ export class Auth {
     );
   }
 
+  verifyEmail(token: string): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
+      `${ENVIROMENT.urlApi}/auth/verify-email`,
+      { token },
+    );
+  }
+
+  resendVerification(): Observable<Response<unknown>> {
+    return this.http.post<Response<unknown>>(
+      `${ENVIROMENT.urlApi}/auth/resend-verification`,
+      {},
+    );
+  }
+
 
   recoveryPassword(
     email: string,

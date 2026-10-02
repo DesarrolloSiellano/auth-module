@@ -10,6 +10,7 @@
     [showCurrentPageReport]="true"
     [scrollHeight]="'max(12rem, calc(100vh - 26rem))'"
     [selectionMode]="bulkSelectable() ? 'multiple' : 'single'"
+    [rowSelectable]="tableRowSelectable"
     [(contextMenuSelection)]="selected" [contextMenu]="cm"
     (contextMenuSelectionChange)="onContextMenuSelect()"
     [(selection)]="selected" (onRowSelect)="onRowSelect()"
@@ -90,9 +91,10 @@
     </ng-template>
 
     <ng-template #body pTemplate="body" let-rowData let-columns="columns">
-      <tr [pSelectableRow]="rowData" [pContextMenuRow]="rowData">
+      <tr [pSelectableRow]="rowData" [pSelectableRowDisabled]="!isRowSelectable(rowData)"
+        [pContextMenuRow]="rowData">
         @if (bulkSelectable()) {
-          <td><p-tableCheckbox [value]="rowData" /></td>
+          <td><p-tableCheckbox [value]="rowData" [disabled]="!isRowSelectable(rowData)" /></td>
         }
         @for (col of columns; track col) {
           <td>
@@ -105,7 +107,7 @@
               @for (action of actionsFor(rowData); track action.key) {
                 <p-button [icon]="action.icon" [severity]="$any(action.severity) || 'secondary'" outlined
                   class="mr-xs" [pTooltip]="action.tooltip || action.key"
-                  [ariaLabel]="action.tooltip || action.key" [disabled]="actionsDisabled()"
+                  [ariaLabel]="action.tooltip || action.key" [disabled]="actionsDisabled() || action.disabled"
                   (click)="onExtraAction(action.key, rowData)" />
               }
               @if (showEdit()) {

@@ -10,6 +10,9 @@ export interface Companies {
   logo?: string;
   id: string;
   isActive: boolean;
+  isBlocked?: boolean;
+  blockReason?: string | null;
+  blockedUntil?: string | null;
   dateCreated?: string;
   hourCreated?: string;
   dateModified?: string;

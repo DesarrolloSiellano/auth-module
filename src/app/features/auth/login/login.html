@@ -14,7 +14,9 @@
         }
 
         @if (showMessageError()) {
-        <p-message [life]="5000" severity="error">{{ errorStatus() }} {{ errorMessage() }}</p-message>
+        @for (message of errorMessages(); track message) {
+        <p-message severity="error">{{ message }}</p-message>
+        }
         }
       </div>
 

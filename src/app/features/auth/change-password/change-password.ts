@@ -127,6 +127,7 @@ export class ChangePasswordComponent implements OnInit {
         next: () => {
           this.loading.set(false);
           localStorage.setItem('mustChangePassword', 'false');
+          localStorage.setItem('isNewUser', 'false');
           this.router.navigate(['/pages/dashboard']);
         },
         error: (err) => {

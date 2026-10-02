@@ -52,4 +52,33 @@ describe('getHttpErrorInfo', () => {
   it('should respect a custom fallback', () => {
     expect(getHttpErrorInfo(null, 'custom').message).toBe('custom');
   });
+
+  it('should expose structured errors and code', () => {
+    const info = getHttpErrorInfo({
+      status: 403,
+      error: {
+        message: 'Tu empresa está bloqueada.',
+        code: 'COMPANY_BLOCKED',
+        errors: [
+          { code: 'COMPANY_BLOCKED', message: 'Tu empresa está bloqueada.' },
+          { code: 'TRIAL_EXPIRED', message: 'Tu prueba finalizó.' },
+        ],
+      },
+    });
+
+    expect(info.code).toBe('COMPANY_BLOCKED');
+    expect(info.errors.length).toBe(2);
+    expect(info.errors[1].code).toBe('TRIAL_EXPIRED');
+  });
+
+  it('should synthesize a single error from message when there is no errors array', () => {
+    const info = getHttpErrorInfo({
+      status: 403,
+      error: { message: 'Creadenciales invalidas' },
+    });
+
+    expect(info.errors).toEqual([
+      { code: '', message: 'Creadenciales invalidas' },
+    ]);
+  });
 });

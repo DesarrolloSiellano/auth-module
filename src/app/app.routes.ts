@@ -22,6 +22,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email').then(
+        (m) => m.VerifyEmailComponent,
+      ),
+  },
+  {
     path: 'change-password',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -106,6 +113,12 @@ export const routes: Routes = [
           import('./features/tenant-config/tenant-config').then(
             (m) => m.TenantConfigComponent,
           ),
+        canActivate: [superAdminGuard],
+      },
+      {
+        path: 'api-docs',
+        loadComponent: () =>
+          import('./features/api-docs/api-docs').then((m) => m.ApiDocsComponent),
         canActivate: [superAdminGuard],
       },
 
