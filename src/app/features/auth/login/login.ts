@@ -21,6 +21,7 @@ import { UAParser } from 'ua-parser-js';
 import { Toast } from 'primeng/toast';
 import { Subscription } from 'rxjs';
 import { getHttpErrorInfo } from '../../../core/helpers/http-error';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -40,7 +41,8 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(FormTemplateComponent) formComponent?: FormTemplateComponent;
   loginForm = LOGIN_FORM;
   showMessageError = signal(false);
-  errorMessage = signal(''); // Señal para mensaje
+  errorMessage = signal(''); // Señal para mensaje (compatibilidad)
+  errorMessages = signal<string[]>([]); // Uno o varios motivos de bloqueo
   errorStatus = signal(0);
   showMessageSuccess = signal(false);
   messageSuccess = signal('');
@@ -56,6 +58,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly notification = inject(NotificationService);
 
   ngOnInit(): void {
     this.subscriptions.add(
@@ -133,13 +136,11 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
               this.isSubmitting.set(false);
               console.error(profileError);
               this.showMessageSuccess.set(false);
-              this.errorStatus.set(profileError?.status || res.statusCode || 0);
-              this.errorMessage.set(
-                this.extractErrorMessage(profileError) ||
-                  'No tienes permisos para acceder a este módulo',
+              this.showLoginErrors(
+                profileError,
+                profileError?.status || res.statusCode || 0,
+                'No tienes permisos para acceder a este módulo',
               );
-              this.showMessageError.set(true);
-              this.cdRef.detectChanges();
             },
           });
       },
@@ -147,18 +148,13 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
         this.isSubmitting.set(false);
         console.error(err);
         this.showMessageSuccess.set(false);
-        this.errorStatus.set(err.status);
-        this.errorMessage.set(
-          this.extractErrorMessage(err) || 'Error al iniciar sesión',
-        );
-        this.showMessageError.set(true);
-        this.cdRef.detectChanges();
+        this.showLoginErrors(err, err?.status || 0, 'Error al iniciar sesión');
 
         this.timers.push(
           setTimeout(() => {
             this.showMessageError.set(false);
             this.cdRef.detectChanges();
-          }, 5000),
+          }, 6000),
         );
       },
       complete: () => {
@@ -167,8 +163,30 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private extractErrorMessage(err: unknown): string {
-    return getHttpErrorInfo(err).message;
+  /**
+   * Muestra uno o varios motivos de bloqueo: un toast por mensaje y la lista
+   * inline bajo el formulario.
+   */
+  private showLoginErrors(
+    err: unknown,
+    status: number,
+    fallback: string,
+  ): void {
+    const info = getHttpErrorInfo(err, fallback);
+    const messages = info.errors.length
+      ? info.errors.map((error) => error.message)
+      : [info.message || fallback];
+
+    this.errorStatus.set(status);
+    this.errorMessages.set(messages);
+    this.errorMessage.set(messages[0] || fallback);
+    this.showMessageError.set(true);
+
+    messages.forEach((detail) =>
+      this.notification.error('No se pudo iniciar sesión', detail, 6000),
+    );
+
+    this.cdRef.detectChanges();
   }
 
   recoveryPass() {

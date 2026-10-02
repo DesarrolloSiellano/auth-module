@@ -1,0 +1,310 @@
+<div class="content api-docs">
+  <!-- Encabezado -->
+  <div class="ad-header">
+    <div class="ad-title">
+      <span class="ad-icon"><i class="pi pi-book"></i></span>
+      <div>
+        <h2>Documentación del API</h2>
+        <p>
+          Referencia viva de la superficie del microservicio: comandos TCP y
+          endpoints REST. Solo informativa.
+          <a class="ad-pdf-link" href="guias/Guia_Integracion_APIs_Externas.pdf"
+            download="Guia_Integracion_APIs_Externas.pdf"
+            title="Descargar la guía de integración">
+            <i class="pi pi-file-pdf"></i> Descargar Guia de integración API'S Externas
+          </a>
+        </p>
+      </div>
+    </div>
+    <p-button icon="pi pi-refresh" severity="secondary" [text]="true"
+      ariaLabel="Recargar documentación" [loading]="loading"
+      (click)="loadAll()" />
+  </div>
+
+  <!-- Métricas -->
+  <div class="ad-stats">
+    <div class="ad-stat ad-stat--indigo">
+      <span class="ad-stat-icon"><i class="pi pi-server"></i></span>
+      <div class="ad-stat-body">
+        <span class="ad-stat-value">{{ totalTcpCommands() }}</span>
+        <span class="ad-stat-label">Comandos TCP</span>
+      </div>
+    </div>
+    <div class="ad-stat ad-stat--blue">
+      <span class="ad-stat-icon"><i class="pi pi-globe"></i></span>
+      <div class="ad-stat-body">
+        <span class="ad-stat-value">{{ totalRestEndpoints() }}</span>
+        <span class="ad-stat-label">Endpoints REST</span>
+      </div>
+    </div>
+    <div class="ad-stat ad-stat--teal">
+      <span class="ad-stat-icon"><i class="pi pi-sitemap"></i></span>
+      <div class="ad-stat-body">
+        <span class="ad-stat-value">{{ totalDomains() }}</span>
+        <span class="ad-stat-label">Dominios</span>
+      </div>
+    </div>
+    <div class="ad-stat ad-stat--amber">
+      <span class="ad-stat-icon"><i class="pi pi-bolt"></i></span>
+      <div class="ad-stat-body">
+        <span class="ad-stat-value">{{ totalMethods() }}</span>
+        <span class="ad-stat-label">Métodos HTTP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Switch de documentación -->
+  <div class="ad-switch" role="tablist" aria-label="Tipo de documentación">
+    <button type="button" role="tab" class="ad-switch-btn"
+      [class.active]="activeTab === 'tcp'" [attr.aria-selected]="activeTab === 'tcp'"
+      (click)="setTab('tcp')">
+      <i class="pi pi-server"></i>
+      <span>Comandos TCP</span>
+      <span class="ad-switch-count">{{ totalTcpCommands() }}</span>
+    </button>
+    <button type="button" role="tab" class="ad-switch-btn"
+      [class.active]="activeTab === 'rest'" [attr.aria-selected]="activeTab === 'rest'"
+      (click)="setTab('rest')">
+      <i class="pi pi-globe"></i>
+      <span>Endpoints REST</span>
+      <span class="ad-switch-count">{{ totalRestEndpoints() }}</span>
+    </button>
+  </div>
+
+  @if (!tcp && !rest && loading) {
+    <div class="ad-loading">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Cargando documentación…</span>
+    </div>
+  } @else if (!tcp && !rest && failed) {
+    <div class="ad-empty">
+      <i class="pi pi-exclamation-triangle"></i>
+      <p>No se pudo cargar la documentación desde el API.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (click)="loadAll()" />
+    </div>
+  } @else {
+    <!-- Panel resumen: gráfico -->
+    <div class="ad-panel">
+      <div class="ad-panel-head">
+        <div>
+          <h3>
+            @if (activeTab === 'tcp') { Distribución de comandos por dominio }
+            @else { Distribución de endpoints por dominio }
+          </h3>
+          <p>
+            @if (activeTab === 'tcp') {
+              {{ totalTcpCommands() }} comandos agrupados en {{ tcp?.domains?.length || 0 }} dominios.
+            } @else {
+              {{ totalRestEndpoints() }} endpoints agrupados en {{ rest?.domains?.length || 0 }} dominios.
+            }
+          </p>
+        </div>
+      </div>
+      <div class="ad-chart">
+        @if (activeTab === 'tcp') {
+          <canvas #tcpChart></canvas>
+        } @else {
+          <canvas #restChart></canvas>
+        }
+      </div>
+      @if (activeTab === 'rest') {
+        <div class="ad-methods">
+          @for (m of restMethodCounts(); track m.domain) {
+            <span class="ad-method-pill" [style.background]="methodColors[m.domain]">
+              {{ m.domain }} · {{ m.count }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Aviso -->
+    <div class="ad-note">
+      <i class="pi pi-info-circle"></i>
+      <div>
+        @if (activeTab === 'tcp') {
+          <strong>{{ tcp?.serviceAuth || 'serviceKey obligatorio' }}.</strong>
+          {{ tcp?.note }}
+        } @else {
+          {{ rest?.note }}
+        }
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="ad-toolbar">
+      <span class="ad-search">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" placeholder="Buscar…"
+          [(ngModel)]="search" />
+      </span>
+      <p-select [options]="domainOptions()" optionLabel="label" optionValue="value"
+        [(ngModel)]="domain" appendTo="body" styleClass="ad-domain" />
+    </div>
+
+    <!-- Contenido TCP -->
+    @if (activeTab === 'tcp') {
+      @if (filteredTcp().length === 0) {
+        <div class="ad-empty">
+          <i class="pi pi-inbox"></i>
+          <p>No hay comandos para el filtro actual.</p>
+        </div>
+      } @else {
+        <div class="ad-cards">
+          @for (cmd of filteredTcp(); track cmd.command) {
+            <article class="ad-card" [class.open]="isExpanded(cmd.command)">
+              <button type="button" class="ad-card-head" (click)="toggleExpand(cmd.command)">
+                <span class="ad-cmd"><i class="pi pi-hashtag"></i>{{ cmd.command }}</span>
+                <span class="ad-domain-tag">{{ cmd.domain }}</span>
+                <span class="ad-card-desc">{{ cmd.description }}</span>
+                <i class="pi ad-chevron"
+                  [class]="isExpanded(cmd.command) ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+              </button>
+
+              @if (isExpanded(cmd.command)) {
+                <div class="ad-card-body">
+                  <div class="ad-code-block">
+                    <div class="ad-code-head">
+                      <span>payload</span>
+                      <button type="button" (click)="copy(formatJson(cmd.payloadExample))">
+                        <i class="pi pi-copy"></i> Copiar
+                      </button>
+                    </div>
+                    <pre>{{ formatJson(cmd.payloadExample) }}</pre>
+                  </div>
+                  @if (cmd.responseExample) {
+                    <div class="ad-code-block">
+                      <div class="ad-code-head">
+                        <span>respuesta</span>
+                        <button type="button" (click)="copy(formatJson(cmd.responseExample))">
+                          <i class="pi pi-copy"></i> Copiar
+                        </button>
+                      </div>
+                      <pre>{{ formatJson(cmd.responseExample) }}</pre>
+                    </div>
+                  }
+                </div>
+              }
+            </article>
+          }
+        </div>
+      }
+    } @else {
+      <!-- Contenido REST -->
+      @if (filteredRest().length === 0) {
+        <div class="ad-empty">
+          <i class="pi pi-inbox"></i>
+          <p>No hay endpoints para el filtro actual.</p>
+        </div>
+      } @else {
+        <div class="ad-table-wrap">
+          <p-table [value]="filteredRest()" [paginator]="true" [rows]="12"
+            [rowsPerPageOptions]="[12, 25, 50]" styleClass="p-datatable-sm ad-table"
+            [tableStyle]="{ 'min-width': '48rem' }">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Método</th>
+                <th>Ruta</th>
+                <th>Autenticación</th>
+                <th>Descripción</th>
+                <th></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr class="ad-row" (click)="openEndpoint(row)"
+                title="Ver ejemplo de payload y respuesta">
+                <td>
+                  <span class="ad-method-badge"
+                    [style.background]="methodColors[row.method]">{{ row.method }}</span>
+                </td>
+                <td>
+                  <span class="ad-path">
+                    <code>{{ row.path }}</code>
+                    <button type="button" class="ad-copy-btn"
+                      (click)="$event.stopPropagation(); copy(row.path)"
+                      aria-label="Copiar ruta">
+                      <i class="pi pi-copy"></i>
+                    </button>
+                  </span>
+                </td>
+                <td><span class="ad-auth">{{ row.auth }}</span></td>
+                <td>{{ row.description }}</td>
+                <td class="ad-row-action">
+                  <span class="ad-row-btn"><i class="pi pi-code"></i> Ejemplo</span>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="5">Sin endpoints.</td></tr>
+            </ng-template>
+          </p-table>
+        </div>
+      }
+    }
+  }
+
+  <!-- Diálogo de ejemplo (payload + respuesta) -->
+  <p-dialog [visible]="endpointDialogVisible"
+    (visibleChange)="endpointDialogVisible = $event" [modal]="true"
+    [draggable]="false" [resizable]="false" appendTo="body"
+    [style]="{ width: '92vw', maxWidth: '960px' }"
+    [breakpoints]="{ '900px': '96vw' }" styleClass="ad-dialog"
+    (onHide)="closeEndpoint()">
+    <ng-template #header>
+      @if (selectedEndpoint) {
+        <div class="ad-dlg-head">
+          <span class="ad-method-badge ad-method-badge--lg"
+            [style.background]="methodColors[selectedEndpoint.method]">{{ selectedEndpoint.method }}</span>
+          <div class="ad-dlg-headtext">
+            <code class="ad-dlg-path">{{ selectedEndpoint.path }}</code>
+            <div class="ad-dlg-sub">
+              <span class="ad-auth"><i class="pi pi-lock"></i> {{ selectedEndpoint.auth }}</span>
+              <span class="ad-dlg-desc">{{ selectedEndpoint.description }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+
+    @if (selectedEndpoint) {
+      <div class="ad-dlg-body">
+        <section class="ad-dlg-card ad-dlg-card--req">
+          <header class="ad-dlg-card-head">
+            <span class="ad-dlg-card-title">
+              <i class="pi pi-upload"></i> Payload · request
+            </span>
+            <button type="button" class="ad-dlg-copy"
+              (click)="copy(formatJson(selectedEndpoint.requestExample))">
+              <i class="pi pi-copy"></i> Copiar
+            </button>
+          </header>
+          <pre class="ad-dlg-pre">{{ formatJson(selectedEndpoint.requestExample) }}</pre>
+        </section>
+
+        <section class="ad-dlg-card ad-dlg-card--res">
+          <header class="ad-dlg-card-head">
+            <span class="ad-dlg-card-title">
+              <i class="pi pi-download"></i> Respuesta · response
+            </span>
+            <button type="button" class="ad-dlg-copy"
+              (click)="copy(formatJson(selectedEndpoint.responseExample))">
+              <i class="pi pi-copy"></i> Copiar
+            </button>
+          </header>
+          <pre class="ad-dlg-pre">{{ formatJson(selectedEndpoint.responseExample) }}</pre>
+        </section>
+      </div>
+    }
+
+    <ng-template #footer>
+      <div class="ad-dlg-footer">
+        <span class="ad-dlg-hint">
+          <i class="pi pi-info-circle"></i>
+          Solo documentación. El endpoint real se consume con su autenticación.
+        </span>
+        <p-button label="Cerrar" [text]="true" severity="secondary"
+          (click)="closeEndpoint()" />
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

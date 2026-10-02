@@ -17,6 +17,32 @@
     </div>
   </div>
 
+  <!-- Período de prueba (solo usuarios de prueba) -->
+  @if (isTrialUser) {
+  <section class="trial-card trial-card--{{ trialState }}">
+    <div class="trial-card-head">
+      <span class="trial-card-icon"><i class="pi pi-hourglass"></i></span>
+      <div class="trial-card-text">
+        <p class="trial-card-title">Días de prueba</p>
+        <p class="trial-card-sub">
+          @if (trialExpired) {
+            Tu período de prueba venció. Contacta al administrador.
+          } @else {
+            Te quedan {{ trialRemainingDays }} de {{ trialTotalDays }} días de prueba
+          }
+        </p>
+      </div>
+      <span class="trial-card-total">{{ trialTotalDays }} días</span>
+    </div>
+    <p-progressBar [value]="trialPercent" [showValue]="false"
+      [styleClass]="'trial-progress trial-progress--' + trialState" />
+    <div class="trial-card-foot">
+      <span>{{ trialElapsedDays }} / {{ trialTotalDays }} días transcurridos</span>
+      <span>{{ trialPercent }}%</span>
+    </div>
+  </section>
+  }
+
   <!-- Resumen -->
   <div class="dash-cards">
     <div class="dash-card">
@@ -134,7 +160,7 @@
   <div class="dash-panels dash-panels--usage">
     <section class="dash-panel">
       <h3><i class="pi pi-list mr-2"></i> Detalle por métrica</h3>
-      <p-table [value]="rows" styleClass="p-datatable-sm" [paginator]="true" [rows]="10"
+      <p-table [value]="rows" styleClass="p-datatable-sm dash-table" [paginator]="true" [rows]="10"
         [scrollable]="true" [tableStyle]="{ 'min-width': '32rem' }">
         <ng-template #rowsHeader pTemplate="header">
           <tr>
@@ -145,9 +171,9 @@
         </ng-template>
         <ng-template #rowsBody pTemplate="body" let-row>
           <tr>
-            <td>{{ row.period }}</td>
-            <td>{{ row.metric }}</td>
-            <td><strong>{{ row.value }}</strong></td>
+            <td [attr.data-label]="'Período'">{{ row.period }}</td>
+            <td [attr.data-label]="'Métrica'">{{ row.metric }}</td>
+            <td [attr.data-label]="'Consumo'"><strong>{{ row.value }}</strong></td>
           </tr>
         </ng-template>
         <ng-template #rowsEmpty pTemplate="emptymessage">

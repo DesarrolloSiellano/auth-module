@@ -107,9 +107,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }),
     );
 
-    if (localStorage.getItem('isNewUser') === 'true') {
-      this.isDisplayChangePassword = true;
-    }
+    // El cambio forzado se gestiona con la página /change-password (según
+    // `mustChangePassword`); el modal del navbar es solo cambio voluntario.
   }
 
   ngOnDestroy(): void {
@@ -147,6 +146,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   toggleInput() {
     this.inputVisible = !this.inputVisible;
+  }
+
+  get isSuperAdmin(): boolean {
+    return this.session.getClaims()?.isSuperAdmin === true;
+  }
+
+  openApiDocs(): void {
+    this.router.navigate(['/pages/api-docs']);
   }
 
   toggleSidebar() {
@@ -234,6 +241,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         if (res.statusCode === 200 || res.statusCode === 201) {
           this.confirmService.showMessage('info', 'Exito', res.message);
           localStorage.setItem('isNewUser', 'false');
+          localStorage.setItem('mustChangePassword', 'false');
         }
       },
       error: (err) => {

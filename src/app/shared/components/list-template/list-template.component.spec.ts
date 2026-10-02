@@ -21,6 +21,24 @@ describe('ListTemplateComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should honor rowSelectableFn (per-row selection)', () => {
+    expect(component.isRowSelectable({ id: 1 })).toBe(true);
+    expect(component.tableRowSelectable({ data: { id: 1 }, index: 0 })).toBe(
+      true,
+    );
+
+    fixture.componentRef.setInput(
+      'rowSelectableFn',
+      (row: { id: number }) => row.id !== 1,
+    );
+
+    expect(component.isRowSelectable({ id: 1 })).toBe(false);
+    expect(component.isRowSelectable({ id: 2 })).toBe(true);
+    expect(component.tableRowSelectable({ data: { id: 1 }, index: 0 })).toBe(
+      false,
+    );
+  });
+
   it('should emit loadLazy on lazy load', () => {
     let emitted: any;
     component.loadLazy.subscribe((e) => (emitted = e));

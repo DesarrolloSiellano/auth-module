@@ -1,0 +1,43 @@
+.verify-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  font-size: 0.85rem;
+
+  i {
+    font-size: 1rem;
+  }
+
+  .verify-banner-text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .verify-banner-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    background: #d97706;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: #b45309;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}

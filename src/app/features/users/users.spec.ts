@@ -287,6 +287,50 @@ describe('Users', () => {
     expect(component.userForm.get('company')?.hasError('required')).toBe(true);
   });
 
+  it('should enable isTrial on create and keep it editable for SuperAdmin', () => {
+    component.create();
+    const trial = component.userForm.get('isTrial');
+    expect(trial?.enabled).toBe(true);
+    expect(trial?.value).toBe(false);
+
+    // SuperAdmin puede modificar la prueba en edición.
+    component.isEditForm = true;
+    component.updateValidatorsBasedOnEditMode();
+    expect(trial?.enabled).toBe(true);
+
+    // Un administrador normal no puede modificarla (se omite del formulario).
+    sessionStoreMock.getClaims.and.returnValue({ isSuperAdmin: false });
+    component.updateValidatorsBasedOnEditMode();
+    expect(trial?.disabled).toBe(true);
+    expect(component.getFormattedFormValues().isTrial).toBeUndefined();
+  });
+
+  it('should not allow selecting/blocking/deleting the logged-in user', () => {
+    sessionStoreMock.getClaims.and.returnValue({
+      _id: 'me',
+      isSuperAdmin: true,
+      company: 'BPONET',
+      tenantId: '000000',
+    });
+
+    expect(component.rowSelectableFor({ _id: 'me' } as User)).toBe(false);
+    expect(component.rowSelectableFor({ _id: 'other' } as User)).toBe(true);
+
+    const selfActions = component.rowActionsFor({
+      _id: 'me',
+      isBlocked: false,
+    } as User);
+    expect(selfActions.find((a) => a.key === 'block')?.disabled).toBe(true);
+    expect(selfActions.find((a) => a.key === 'softDelete')?.disabled).toBe(true);
+    expect(selfActions.find((a) => a.key === 'hardDelete')?.disabled).toBe(true);
+
+    const otherActions = component.rowActionsFor({
+      _id: 'other',
+      isBlocked: false,
+    } as User);
+    expect(otherActions.find((a) => a.key === 'block')?.disabled).toBeFalsy();
+  });
+
   it('should toggle module routes', () => {
     const mod = JSON.parse(JSON.stringify(moduleItem));
     component.toggleModule(mod, { checked: false });

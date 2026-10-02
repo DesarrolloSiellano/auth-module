@@ -47,8 +47,10 @@ export class TokenRefreshService {
     return this.auth.refreshToken(refreshToken).pipe(
       switchMap((res) => {
         const newToken = res.accessToken;
+        // Rotación: el backend puede devolver un refresh token nuevo.
+        const newRefresh = res.refreshToken ?? refreshToken;
         // Reprocesar identidad y perfil (modules/roles/permissions) antes de reintentar
-        return this.processAuthData.proccesAuthData(newToken, refreshToken).pipe(
+        return this.processAuthData.proccesAuthData(newToken, newRefresh).pipe(
           map(() => newToken),
         );
       }),

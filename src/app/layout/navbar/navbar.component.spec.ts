@@ -157,8 +157,18 @@ describe('NavbarComponent', () => {
       'Cambio exitoso',
     );
     expect(localStorage.getItem('isNewUser')).toBe('false');
+    expect(localStorage.getItem('mustChangePassword')).toBe('false');
     expect(component.isDisplayChangePassword).toBe(false);
   }));
+
+  it('no abre el modal de cambio automáticamente por isNewUser', () => {
+    localStorage.setItem('isNewUser', 'true');
+    component.isDisplayChangePassword = false;
+
+    component.ngOnInit();
+
+    expect(component.isDisplayChangePassword).toBe(false);
+  });
 
   it('should reset the button on change password error', fakeAsync(() => {
     authMock.changePassword.and.returnValue(

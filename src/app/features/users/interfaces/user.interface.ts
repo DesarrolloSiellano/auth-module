@@ -17,6 +17,9 @@ export interface User {
   isSuperAdmin: boolean;
   isNewUser: boolean;
   mustChangePassword?: boolean;
+  isTrial?: boolean;
+  trialStartedAt?: Date;
+  trialEndsAt?: Date | null;
   isBlocked?: boolean;
   blockReason?: string;
   blockedUntil?: Date;
