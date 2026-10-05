@@ -8,6 +8,7 @@ export interface JwtPayload {
   company: string;
   tenantId: string;
   isSuperAdmin?: boolean;
+  isAdmin?: boolean;
   isTrial?: boolean;
   trialStartedAt?: string | null;
   trialEndsAt?: string | null;
