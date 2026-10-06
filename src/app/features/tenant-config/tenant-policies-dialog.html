@@ -1,5 +1,5 @@
 <p-dialog [visible]="visible" (visibleChange)="onVisibleChange($event)" [modal]="true" [draggable]="false"
-  [resizable]="false" appendTo="body" [baseZIndex]="10000" [style]="{ width: '92vw', maxWidth: '1100px' }"
+  [resizable]="false" appendTo="body" [baseZIndex]="10000" [style]="{ width: '92vw', maxWidth: '1200px' }"
   [breakpoints]="{ '1199px': '96vw' }" styleClass="tenant-policies-dialog">
   <ng-template #header>
     <div class="tp-header">
@@ -33,6 +33,15 @@
                   <i class="pi pi-circle-fill"></i>
                   <span>{{ group.group }}</span>
                 </header>
+                @if (group.group === 'messages' && whatsappPlatformEnabled) {
+                  <div class="tp-hint">
+                    @if (globalBagValue > 0) {
+                      Bolsas: {{ bagsSum }} / WhatsApp por mes: {{ globalBagValue }} — deben ser iguales.
+                    } @else {
+                      0 = ilimitado. Puedes fijar un tope por categoría.
+                    }
+                  </div>
+                }
                 <div class="tp-grid">
                   @for (item of group.items; track item.key) {
                     <div class="tp-item">
@@ -45,20 +54,23 @@
                           <p-toggleSwitch [inputId]="'tp-' + item.key" [(ngModel)]="configValues[item.key]" />
                         }
                         @case ('number') {
-                          <p-inputNumber [inputId]="'tp-' + item.key" [(ngModel)]="configValues[item.key]"
-                            [min]="item.min ?? 0" styleClass="w-full" />
+                          <p-inputNumber [inputId]="'tp-' + item.key" [ngModel]="configValues[item.key]"
+                            (ngModelChange)="onPolicyValueChange(item.key, $event)"
+                            [min]="item.min ?? 0" [disabled]="isPolicyDisabled(item.key)" styleClass="w-full" />
                         }
                         @case ('select') {
                           <p-select [inputId]="'tp-' + item.key" [options]="item.options || []"
                             optionLabel="label" optionValue="value" [(ngModel)]="configValues[item.key]"
-                            appendTo="body" />
+                            [disabled]="isPolicyDisabled(item.key)" appendTo="body" />
                         }
                         @case ('json') {
                           <textarea pTextarea [id]="'tp-' + item.key" rows="2"
+                            [disabled]="isPolicyDisabled(item.key)"
                             [(ngModel)]="configValues[item.key]"></textarea>
                         }
                         @default {
-                          <input pInputText [id]="'tp-' + item.key" [(ngModel)]="configValues[item.key]" />
+                          <input pInputText [id]="'tp-' + item.key" [(ngModel)]="configValues[item.key]"
+                            [disabled]="isPolicyDisabled(item.key)" />
                         }
                       }
                     </div>
