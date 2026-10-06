@@ -36,6 +36,21 @@ interface PolicyGroup {
   items: PolicyDefinition[];
 }
 
+/**
+ * Políticas de bolsas de mensajes que solo aplican cuando la plataforma provee
+ * el API de WhatsApp (`channels.whatsapp.enabled = true`). Con BYO (false) se
+ * deshabilitan en la UI.
+ */
+const WHATSAPP_MESSAGE_POLICY_KEYS = [
+  'messages.bolsa.utilidad',
+  'messages.bolsa.marketingComercial',
+  'messages.bolsa.autenticacion',
+  'messages.bolsa.servicio',
+];
+
+const WHATSAPP_GLOBAL_BAG_KEY = 'channels.whatsapp.monthlyLimit';
+const WHATSAPP_BALANCE_KEY = 'messages.bolsa.utilidad';
+
 @Component({
   selector: 'app-tenant-policies-dialog',
   imports: [
@@ -187,6 +202,64 @@ export class TenantPoliciesDialogComponent implements OnChanges {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  /** `channels.whatsapp.enabled`: la plataforma provee el API. */
+  get whatsappPlatformEnabled(): boolean {
+    return this.configValues['channels.whatsapp.enabled'] === true;
+  }
+
+  /** Deshabilita las bolsas de mensajes cuando el API de plataforma está off. */
+  isPolicyDisabled(key: string): boolean {
+    return WHATSAPP_MESSAGE_POLICY_KEYS.includes(key) && !this.whatsappPlatformEnabled;
+  }
+
+  get globalBagValue(): number {
+    const value = Number(this.configValues[WHATSAPP_GLOBAL_BAG_KEY] ?? 0);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  get bagsSum(): number {
+    return WHATSAPP_MESSAGE_POLICY_KEYS.reduce(
+      (sum, key) => sum + (Number(this.configValues[key]) || 0),
+      0,
+    );
+  }
+
+  /**
+   * Mantiene coherencia entre la bolsa global y las bolsas por categoría:
+   * al cambiar la global se reparte igual (resto a utilidad); al cambiar una
+   * categoría se ajusta `utilidad` para que la suma siga cuadrando.
+   */
+  onPolicyValueChange(key: string, value: unknown): void {
+    this.configValues[key] = value;
+
+    if (key === WHATSAPP_GLOBAL_BAG_KEY) {
+      this.distributeBags(Number(value) || 0);
+      return;
+    }
+    if (WHATSAPP_MESSAGE_POLICY_KEYS.includes(key) && this.globalBagValue > 0) {
+      this.balanceBags(key);
+    }
+  }
+
+  private distributeBags(global: number): void {
+    if (!(global > 0)) return;
+    const count = WHATSAPP_MESSAGE_POLICY_KEYS.length;
+    const base = Math.floor(global / count);
+    const remainder = global % count;
+    WHATSAPP_MESSAGE_POLICY_KEYS.forEach((key, index) => {
+      this.configValues[key] = base + (index === 0 ? remainder : 0);
+    });
+  }
+
+  private balanceBags(changedKey: string): void {
+    if (changedKey === WHATSAPP_BALANCE_KEY) return;
+    const others = WHATSAPP_MESSAGE_POLICY_KEYS.filter((k) => k !== WHATSAPP_BALANCE_KEY).reduce(
+      (sum, key) => sum + (Number(this.configValues[key]) || 0),
+      0,
+    );
+    this.configValues[WHATSAPP_BALANCE_KEY] = Math.max(this.globalBagValue - others, 0);
   }
 
   usageRows(usage: TenantUsage): { metric: string; value: number }[] {

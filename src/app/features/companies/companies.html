@@ -8,7 +8,7 @@
     (extraAction)="onExtraAction($any($event))" (onRowSelectionChange)="onSelectionChange($any($event))">
   </app-list-template>
 
-  <p-dialog [(visible)]="isDisplayForm" [style]="{width: '70vw'}" [header]="titleForm" [draggable]="false"
+  <p-dialog [(visible)]="isDisplayForm" [style]="{width: '90vw'}" [header]="titleForm" [draggable]="false"
     [resizable]="false" [closable]="false" [modal]="true" [baseZIndex]="10000">
     <app-form-template [width]="'70rem'" [title]="titleForm" [isVisible]="isFormVisible" [isEdit]="isEditForm"
       [initialData]="initialData" [form]="form">
