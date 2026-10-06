@@ -172,6 +172,12 @@ code {
   }
 }
 
+.tp-hint {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.8rem;
+  color: var(--p-surface-600);
+}
+
 @media (max-width: 768px) {
   .tp-def-form {
     grid-template-columns: 1fr;
