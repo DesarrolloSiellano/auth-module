@@ -117,12 +117,264 @@
   font-style: italic;
 }
 
-.tp-usage-block {
+.tp-period-select {
+  min-width: 12rem;
+}
+
+.tp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
   margin-bottom: 1.25rem;
+}
+
+.tp-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #fff;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  .tp-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 12px;
+    background: rgba(94, 122, 244, 0.14);
+    color: #4054c7;
+    font-size: 1.1rem;
+
+    &--alt {
+      background: rgba(217, 119, 6, 0.14);
+      color: #b45309;
+    }
+
+    &--info {
+      background: rgba(14, 116, 144, 0.14);
+      color: #0e7490;
+    }
+  }
+
+  .tp-card-label {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--p-surface-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .tp-card-value {
+    margin: 0.15rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--p-surface-800);
+
+    &--sm {
+      font-size: 1.05rem;
+    }
+  }
+}
+
+.tp-panels {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tp-panel {
+  background: #fff;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  min-width: 0;
 
   h4 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.85rem;
+    font-size: 0.98rem;
+    font-weight: 700;
     color: var(--p-surface-700);
+    display: flex;
+    align-items: center;
+  }
+
+  &--full {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+.tp-quota-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.15rem;
+
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+
+  .tp-quota-bar {
+    padding: 0.35rem 0;
+  }
+
+  .tp-quota-bar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.75rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .tp-quota-label {
+    color: var(--p-surface-600);
+  }
+
+  .tp-quota-value {
+    font-weight: 600;
+    color: var(--p-surface-800);
+    font-size: 0.78rem;
+
+    small {
+      font-weight: 400;
+      color: var(--p-surface-400);
+      margin-left: 0.15rem;
+    }
+  }
+}
+
+.tp-metric-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin-bottom: 0.85rem;
+  }
+
+  .tp-metric-bar-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--p-surface-600);
+    margin-bottom: 0.3rem;
+
+    span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    strong {
+      color: var(--p-surface-800);
+      white-space: nowrap;
+    }
+  }
+
+  .tp-metric-bar-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--p-surface-100);
+    overflow: hidden;
+  }
+
+  .tp-metric-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #5e7af4, #7c93f7);
+    transition: width 0.4s ease;
+  }
+}
+
+@media (max-width: 991px) {
+  .tp-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+:host ::ng-deep {
+  .p-progressbar.quota-progress {
+    height: 0.3rem;
+    min-height: 0.3rem;
+    border-radius: 999px;
+    background: var(--p-surface-100);
+    overflow: hidden;
+  }
+
+  .quota-progress .p-progressbar-value {
+    border-radius: 999px;
+    background: linear-gradient(90deg, #5e7af4, #7c93f7);
+    transition: width 0.4s ease, background 0.3s ease;
+  }
+
+  .quota-progress--unlimited .p-progressbar-value {
+    background: linear-gradient(90deg, #34d399, #10b981);
+  }
+
+  .quota-progress--warn .p-progressbar-value {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  }
+
+  .quota-progress--danger .p-progressbar-value {
+    background: linear-gradient(90deg, #f87171, #dc2626);
+  }
+}
+
+@media (max-width: 767.98px) {
+  :host ::ng-deep .tp-table {
+    .p-datatable-table-container {
+      overflow-x: visible;
+    }
+
+    .p-datatable-table {
+      min-width: 0 !important;
+      width: 100%;
+    }
+
+    .p-datatable-thead {
+      display: none;
+    }
+
+    .p-datatable-tbody > tr {
+      display: block;
+      border: 1px solid var(--p-surface-100);
+      border-radius: 12px;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 0.6rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .p-datatable-tbody > tr > td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border: none;
+      padding: 0.15rem 0;
+      text-align: right;
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--p-surface-500);
+        text-align: left;
+      }
+    }
   }
 }
 

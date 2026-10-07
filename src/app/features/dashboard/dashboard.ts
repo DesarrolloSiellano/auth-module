@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
 import { ProgressBar } from 'primeng/progressbar';
 
 import { SessionStore } from '../../core/services/session.store';
@@ -20,6 +21,15 @@ import {
   TenantConfig,
   TenantUsage,
 } from '../tenant-config/interfaces/tenant-config.interface';
+import {
+  buildQuotaBars,
+  buildUsagePeriods,
+  currentPeriod,
+  flattenMetrics,
+  toQuotaItems,
+  PolicyItem,
+  QuotaBar,
+} from '../tenant-config/helpers/usage.helper';
 
 interface UsageRow {
   period: string;
@@ -32,45 +42,6 @@ interface MetricTotal {
   value: number;
 }
 
-interface PolicyItem {
-  key: string;
-  label: string;
-  value: unknown;
-  unit?: string;
-}
-
-type QuotaState = 'ok' | 'warn' | 'danger' | 'unlimited';
-
-interface QuotaBar {
-  key: string;
-  label: string;
-  limit: number;
-  used: number;
-  unit?: string;
-  metric: string;
-  unlimited: boolean;
-  exceeded: boolean;
-  percent: number;
-  state: QuotaState;
-}
-
-/**
- * Mapea cada política de cuota con la métrica de uso reportada que la
- * consume (mismo criterio que el reporte "Uso vs cuotas").
- */
-const QUOTA_USAGE_MAP: Record<string, string> = {
-  'channels.sms.monthlyLimit': 'sms.sent',
-  'channels.audio.monthlyLimit': 'audio.sent',
-  'channels.email.monthlyLimit': 'email.sent',
-  'channels.whatsapp.monthlyLimit': 'whatsapp.sent',
-  'messages.texto.limit': 'sms.sent',
-  'messages.audio.limit': 'audio.sent',
-  'messages.bolsa.utilidad': 'whatsapp.utilidad',
-  'messages.bolsa.marketingComercial': 'whatsapp.marketingComercial',
-  'messages.bolsa.autenticacion': 'whatsapp.autenticacion',
-  'messages.bolsa.servicio': 'whatsapp.servicio',
-};
-
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -78,7 +49,7 @@ const QUOTA_USAGE_MAP: Record<string, string> = {
     FormsModule,
     TableModule,
     Button,
-    InputText,
+    Select,
     ProgressBar,
   ],
   templateUrl: './dashboard.html',
@@ -93,6 +64,7 @@ export class DashboardComponent implements OnInit {
   company = '';
   tenantId = '';
   period = '';
+  usagePeriods: string[] = [];
   loading = false;
 
   catalog: PolicyDefinition[] = [];
@@ -104,14 +76,13 @@ export class DashboardComponent implements OnInit {
     const claims = this.session.getClaims();
     this.company = claims?.company ?? '';
     this.tenantId = claims?.tenantId ?? claims?.company ?? '';
-    this.period = new Date().toISOString().slice(0, 7);
     this.loadAll();
   }
 
   loadAll(): void {
     this.loadCatalog();
     this.loadConfig();
-    this.loadUsage();
+    this.loadUsagePeriods();
   }
 
   loadCatalog(): void {
@@ -165,6 +136,25 @@ export class DashboardComponent implements OnInit {
     return out;
   }
 
+  /** Períodos existentes con consumo; mes actual como fallback. */
+  loadUsagePeriods(): void {
+    if (!this.tenantId) return;
+    this.tenantConfigService
+      .listUsagePeriods(this.tenantId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const existing = buildUsagePeriods(res.data || []);
+          this.usagePeriods = existing.length ? existing : [currentPeriod()];
+          if (!this.usagePeriods.includes(this.period)) {
+            this.period = this.usagePeriods[0];
+          }
+          this.loadUsage();
+        },
+        error: () => this.loadUsage(),
+      });
+  }
+
   loadUsage(): void {
     if (!this.tenantId) return;
     this.loading = true;
@@ -213,20 +203,7 @@ export class DashboardComponent implements OnInit {
 
   /** Límites y cuotas configurados (canales, mensajería y límites). */
   get quotas(): PolicyItem[] {
-    return this.catalog
-      .filter(
-        (def) =>
-          (def.key.startsWith('channels.') &&
-            def.key.endsWith('.monthlyLimit')) ||
-          def.key.startsWith('messages.') ||
-          def.key.startsWith('limits.'),
-      )
-      .map((def) => ({
-        key: def.key,
-        label: def.label,
-        value: this.configValues[def.key],
-        unit: def.unit,
-      }));
+    return toQuotaItems(this.catalog, this.configValues);
   }
 
   get usedByMetric(): Map<string, number> {
@@ -237,47 +214,15 @@ export class DashboardComponent implements OnInit {
 
   /** Cuotas numéricas con su barra de carga (uso vs límite). */
   get quotaBars(): QuotaBar[] {
-    const used = this.usedByMetric;
-    // `limits.trialDays` tiene su propia card de prueba en el dashboard.
-    return this.quotas
-      .filter((quota) => quota.key !== 'limits.trialDays')
-      .map((quota) => {
-      const limit = Number(quota.value) || 0;
-      const unlimited = limit <= 0;
-      const metric = QUOTA_USAGE_MAP[quota.key] || '';
-      const usedValue = metric ? used.get(metric) || 0 : 0;
-      const percent = unlimited
-        ? 100
-        : Math.min(100, Math.round((usedValue / limit) * 100));
-      const exceeded = !unlimited && usedValue > limit;
-      const state: QuotaState = unlimited
-        ? 'unlimited'
-        : exceeded || percent >= 90
-          ? 'danger'
-          : percent >= 80
-            ? 'warn'
-            : 'ok';
-      return {
-        key: quota.key,
-        label: quota.label,
-        limit,
-        used: usedValue,
-        unit: quota.unit,
-        metric,
-        unlimited,
-        exceeded,
-        percent,
-        state,
-      };
-    });
+    return buildQuotaBars(this.quotas, this.usedByMetric);
   }
 
   get rows(): UsageRow[] {
     return this.usage.flatMap((item) =>
-      Object.entries(item.metrics || {}).map(([metric, value]) => ({
+      Object.entries(flattenMetrics(item.metrics)).map(([metric, value]) => ({
         period: item.period,
         metric,
-        value: Number(value) || 0,
+        value,
       })),
     );
   }

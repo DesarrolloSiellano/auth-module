@@ -18,6 +18,7 @@ describe('DashboardComponent', () => {
       'getCatalog',
       'getMyConfig',
       'getUsage',
+      'listUsagePeriods',
     ]);
     tenantServiceMock.getCatalog.and.returnValue(
       of({
@@ -73,6 +74,10 @@ describe('DashboardComponent', () => {
       } as any),
     );
 
+    tenantServiceMock.listUsagePeriods.and.returnValue(
+      of({ data: ['2026-09'], meta: { totalData: 1 } } as any),
+    );
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
@@ -97,6 +102,11 @@ describe('DashboardComponent', () => {
   it('toma la compañía y tenant del usuario', () => {
     expect(component.company).toBe('BPONET');
     expect(component.tenantId).toBe('0000000');
+  });
+
+  it('lista solo los períodos existentes', () => {
+    expect(component.usagePeriods).toEqual(['2026-09']);
+    expect(component.period).toBe('2026-09');
   });
 
   it('marca las políticas activas de la compañía', () => {

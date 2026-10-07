@@ -99,4 +99,11 @@ export class TenantConfigService {
       `${this.base}/usage/${encodeURIComponent(tenantId)}${query}`,
     );
   }
+
+  /** Períodos con consumo del tenant (último año), solo los existentes. */
+  listUsagePeriods(tenantId: string): Observable<Response<string[]>> {
+    return this.http.get<Response<string[]>>(
+      `${this.base}/usage/${encodeURIComponent(tenantId)}/periods`,
+    );
+  }
 }

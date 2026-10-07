@@ -56,6 +56,10 @@
     :is(input, p-select, p-datepicker) {
       max-width: 100%;
     }
+
+    .dash-period-select {
+      min-width: 12rem;
+    }
   }
 
   // Card ancha y visible del período de prueba
