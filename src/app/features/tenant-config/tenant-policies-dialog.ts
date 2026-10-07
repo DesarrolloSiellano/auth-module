@@ -37,9 +37,8 @@ interface PolicyGroup {
 }
 
 /**
- * Políticas de bolsas de mensajes que solo aplican cuando la plataforma provee
- * el API de WhatsApp (`channels.whatsapp.enabled = true`). Con BYO (false) se
- * deshabilitan en la UI.
+ * Políticas de bolsas de mensajes de WhatsApp. Aplican a las conexiones por
+ * API (BYO) con credenciales propias del tenant.
  */
 const WHATSAPP_MESSAGE_POLICY_KEYS = [
   'messages.bolsa.utilidad',
@@ -202,16 +201,6 @@ export class TenantPoliciesDialogComponent implements OnChanges {
           this.cdr.detectChanges();
         },
       });
-  }
-
-  /** `channels.whatsapp.enabled`: la plataforma provee el API. */
-  get whatsappPlatformEnabled(): boolean {
-    return this.configValues['channels.whatsapp.enabled'] === true;
-  }
-
-  /** Deshabilita las bolsas de mensajes cuando el API de plataforma está off. */
-  isPolicyDisabled(key: string): boolean {
-    return WHATSAPP_MESSAGE_POLICY_KEYS.includes(key) && !this.whatsappPlatformEnabled;
   }
 
   get globalBagValue(): number {

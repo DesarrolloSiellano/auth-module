@@ -33,7 +33,7 @@
                   <i class="pi pi-circle-fill"></i>
                   <span>{{ group.group }}</span>
                 </header>
-                @if (group.group === 'messages' && whatsappPlatformEnabled) {
+                @if (group.group === 'messages') {
                   <div class="tp-hint">
                     @if (globalBagValue > 0) {
                       Bolsas: {{ bagsSum }} / WhatsApp por mes: {{ globalBagValue }} — deben ser iguales.
@@ -56,21 +56,21 @@
                         @case ('number') {
                           <p-inputNumber [inputId]="'tp-' + item.key" [ngModel]="configValues[item.key]"
                             (ngModelChange)="onPolicyValueChange(item.key, $event)"
-                            [min]="item.min ?? 0" [disabled]="isPolicyDisabled(item.key)" styleClass="w-full" />
+                            [min]="item.min ?? 0" styleClass="w-full" />
                         }
                         @case ('select') {
                           <p-select [inputId]="'tp-' + item.key" [options]="item.options || []"
                             optionLabel="label" optionValue="value" [(ngModel)]="configValues[item.key]"
-                            [disabled]="isPolicyDisabled(item.key)" appendTo="body" />
+                            appendTo="body" />
                         }
                         @case ('json') {
                           <textarea pTextarea [id]="'tp-' + item.key" rows="2"
-                            [disabled]="isPolicyDisabled(item.key)"
+                           
                             [(ngModel)]="configValues[item.key]"></textarea>
                         }
                         @default {
                           <input pInputText [id]="'tp-' + item.key" [(ngModel)]="configValues[item.key]"
-                            [disabled]="isPolicyDisabled(item.key)" />
+                            />
                         }
                       }
                     </div>
