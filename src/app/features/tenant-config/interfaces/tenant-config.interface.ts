@@ -32,10 +32,3 @@ export interface TenantConfig {
   values?: Record<string, unknown>;
   [key: string]: unknown;
 }
-
-export interface TenantUsage {
-  _id?: string;
-  tenantId: string;
-  period: string;
-  metrics: Record<string, number>;
-}

@@ -181,4 +181,21 @@ describe('FormTemplateComponent', () => {
 
     expect(component.formGroup.get('name')?.value).toBeFalsy();
   });
+
+  it('deshabilita los campos disabledOnEdit solo en edición', () => {
+    fixture.componentRef.setInput('form', [
+      { name: 'name', label: 'Nombre', type: 'text', show: true, weight: 1, disabledOnEdit: true },
+      { name: 'email', label: 'Email', type: 'text', show: true, weight: 2 },
+    ] as FormFieldConfig[]);
+    fixture.componentRef.setInput('isEdit', true);
+    fixture.detectChanges();
+
+    expect(component.formGroup.get('name')?.disabled).toBe(true);
+    expect(component.formGroup.get('email')?.enabled).toBe(true);
+
+    fixture.componentRef.setInput('isEdit', false);
+    fixture.detectChanges();
+
+    expect(component.formGroup.get('name')?.enabled).toBe(true);
+  });
 });

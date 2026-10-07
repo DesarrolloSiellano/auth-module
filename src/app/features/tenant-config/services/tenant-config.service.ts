@@ -7,7 +7,6 @@ import { Response } from '../../../shared/interfaces/response.interface';
 import {
   PolicyDefinition,
   TenantConfig,
-  TenantUsage,
 } from '../interfaces/tenant-config.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -80,30 +79,6 @@ export class TenantConfigService {
     return this.http.patch<Response<TenantConfig>>(
       `${this.base}/config/${encodeURIComponent(tenantId)}/values`,
       { values },
-    );
-  }
-
-  listUsage(period?: string): Observable<Response<TenantUsage[]>> {
-    const query = period ? `?period=${encodeURIComponent(period)}` : '';
-    return this.http.get<Response<TenantUsage[]>>(
-      `${this.base}/usage${query}`,
-    );
-  }
-
-  getUsage(
-    tenantId: string,
-    period?: string,
-  ): Observable<Response<TenantUsage[]>> {
-    const query = period ? `?period=${encodeURIComponent(period)}` : '';
-    return this.http.get<Response<TenantUsage[]>>(
-      `${this.base}/usage/${encodeURIComponent(tenantId)}${query}`,
-    );
-  }
-
-  /** Períodos con consumo del tenant (último año), solo los existentes. */
-  listUsagePeriods(tenantId: string): Observable<Response<string[]>> {
-    return this.http.get<Response<string[]>>(
-      `${this.base}/usage/${encodeURIComponent(tenantId)}/periods`,
     );
   }
 }
