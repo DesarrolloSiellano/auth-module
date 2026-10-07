@@ -12,7 +12,8 @@
     </div>
 
     <div class="dash-filters">
-      <input pInputText placeholder="Período (YYYY-MM)" [(ngModel)]="period" />
+      <p-select [options]="usagePeriods" [(ngModel)]="period" placeholder="Período (YYYY-MM)"
+        appendTo="body" styleClass="dash-period-select" />
       <p-button label="Consultar" icon="pi pi-search" (click)="loadUsage()" [loading]="loading" />
     </div>
   </div>
