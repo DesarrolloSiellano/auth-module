@@ -75,7 +75,6 @@ export class CompaniesComponent extends BaseCrud<Companies> {
   protected override form = COMPANIES_FORM;
 
   policiesDialogVisible = false;
-  policiesDialogTab: 'policies' | 'usage' = 'policies';
   selectedCompanyForPolicies: Companies | null = null;
 
   blockDialogVisible = false;
@@ -148,7 +147,6 @@ export class CompaniesComponent extends BaseCrud<Companies> {
     }
 
     this.selectedCompanyForPolicies = company;
-    this.policiesDialogTab = 'policies';
     this.policiesDialogVisible = true;
     this.cdr.detectChanges();
   }

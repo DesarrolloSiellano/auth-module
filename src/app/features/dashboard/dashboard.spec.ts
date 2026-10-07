@@ -17,8 +17,6 @@ describe('DashboardComponent', () => {
     tenantServiceMock = jasmine.createSpyObj('TenantConfigService', [
       'getCatalog',
       'getMyConfig',
-      'getUsage',
-      'listUsagePeriods',
     ]);
     tenantServiceMock.getCatalog.and.returnValue(
       of({
@@ -45,8 +43,15 @@ describe('DashboardComponent', () => {
             defaultValue: 3000,
             unit: 'mensajes/mes',
           },
+          {
+            key: 'general.timezone',
+            label: 'Zona horaria',
+            group: 'general',
+            type: 'select',
+            defaultValue: 'America/Bogota',
+          },
         ],
-        meta: { totalData: 3 },
+        meta: { totalData: 4 },
       } as any),
     );
     tenantServiceMock.getMyConfig.and.returnValue(
@@ -60,22 +65,6 @@ describe('DashboardComponent', () => {
         },
         meta: { totalData: 1 },
       } as any),
-    );
-    tenantServiceMock.getUsage.and.returnValue(
-      of({
-        data: [
-          {
-            tenantId: '0000000',
-            period: '2026-09',
-            metrics: { 'sms.sent': 10, 'audio.sent': 5 },
-          },
-        ],
-        meta: { totalData: 1 },
-      } as any),
-    );
-
-    tenantServiceMock.listUsagePeriods.and.returnValue(
-      of({ data: ['2026-09'], meta: { totalData: 1 } } as any),
     );
 
     await TestBed.configureTestingModule({
@@ -104,11 +93,6 @@ describe('DashboardComponent', () => {
     expect(component.tenantId).toBe('0000000');
   });
 
-  it('lista solo los períodos existentes', () => {
-    expect(component.usagePeriods).toEqual(['2026-09']);
-    expect(component.period).toBe('2026-09');
-  });
-
   it('marca las políticas activas de la compañía', () => {
     expect(component.activeFeatures.length).toBe(1);
     expect(component.activeFeatures[0].label).toBe('PBX');
@@ -119,40 +103,16 @@ describe('DashboardComponent', () => {
     expect(keys).toContain('channels.sms.monthlyLimit');
   });
 
-  it('calcula totales y barras por métrica', () => {
-    expect(component.totalUsage).toBe(15);
-    expect(component.totalsByMetric[0].metric).toBe('sms.sent');
-    expect(component.barWidth(10)).toBe('100%');
+  it('expone la información general del tenant', () => {
+    expect(component.generalInfo.map((i) => i.key)).toContain('general.timezone');
+  });
+
+  it('resume el catálogo por grupo', () => {
+    expect(component.catalogSummary.map((g) => g.group)).toContain('channels');
   });
 
   it('no muestra la barra de prueba si el usuario no es de prueba', () => {
     expect(component.isTrialUser).toBe(false);
-  });
-
-  it('excluye Días de prueba de "Consumo vs límites"', () => {
-    component.catalog = [
-      {
-        key: 'limits.trialDays',
-        label: 'Días de prueba',
-        group: 'limits',
-        type: 'number',
-        defaultValue: 7,
-      },
-      {
-        key: 'limits.maxUsers',
-        label: 'Máx. usuarios',
-        group: 'limits',
-        type: 'number',
-        defaultValue: 10,
-      },
-    ] as any;
-    component.configValues = { 'limits.trialDays': 7, 'limits.maxUsers': 10 };
-
-    expect(component.quotas.map((q) => q.key)).toContain('limits.trialDays');
-    expect(component.quotaBars.map((q) => q.key)).not.toContain(
-      'limits.trialDays',
-    );
-    expect(component.quotaBars.map((q) => q.key)).toContain('limits.maxUsers');
   });
 
   it('calcula días, porcentaje y color de la prueba según la config del tenant', () => {

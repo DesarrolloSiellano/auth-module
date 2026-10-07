@@ -25,6 +25,8 @@ export interface FormFieldConfig {
   minLength?: string;
   weight?: number;
   disabled?: boolean;
+  /** Si es `true`, el campo se deshabilita en modo edición (no editable). */
+  disabledOnEdit?: boolean;
   placeholder?: string;
   pKeyFilter?: RegExp | KeyFilterPattern;
   pattern?: string | RegExp;

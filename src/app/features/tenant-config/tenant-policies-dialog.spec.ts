@@ -17,8 +17,6 @@ describe('TenantPoliciesDialogComponent', () => {
       'getCatalog',
       'getConfigByTenant',
       'upsertConfig',
-      'getUsage',
-      'listUsagePeriods',
     ]);
     tenantServiceMock.getCatalog.and.returnValue(
       of({
@@ -51,21 +49,6 @@ describe('TenantPoliciesDialogComponent', () => {
         },
         meta: { totalData: 1 },
       } as any),
-    );
-    tenantServiceMock.getUsage.and.returnValue(
-      of({
-        data: [
-          {
-            tenantId: '0000000',
-            period: '2026-09',
-            metrics: { 'sms.sent': 5 },
-          },
-        ],
-        meta: { totalData: 1 },
-      } as any),
-    );
-    tenantServiceMock.listUsagePeriods.and.returnValue(
-      of({ data: ['2026-09'], meta: { totalData: 1 } } as any),
     );
 
     await TestBed.configureTestingModule({
@@ -115,35 +98,5 @@ describe('TenantPoliciesDialogComponent', () => {
       company: 'BPONET',
       values: { 'features.pbx': false },
     });
-  });
-
-  it('mapea las métricas de uso a filas', () => {
-    const rows = component.usageRows({
-      tenantId: '0000000',
-      period: '2026-09',
-      metrics: { 'sms.sent': 3, 'audio.sent': 2 },
-    } as any);
-
-    expect(rows.length).toBe(2);
-    expect(rows[0].metric).toBe('sms.sent');
-    expect(rows[0].value).toBe(3);
-  });
-
-  it('aplana métricas anidadas (evita [object Object])', () => {
-    const rows = component.usageRows({
-      tenantId: '0000000',
-      period: '2026-09',
-      metrics: { whatsapp: { sent: 7 } },
-    } as any);
-
-    expect(rows).toEqual([{ metric: 'whatsapp.sent', value: 7 }]);
-  });
-
-  it('carga solo los períodos existentes', () => {
-    component.visible = true;
-    component.ngOnChanges({ visible: { currentValue: true } } as any);
-
-    expect(component.usagePeriods).toEqual(['2026-09']);
-    expect(component.usagePeriod).toBe('2026-09');
   });
 });
