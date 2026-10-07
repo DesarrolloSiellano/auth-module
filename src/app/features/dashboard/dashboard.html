@@ -1,20 +1,14 @@
 <div class="content dashboard">
   <div class="dash-header">
     <div class="dash-title">
-      <span class="dash-icon"><i class="pi pi-chart-line"></i></span>
+      <span class="dash-icon"><i class="pi pi-shield"></i></span>
       <div>
-        <h2>Dashboard de uso</h2>
+        <h2>Políticas de la empresa</h2>
         <p>
           {{ company || 'Mi compañía' }}
           @if (tenantId) { <span class="dash-tenant">· Tenant {{ tenantId }}</span> }
         </p>
       </div>
-    </div>
-
-    <div class="dash-filters">
-      <p-select [options]="usagePeriods" [(ngModel)]="period" placeholder="Período (YYYY-MM)"
-        appendTo="body" styleClass="dash-period-select" />
-      <p-button label="Consultar" icon="pi pi-search" (click)="loadUsage()" [loading]="loading" />
     </div>
   </div>
 
@@ -47,36 +41,36 @@
   <!-- Resumen -->
   <div class="dash-cards">
     <div class="dash-card">
-      <span class="dash-card-icon"><i class="pi pi-send"></i></span>
-      <div>
-        <p class="dash-card-label">Consumo total</p>
-        <p class="dash-card-value">{{ totalUsage }}</p>
-      </div>
-    </div>
-    <div class="dash-card">
-      <span class="dash-card-icon dash-card-icon--alt"><i class="pi pi-tags"></i></span>
-      <div>
-        <p class="dash-card-label">Métricas activas</p>
-        <p class="dash-card-value">{{ activeMetrics }}</p>
-      </div>
-    </div>
-    <div class="dash-card">
-      <span class="dash-card-icon dash-card-icon--ok"><i class="pi pi-star"></i></span>
+      <span class="dash-card-icon"><i class="pi pi-star"></i></span>
       <div>
         <p class="dash-card-label">Políticas activas</p>
         <p class="dash-card-value">{{ activeFeatures.length }}</p>
       </div>
     </div>
     <div class="dash-card">
-      <span class="dash-card-icon dash-card-icon--info"><i class="pi pi-calendar"></i></span>
+      <span class="dash-card-icon dash-card-icon--alt"><i class="pi pi-send"></i></span>
       <div>
-        <p class="dash-card-label">Período</p>
-        <p class="dash-card-value dash-card-value--sm">{{ period || 'Todos' }}</p>
+        <p class="dash-card-label">Canales habilitados</p>
+        <p class="dash-card-value">{{ enabledChannels.length }}</p>
+      </div>
+    </div>
+    <div class="dash-card">
+      <span class="dash-card-icon dash-card-icon--ok"><i class="pi pi-sliders-h"></i></span>
+      <div>
+        <p class="dash-card-label">Límites configurados</p>
+        <p class="dash-card-value">{{ quotas.length }}</p>
+      </div>
+    </div>
+    <div class="dash-card">
+      <span class="dash-card-icon dash-card-icon--info"><i class="pi pi-list"></i></span>
+      <div>
+        <p class="dash-card-label">Catálogo</p>
+        <p class="dash-card-value">{{ catalog.length }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Políticas activas + límites (layout original) -->
+  <!-- Políticas activas + límites -->
   <div class="dash-panels">
     <section class="dash-panel">
       <h3><i class="pi pi-verified mr-2"></i> Políticas activas para tu compañía</h3>
@@ -124,80 +118,36 @@
     </section>
   </div>
 
-  <!-- Consumo vs límites (card propio, barras delgadas) -->
-  <section class="dash-panel dash-panel--full">
-    <h3><i class="pi pi-chart-bar mr-2"></i> Consumo vs límites</h3>
-
-    @if (quotaBars.length === 0) {
-      <div class="dash-empty">Sin límites configurados.</div>
-    } @else {
-      <ul class="quota-bars">
-        @for (quota of quotaBars; track quota.key) {
-          <li class="quota-bar">
-            <div class="quota-bar-head">
-              <span class="quota-label">{{ quota.label }}</span>
-              <span class="quota-value">
-                @if (quota.unlimited) {
-                  Ilimitado · 100%
-                } @else if (quota.metric) {
-                  <strong>{{ quota.used }}</strong> / {{ quota.limit }}
-                  @if (quota.unit) { <small>{{ quota.unit }}</small> }
-                  · {{ quota.percent }}%
-                } @else {
-                  {{ quota.limit }}
-                  @if (quota.unit) { <small>{{ quota.unit }}</small> }
-                }
-              </span>
-            </div>
-            <p-progressBar [value]="quota.percent" [showValue]="false"
-              [styleClass]="'quota-progress quota-progress--' + quota.state" />
-          </li>
-        }
-      </ul>
-    }
-  </section>
-
-  <!-- Uso -->
-  <div class="dash-panels dash-panels--usage">
+  <!-- General + resumen del catálogo -->
+  <div class="dash-panels">
     <section class="dash-panel">
-      <h3><i class="pi pi-list mr-2"></i> Detalle por métrica</h3>
-      <p-table [value]="rows" styleClass="p-datatable-sm dash-table" [paginator]="true" [rows]="10"
-        [scrollable]="true" [tableStyle]="{ 'min-width': '32rem' }">
-        <ng-template #rowsHeader pTemplate="header">
-          <tr>
-            <th>Período</th>
-            <th>Métrica</th>
-            <th style="width: 10rem">Consumo</th>
-          </tr>
-        </ng-template>
-        <ng-template #rowsBody pTemplate="body" let-row>
-          <tr>
-            <td [attr.data-label]="'Período'">{{ row.period }}</td>
-            <td [attr.data-label]="'Métrica'">{{ row.metric }}</td>
-            <td [attr.data-label]="'Consumo'"><strong>{{ row.value }}</strong></td>
-          </tr>
-        </ng-template>
-        <ng-template #rowsEmpty pTemplate="emptymessage">
-          <tr><td colspan="3">Sin consumo registrado para el período.</td></tr>
-        </ng-template>
-      </p-table>
+      <h3><i class="pi pi-globe mr-2"></i> General</h3>
+
+      @if (generalInfo.length === 0) {
+        <div class="dash-empty">Sin preferencias generales.</div>
+      } @else {
+        <ul class="quota-list">
+          @for (item of generalInfo; track item.key) {
+            <li>
+              <span class="quota-label">{{ item.label }}</span>
+              <span class="quota-value">{{ item.value }}</span>
+            </li>
+          }
+        </ul>
+      }
     </section>
 
     <section class="dash-panel">
-      <h3><i class="pi pi-chart-bar mr-2"></i> Totales por métrica</h3>
-      @if (totalsByMetric.length === 0) {
-        <div class="dash-empty">Sin datos.</div>
+      <h3><i class="pi pi-th-large mr-2"></i> Resumen del catálogo</h3>
+
+      @if (catalogSummary.length === 0) {
+        <div class="dash-empty">Sin catálogo.</div>
       } @else {
-        <ul class="metric-bars">
-          @for (item of totalsByMetric; track item.metric) {
+        <ul class="quota-list">
+          @for (group of catalogSummary; track group.group) {
             <li>
-              <div class="metric-bar-head">
-                <span>{{ item.metric }}</span>
-                <strong>{{ item.value }}</strong>
-              </div>
-              <div class="metric-bar-track">
-                <div class="metric-bar-fill" [style.width]="barWidth(item.value)"></div>
-              </div>
+              <span class="quota-label">{{ group.group }}</span>
+              <span class="quota-value">{{ group.count }}</span>
             </li>
           }
         </ul>

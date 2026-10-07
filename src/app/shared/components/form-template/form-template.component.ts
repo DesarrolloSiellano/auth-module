@@ -81,11 +81,14 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       const data = this.initialData();
-      if (data && this.formGroup) {
-        this.formGroup.patchValue(data);
+      const isEdit = this.isEdit();
+      if (!this.formGroup) return;
+      if (data) {
+        this.formGroup.patchValue(data as object);
         this.updateFieldStateDisabled();
         this.updateFieldStatesDisabledByDepends();
       }
+      this.applyDisabledOnEdit(isEdit);
     });
   }
 
@@ -161,10 +164,26 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
     });
     this.updateFieldStatesDisabledByDepends();
     this.updateFieldStateDisabled();
+    this.applyDisabledOnEdit();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  /** Deshabilita en edición los campos marcados como `disabledOnEdit`. */
+  private applyDisabledOnEdit(isEdit = this.isEdit()): void {
+    if (!this.formGroup) return;
+    this.fields.forEach((item) => {
+      if (!item.disabledOnEdit) return;
+      const control = this.formGroup.get(item.name);
+      if (!control) return;
+      if (isEdit) {
+        control.disable({ emitEvent: false });
+      } else {
+        control.enable({ emitEvent: false });
+      }
+    });
   }
 
   get passwordMismatch(): boolean {

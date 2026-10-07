@@ -7,11 +7,6 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
-import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { Select } from 'primeng/select';
 import { ProgressBar } from 'primeng/progressbar';
 
 import { SessionStore } from '../../core/services/session.store';
@@ -19,39 +14,12 @@ import { TenantConfigService } from '../tenant-config/services/tenant-config.ser
 import {
   PolicyDefinition,
   TenantConfig,
-  TenantUsage,
 } from '../tenant-config/interfaces/tenant-config.interface';
-import {
-  buildQuotaBars,
-  buildUsagePeriods,
-  currentPeriod,
-  flattenMetrics,
-  toQuotaItems,
-  PolicyItem,
-  QuotaBar,
-} from '../tenant-config/helpers/usage.helper';
-
-interface UsageRow {
-  period: string;
-  metric: string;
-  value: number;
-}
-
-interface MetricTotal {
-  metric: string;
-  value: number;
-}
+import { PolicyItem, toQuotaItems } from '../tenant-config/helpers/usage.helper';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    Button,
-    Select,
-    ProgressBar,
-  ],
+  imports: [CommonModule, ProgressBar],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -63,26 +31,17 @@ export class DashboardComponent implements OnInit {
 
   company = '';
   tenantId = '';
-  period = '';
-  usagePeriods: string[] = [];
-  loading = false;
 
   catalog: PolicyDefinition[] = [];
   config: TenantConfig | null = null;
   configValues: Record<string, any> = {};
-  usage: TenantUsage[] = [];
 
   ngOnInit(): void {
     const claims = this.session.getClaims();
     this.company = claims?.company ?? '';
     this.tenantId = claims?.tenantId ?? claims?.company ?? '';
-    this.loadAll();
-  }
-
-  loadAll(): void {
     this.loadCatalog();
     this.loadConfig();
-    this.loadUsagePeriods();
   }
 
   loadCatalog(): void {
@@ -90,12 +49,12 @@ export class DashboardComponent implements OnInit {
       .getCatalog(true)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: (res) => {
-        this.catalog = res.data || [];
-        this.cdr.detectChanges();
-      },
-      error: () => this.cdr.detectChanges(),
-    });
+        next: (res) => {
+          this.catalog = res.data || [];
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges(),
+      });
   }
 
   loadConfig(): void {
@@ -105,9 +64,8 @@ export class DashboardComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.config = res.data;
-          // El backend devuelve la config ANIDADA
-          // (p.ej. channels.sms.monthlyLimit); se aplana a las claves de
-          // política para que el dashboard sea dinámico.
+          // El backend devuelve la config ANIDADA (p.ej. channels.sms.monthlyLimit);
+          // se aplana a las claves de política para que el dashboard sea dinámico.
           const values: Record<string, any> = {};
           this.catalog.forEach((def) => {
             values[def.key] = def.defaultValue;
@@ -136,44 +94,6 @@ export class DashboardComponent implements OnInit {
     return out;
   }
 
-  /** Períodos existentes con consumo; mes actual como fallback. */
-  loadUsagePeriods(): void {
-    if (!this.tenantId) return;
-    this.tenantConfigService
-      .listUsagePeriods(this.tenantId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          const existing = buildUsagePeriods(res.data || []);
-          this.usagePeriods = existing.length ? existing : [currentPeriod()];
-          if (!this.usagePeriods.includes(this.period)) {
-            this.period = this.usagePeriods[0];
-          }
-          this.loadUsage();
-        },
-        error: () => this.loadUsage(),
-      });
-  }
-
-  loadUsage(): void {
-    if (!this.tenantId) return;
-    this.loading = true;
-    this.tenantConfigService
-      .getUsage(this.tenantId, this.period || undefined)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.usage = res.data || [];
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-      });
-  }
-
   /** Políticas (features) activas para la compañía del usuario. */
   get activeFeatures(): PolicyItem[] {
     return this.catalog
@@ -195,7 +115,8 @@ export class DashboardComponent implements OnInit {
         key: def.key,
         label: def.label,
         value: this.configValues[def.key],
-      })).map((item) => ({
+      }))
+      .map((item) => ({
         ...item,
         label: item.label.replace(' habilitado', ''),
       }));
@@ -206,35 +127,31 @@ export class DashboardComponent implements OnInit {
     return toQuotaItems(this.catalog, this.configValues);
   }
 
-  get usedByMetric(): Map<string, number> {
+  /** Preferencias generales del tenant (zona horaria, idioma). */
+  get generalInfo(): PolicyItem[] {
+    return this.catalog
+      .filter((def) => def.key.startsWith('general.'))
+      .map((def) => ({
+        key: def.key,
+        label: def.label,
+        value: this.configValues[def.key],
+        unit: def.unit,
+      }));
+  }
+
+  /** Resumen del catálogo por grupo. */
+  get catalogSummary(): { group: string; count: number }[] {
     const map = new Map<string, number>();
-    this.totalsByMetric.forEach((item) => map.set(item.metric, item.value));
-    return map;
-  }
-
-  /** Cuotas numéricas con su barra de carga (uso vs límite). */
-  get quotaBars(): QuotaBar[] {
-    return buildQuotaBars(this.quotas, this.usedByMetric);
-  }
-
-  get rows(): UsageRow[] {
-    return this.usage.flatMap((item) =>
-      Object.entries(flattenMetrics(item.metrics)).map(([metric, value]) => ({
-        period: item.period,
-        metric,
-        value,
-      })),
-    );
-  }
-
-  get totalsByMetric(): MetricTotal[] {
-    const map = new Map<string, number>();
-    this.rows.forEach((row) => {
-      map.set(row.metric, (map.get(row.metric) || 0) + row.value);
+    this.catalog.forEach((def) => {
+      map.set(def.group, (map.get(def.group) || 0) + 1);
     });
     return Array.from(map.entries())
-      .map(([metric, value]) => ({ metric, value }))
-      .sort((a, b) => b.value - a.value);
+      .map(([group, count]) => ({ group, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  isUnlimited(value: unknown): boolean {
+    return Number(value) === 0;
   }
 
   // ---------------------------------------------------------------- Prueba
@@ -300,28 +217,5 @@ export class DashboardComponent implements OnInit {
     if (this.trialPercent >= 80) return 'danger';
     if (this.trialPercent >= 60) return 'warn';
     return 'ok';
-  }
-
-  get totalUsage(): number {
-    return this.rows.reduce((sum, row) => sum + row.value, 0);
-  }
-
-  get activeMetrics(): number {
-    return this.totalsByMetric.length;
-  }
-
-  get maxMetricTotal(): number {
-    const totals = this.totalsByMetric;
-    return totals.length > 0 ? totals[0].value : 0;
-  }
-
-  barWidth(value: number): string {
-    const max = this.maxMetricTotal;
-    if (!max) return '0%';
-    return `${Math.max(6, Math.round((value / max) * 100))}%`;
-  }
-
-  isUnlimited(value: unknown): boolean {
-    return Number(value) === 0;
   }
 }

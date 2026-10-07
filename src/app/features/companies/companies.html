@@ -19,8 +19,7 @@
     </ng-template>
   </p-dialog>
 
-  <app-tenant-policies-dialog [(visible)]="policiesDialogVisible" [company]="selectedCompanyForPolicies"
-    [initialTab]="policiesDialogTab" />
+  <app-tenant-policies-dialog [(visible)]="policiesDialogVisible" [company]="selectedCompanyForPolicies" />
 
   <p-dialog [(visible)]="blockDialogVisible" [style]="{width: '32rem'}" header="Bloquear compañía" [modal]="true"
     [draggable]="false" [resizable]="false" [baseZIndex]="10000">
