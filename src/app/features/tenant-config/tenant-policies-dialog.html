@@ -85,26 +85,111 @@
       <!-- Uso -->
       <p-tabpanel value="usage">
         <div class="tp-toolbar">
-          <input pInputText placeholder="Período (YYYY-MM)" [(ngModel)]="usagePeriod" />
+          <p-select [options]="usagePeriods" [(ngModel)]="usagePeriod"
+            placeholder="Período (YYYY-MM)" appendTo="body" styleClass="tp-period-select" />
           <p-button label="Consultar" icon="pi pi-search" (click)="loadUsage()" />
         </div>
 
         @if (usage.length === 0) {
           <div class="tp-empty">Sin datos de consumo. Selecciona un período y consulta.</div>
         } @else {
-          @for (item of usage; track item._id) {
-            <section class="tp-usage-block">
-              <h4><i class="pi pi-calendar mr-2"></i> Período {{ item.period }}</h4>
-              <p-table [value]="usageRows(item)" styleClass="p-datatable-sm">
+          <div class="tp-cards">
+            <div class="tp-card">
+              <span class="tp-card-icon"><i class="pi pi-send"></i></span>
+              <div>
+                <p class="tp-card-label">Consumo total</p>
+                <p class="tp-card-value">{{ totalUsage }}</p>
+              </div>
+            </div>
+            <div class="tp-card">
+              <span class="tp-card-icon tp-card-icon--alt"><i class="pi pi-tags"></i></span>
+              <div>
+                <p class="tp-card-label">Métricas activas</p>
+                <p class="tp-card-value">{{ activeMetrics }}</p>
+              </div>
+            </div>
+            <div class="tp-card">
+              <span class="tp-card-icon tp-card-icon--info"><i class="pi pi-calendar"></i></span>
+              <div>
+                <p class="tp-card-label">Período</p>
+                <p class="tp-card-value tp-card-value--sm">{{ usagePeriod || 'Todos' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <section class="tp-panel tp-panel--full">
+            <h4><i class="pi pi-chart-bar mr-2"></i> Consumo vs límites</h4>
+            @if (quotaBars.length === 0) {
+              <div class="tp-empty">Sin límites configurados.</div>
+            } @else {
+              <ul class="tp-quota-bars">
+                @for (quota of quotaBars; track quota.key) {
+                  <li class="tp-quota-bar">
+                    <div class="tp-quota-bar-head">
+                      <span class="tp-quota-label">{{ quota.label }}</span>
+                      <span class="tp-quota-value">
+                        @if (quota.unlimited) {
+                          Ilimitado · 100%
+                        } @else if (quota.metric) {
+                          <strong>{{ quota.used }}</strong> / {{ quota.limit }}
+                          @if (quota.unit) { <small>{{ quota.unit }}</small> }
+                          · {{ quota.percent }}%
+                        } @else {
+                          {{ quota.limit }}
+                          @if (quota.unit) { <small>{{ quota.unit }}</small> }
+                        }
+                      </span>
+                    </div>
+                    <p-progressBar [value]="quota.percent" [showValue]="false"
+                      [styleClass]="'quota-progress quota-progress--' + quota.state" />
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <div class="tp-panels">
+            <section class="tp-panel">
+              <h4><i class="pi pi-list mr-2"></i> Detalle por métrica</h4>
+              <p-table [value]="usageDetail" styleClass="p-datatable-sm tp-table" [paginator]="true"
+                [rows]="10" [scrollable]="true" [tableStyle]="{ 'min-width': '32rem' }">
                 <ng-template #usageHeader pTemplate="header">
-                  <tr><th>Métrica</th><th style="width: 12rem">Consumo</th></tr>
+                  <tr><th>Período</th><th>Métrica</th><th style="width: 10rem">Consumo</th></tr>
                 </ng-template>
                 <ng-template #usageBody pTemplate="body" let-row>
-                  <tr><td>{{ row.metric }}</td><td><strong>{{ row.value }}</strong></td></tr>
+                  <tr>
+                    <td [attr.data-label]="'Período'">{{ row.period }}</td>
+                    <td [attr.data-label]="'Métrica'">{{ row.metric }}</td>
+                    <td [attr.data-label]="'Consumo'"><strong>{{ row.value }}</strong></td>
+                  </tr>
+                </ng-template>
+                <ng-template #usageEmpty pTemplate="emptymessage">
+                  <tr><td colspan="3">Sin consumo registrado para el período.</td></tr>
                 </ng-template>
               </p-table>
             </section>
-          }
+
+            <section class="tp-panel">
+              <h4><i class="pi pi-chart-bar mr-2"></i> Totales por métrica</h4>
+              @if (usageTotals.length === 0) {
+                <div class="tp-empty">Sin datos.</div>
+              } @else {
+                <ul class="tp-metric-bars">
+                  @for (item of usageTotals; track item.metric) {
+                    <li>
+                      <div class="tp-metric-bar-head">
+                        <span>{{ item.metric }}</span>
+                        <strong>{{ item.value }}</strong>
+                      </div>
+                      <div class="tp-metric-bar-track">
+                        <div class="tp-metric-bar-fill" [style.width]="metricBarWidth(item.value)"></div>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          </div>
         }
       </p-tabpanel>
     </p-tabpanels>

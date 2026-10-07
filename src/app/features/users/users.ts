@@ -879,10 +879,10 @@ export class Users extends BaseCrud<User> implements OnInit {
     this.loadCustomFieldDefs(selectedItem.company, selectedItem.customFields);
   }
 
-  private parseList(value: any): string[] | undefined {
+  private parseList(value: any): string[] {
     if (Array.isArray(value)) return value;
     const raw = String(value ?? '').trim();
-    if (!raw) return undefined;
+    if (!raw) return [];
     return raw
       .split(',')
       .map((s) => s.trim())

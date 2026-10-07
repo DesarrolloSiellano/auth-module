@@ -21,6 +21,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
+import { ProgressBar } from 'primeng/progressbar';
 
 import { ConfirmService } from '../../shared/services/confirm-dialog.service';
 import { Companies } from '../companies/interfaces/companies.interface';
@@ -30,6 +31,14 @@ import {
   TenantConfig,
   TenantUsage,
 } from './interfaces/tenant-config.interface';
+import {
+  buildQuotaBars,
+  buildUsagePeriods,
+  currentPeriod,
+  flattenMetrics,
+  toQuotaItems,
+  QuotaBar,
+} from './helpers/usage.helper';
 
 interface PolicyGroup {
   group: string;
@@ -68,6 +77,7 @@ const WHATSAPP_BALANCE_KEY = 'messages.bolsa.utilidad';
     ToggleSwitch,
     Select,
     Textarea,
+    ProgressBar,
   ],
   templateUrl: './tenant-policies-dialog.html',
   styleUrl: './tenant-policies-dialog.scss',
@@ -93,6 +103,7 @@ export class TenantPoliciesDialogComponent implements OnChanges {
 
   usage: TenantUsage[] = [];
   usagePeriod = '';
+  usagePeriods: string[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible'] && this.visible) {
@@ -109,6 +120,7 @@ export class TenantPoliciesDialogComponent implements OnChanges {
     this.activeTab = this.initialTab;
     this.loadCatalog();
     this.loadConfig();
+    this.loadUsagePeriods();
   }
 
   loadCatalog(): void {
@@ -158,18 +170,37 @@ export class TenantPoliciesDialogComponent implements OnChanges {
     });
   }
 
+  /** Períodos existentes con consumo; mes actual como fallback. */
+  loadUsagePeriods(): void {
+    if (!this.company) return;
+    this.tenantConfigService
+      .listUsagePeriods(this.company.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const existing = buildUsagePeriods(res.data || []);
+          this.usagePeriods = existing.length ? existing : [currentPeriod()];
+          if (!this.usagePeriods.includes(this.usagePeriod)) {
+            this.usagePeriod = this.usagePeriods[0];
+          }
+          this.loadUsage();
+        },
+        error: () => this.cdr.detectChanges(),
+      });
+  }
+
   loadUsage(): void {
     if (!this.company) return;
     this.tenantConfigService
       .getUsage(this.company.id, this.usagePeriod || undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.usage = res.data || [];
-          this.cdr.detectChanges();
-        },
-        error: () => this.cdr.detectChanges(),
-      });
+      next: (res) => {
+        this.usage = res.data || [];
+        this.cdr.detectChanges();
+      },
+      error: () => this.cdr.detectChanges(),
+    });
   }
 
   saveConfig(): void {
@@ -252,9 +283,56 @@ export class TenantPoliciesDialogComponent implements OnChanges {
   }
 
   usageRows(usage: TenantUsage): { metric: string; value: number }[] {
-    return Object.keys(usage.metrics || {}).map((metric) => ({
-      metric,
-      value: usage.metrics[metric],
-    }));
+    return Object.entries(flattenMetrics(usage.metrics)).map(
+      ([metric, value]) => ({ metric, value }),
+    );
+  }
+
+  /** Filas de consumo del período consultado (métricas ya aplanadas). */
+  get usageDetail(): { period: string; metric: string; value: number }[] {
+    return this.usage.flatMap((item) =>
+      this.usageRows(item).map((row) => ({ period: item.period, ...row })),
+    );
+  }
+
+  get usedByMetric(): Map<string, number> {
+    const map = new Map<string, number>();
+    this.usageDetail.forEach((row) =>
+      map.set(row.metric, (map.get(row.metric) || 0) + row.value),
+    );
+    return map;
+  }
+
+  /** Totales por métrica ordenados de mayor a menor. */
+  get usageTotals(): { metric: string; value: number }[] {
+    return Array.from(this.usedByMetric.entries())
+      .map(([metric, value]) => ({ metric, value }))
+      .sort((a, b) => b.value - a.value);
+  }
+
+  get totalUsage(): number {
+    return this.usageDetail.reduce((sum, row) => sum + row.value, 0);
+  }
+
+  get activeMetrics(): number {
+    return this.usageTotals.length;
+  }
+
+  get maxMetricTotal(): number {
+    return this.usageTotals.length > 0 ? this.usageTotals[0].value : 0;
+  }
+
+  metricBarWidth(value: number): string {
+    const max = this.maxMetricTotal;
+    if (!max) return '0%';
+    return `${Math.max(6, Math.round((value / max) * 100))}%`;
+  }
+
+  /** Consumo vs límites configurados en el catálogo del tenant. */
+  get quotaBars(): QuotaBar[] {
+    return buildQuotaBars(
+      toQuotaItems(this.catalog, this.configValues),
+      this.usedByMetric,
+    );
   }
 }
