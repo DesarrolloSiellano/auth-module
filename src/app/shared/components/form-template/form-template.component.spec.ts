@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { of } from 'rxjs';
 import { FormTemplateComponent } from './form-template.component';
 import { FormFieldConfig } from '../../forms/form-field.model';
 
@@ -197,5 +198,26 @@ describe('FormTemplateComponent', () => {
     fixture.detectChanges();
 
     expect(component.formGroup.get('name')?.enabled).toBe(true);
+  });
+
+  it('verifica disponibilidad de campos checkable (búsqueda manual)', () => {
+    const checker = jasmine
+      .createSpy('checkAvailability')
+      .and.returnValue(of(true));
+    fixture.componentRef.setInput('form', [
+      { name: 'name', label: 'Nombre', type: 'text', show: true, weight: 1, checkable: true },
+    ] as FormFieldConfig[]);
+    fixture.componentRef.setInput('checkAvailability', checker);
+    fixture.componentRef.setInput('checkMessages', {
+      name: { taken: 'Ya existe', available: 'Disponible' },
+    });
+    fixture.detectChanges();
+
+    component.formGroup.get('name')?.setValue('EmpresaX');
+    component.checkFieldNow('name');
+
+    expect(checker).toHaveBeenCalledWith('name', 'EmpresaX');
+    expect(component.availability['name'].status).toBe('taken');
+    expect(component.availability['name'].message).toBe('Ya existe');
   });
 });
