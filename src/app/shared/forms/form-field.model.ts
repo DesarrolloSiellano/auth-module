@@ -27,6 +27,8 @@ export interface FormFieldConfig {
   disabled?: boolean;
   /** Si es `true`, el campo se deshabilita en modo edición (no editable). */
   disabledOnEdit?: boolean;
+  /** Si es `true`, se ofrece verificación de disponibilidad (creación). */
+  checkable?: boolean;
   placeholder?: string;
   pKeyFilter?: RegExp | KeyFilterPattern;
   pattern?: string | RegExp;

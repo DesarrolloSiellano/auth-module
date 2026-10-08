@@ -51,9 +51,11 @@ export class TenantConfigService {
 
   getConfigByTenant(
     tenantId: string,
+    company?: string,
   ): Observable<Response<TenantConfig>> {
+    const query = company ? `?company=${encodeURIComponent(company)}` : '';
     return this.http.get<Response<TenantConfig>>(
-      `${this.base}/config/${encodeURIComponent(tenantId)}`,
+      `${this.base}/config/${encodeURIComponent(tenantId)}${query}`,
     );
   }
 

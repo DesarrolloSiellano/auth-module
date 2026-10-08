@@ -122,7 +122,7 @@ export class TenantPoliciesDialogComponent implements OnChanges {
   loadConfig(): void {
     if (!this.company) return;
     this.tenantConfigService
-      .getConfigByTenant(this.company.id)
+      .getConfigByTenant(this.company.id, this.company.name)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: (res) => {

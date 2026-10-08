@@ -9,10 +9,54 @@
 
 
 .message-validation{
-  padding: auto;
+  margin-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
   span {
     color: var(--color-danger);
-    font-size: 11px;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .availability-ok {
+    color: #16a34a;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .availability-taken {
+    color: #dc2626;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .availability-checking {
+    color: var(--p-surface-500);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.field-with-action {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+
+  .flex-1 {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  p-button {
+    margin-bottom: 0.15rem;
   }
 }
 
