@@ -19,6 +19,26 @@ export class CompaniesService extends BaseService<Companies, Response<Companies[
     return this.http.get<Response<Companies[]>>(`${ENVIROMENT.urlApi}/companies/findByAutoComplete?name=${encodeURIComponent(name)}`);
   }
 
+  checkAvailability(params: {
+    name?: string;
+    id?: string;
+    excludeId?: string;
+  }): Observable<Response<{ nameExists: boolean; idExists: boolean }>> {
+    const query = [
+      params.name ? `name=${encodeURIComponent(params.name)}` : '',
+      params.id ? `id=${encodeURIComponent(params.id)}` : '',
+      params.excludeId
+        ? `excludeId=${encodeURIComponent(params.excludeId)}`
+        : '',
+    ]
+      .filter(Boolean)
+      .join('&');
+
+    return this.http.get<Response<{ nameExists: boolean; idExists: boolean }>>(
+      `${this.baseUrl}/check-availability${query ? `?${query}` : ''}`,
+    );
+  }
+
   block(
     id: string,
     body: { reason?: string; until?: string } = {},

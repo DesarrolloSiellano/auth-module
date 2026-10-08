@@ -16,7 +16,8 @@ import { Companies } from './interfaces/companies.interface';
 import { CompaniesService } from './services/companies.service';
 import { COMPANIES_FORM } from '../../shared/forms/companies.form';
 import { TenantPoliciesDialogComponent } from '../tenant-config/tenant-policies-dialog';
-import { finalize } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 interface RowAction {
   key: string;
@@ -76,6 +77,35 @@ export class CompaniesComponent extends BaseCrud<Companies> {
 
   policiesDialogVisible = false;
   selectedCompanyForPolicies: Companies | null = null;
+
+  /** Verificación de disponibilidad de nombre y RUT/NIT (solo creación). */
+  readonly checkCompanyAvailability = (
+    field: string,
+    value: string,
+  ): Observable<boolean> => {
+    const params: { name?: string; id?: string; excludeId?: string } = {
+      excludeId: this.isEditForm ? this.initialData?._id : undefined,
+    };
+    if (field === 'name') params.name = value;
+    else params.id = value;
+
+    return (this.service as CompaniesService).checkAvailability(params).pipe(
+      map((res) =>
+        field === 'name' ? !!res.data?.nameExists : !!res.data?.idExists,
+      ),
+    );
+  };
+
+  readonly companyCheckMessages = {
+    name: {
+      taken: 'La empresa ya está registrada',
+      available: 'Nombre disponible',
+    },
+    id: {
+      taken: 'El RUT/NIT ya está registrado',
+      available: 'RUT/NIT disponible',
+    },
+  };
 
   blockDialogVisible = false;
   blockTarget: Companies | null = null;

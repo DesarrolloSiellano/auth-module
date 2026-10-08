@@ -11,7 +11,8 @@
   <p-dialog [(visible)]="isDisplayForm" [style]="{width: '90vw'}" [header]="titleForm" [draggable]="false"
     [resizable]="false" [closable]="false" [modal]="true" [baseZIndex]="10000">
     <app-form-template [width]="'70rem'" [title]="titleForm" [isVisible]="isFormVisible" [isEdit]="isEditForm"
-      [initialData]="initialData" [form]="form">
+      [initialData]="initialData" [form]="form" [checkAvailability]="checkCompanyAvailability"
+      [checkMessages]="companyCheckMessages">
     </app-form-template>
     <ng-template #footer>
       <p-button label="Cancel" [text]="true" severity="secondary" (click)="closeDialog()" />

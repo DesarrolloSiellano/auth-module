@@ -5,18 +5,36 @@
       <div [class]="colClass()">
         @if (item.type === 'text') {
         <div class="p-md w-full">
-          <p-floatlabel variant="on" class="p-float-label p-fluid input-field ">
-            <input type="{{item.type}}" pInputText id="{{item.name}}"
-              max="{{item.maxLength}}" min="{{item.minLength}}"
-              autocomplete="off"
-              required="{{item.required}}" class="w-full"
-              [pKeyFilter]="item.pKeyFilter" formControlName="{{item.name}}" />
-            <label for="{{item.name}}">{{item.label}}</label>
-          </p-floatlabel>
+          <div class="field-with-action">
+            <p-floatlabel variant="on" class="p-float-label p-fluid input-field flex-1">
+              <input type="{{item.type}}" pInputText id="{{item.name}}"
+                max="{{item.maxLength}}" min="{{item.minLength}}"
+                autocomplete="off"
+                required="{{item.required}}" class="w-full"
+                [pKeyFilter]="item.pKeyFilter" formControlName="{{item.name}}" />
+              <label for="{{item.name}}">{{item.label}}</label>
+            </p-floatlabel>
+            @if (item.checkable && !isEdit()) {
+            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" [rounded]="true"
+              [title]="'Verificar ' + item.label" [ariaLabel]="'Verificar ' + item.label"
+              (click)="checkFieldNow(item.name)"
+              [disabled]="fieldAvailability(item.name).status === 'checking'" />
+            }
+          </div>
           <div class="message-validation">
             @if (formGroup.get(item.name)?.invalid &&
             formGroup.get(item.name)?.touched) {
             <span>{{getErrorMessage(item.name) }}</span>
+            }
+            @if (fieldAvailability(item.name).status === 'checking') {
+            <span class="availability-checking"><i class="pi pi-spin pi-spinner"></i> Verificando...</span>
+            } @else if (fieldAvailability(item.name).message) {
+            <span [class.availability-ok]="fieldAvailability(item.name).status === 'available'"
+              [class.availability-taken]="fieldAvailability(item.name).status === 'taken'">
+              <i class="pi"
+                [ngClass]="fieldAvailability(item.name).status === 'available' ? 'pi-check-circle' : 'pi-times-circle'"></i>
+              {{ fieldAvailability(item.name).message }}
+            </span>
             }
           </div>
         </div>

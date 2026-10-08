@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -32,8 +33,25 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 
 import { ColorPickerModule } from 'primeng/colorpicker';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable, of } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  switchMap,
+} from 'rxjs/operators';
 import { FormFieldConfig } from '../../forms/form-field.model';
+
+export type CheckAvailabilityFn = (
+  field: string,
+  value: string,
+) => Observable<boolean>;
+
+export interface FieldAvailabilityState {
+  status: 'idle' | 'checking' | 'available' | 'taken';
+  message: string;
+}
 
 @Component({
   selector: 'app-form-template',
@@ -42,6 +60,7 @@ import { FormFieldConfig } from '../../forms/form-field.model';
     ReactiveFormsModule,
     DialogModule,
     InputTextModule,
+    ButtonModule,
     DatePickerModule,
     PasswordModule,
     InputMaskModule,
@@ -72,9 +91,18 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
   readonly cancelButtonText = input<string>('Cancelar');
   readonly submitForm = input<() => void>();
   readonly cancelForm = input<() => void>();
+  /** Verificador opcional de disponibilidad (campos con `checkable`). */
+  readonly checkAvailability = input<CheckAvailabilityFn | undefined>(
+    undefined,
+  );
+  /** Mensajes por campo para el verificador de disponibilidad. */
+  readonly checkMessages = input<
+    Record<string, { taken?: string; available?: string }>
+  >({});
 
   formGroup!: FormGroup;
   fields: FormFieldConfig[] = [];
+  availability: Record<string, FieldAvailabilityState> = {};
   private subscriptions = new Subscription();
   private readonly formBuilder = inject(FormBuilder);
 
@@ -165,6 +193,7 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
     this.updateFieldStatesDisabledByDepends();
     this.updateFieldStateDisabled();
     this.applyDisabledOnEdit();
+    this.setupAvailabilityChecks();
   }
 
   ngOnDestroy(): void {
@@ -184,6 +213,83 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
         control.enable({ emitEvent: false });
       }
     });
+  }
+
+  /** Verificación de disponibilidad (auto con debounce) para campos `checkable`. */
+  private setupAvailabilityChecks(): void {
+    this.fields.forEach((item) => {
+      if (!item.checkable) return;
+      const control = this.formGroup.get(item.name);
+      if (!control) return;
+      this.subscriptions.add(
+        control.valueChanges
+          .pipe(
+            debounceTime(500),
+            distinctUntilChanged(),
+            switchMap((value) =>
+              this.runAvailabilityCheck(item.name, value),
+            ),
+          )
+          .subscribe((result) =>
+            this.applyAvailabilityResult(item.name, result.exists, result.checked),
+          ),
+      );
+    });
+  }
+
+  checkFieldNow(name: string): void {
+    const value = this.formGroup?.get(name)?.value ?? '';
+    this.runAvailabilityCheck(name, value).subscribe((result) =>
+      this.applyAvailabilityResult(name, result.exists, result.checked),
+    );
+  }
+
+  /** Estado de disponibilidad del campo (default `idle` si no existe). */
+  fieldAvailability(name: string): FieldAvailabilityState {
+    return this.availability[name] ?? { status: 'idle', message: '' };
+  }
+
+  private runAvailabilityCheck(
+    field: string,
+    rawValue: unknown,
+  ): Observable<{ exists: boolean; checked: boolean }> {
+    const checker = this.checkAvailability();
+    const value = String(rawValue ?? '').trim();
+
+    if (!checker || !value || this.isEdit()) {
+      this.setAvailability(field, 'idle');
+      return of({ exists: false, checked: false });
+    }
+
+    this.setAvailability(field, 'checking');
+    return checker(field, value).pipe(
+      map((exists) => ({ exists, checked: true })),
+      catchError(() => of({ exists: false, checked: false })),
+    );
+  }
+
+  private applyAvailabilityResult(
+    field: string,
+    exists: boolean,
+    checked = true,
+  ): void {
+    this.setAvailability(field, checked ? (exists ? 'taken' : 'available') : 'idle');
+  }
+
+  private setAvailability(
+    field: string,
+    status: FieldAvailabilityState['status'],
+  ): void {
+    const messages = this.checkMessages()[field] || {};
+    this.availability[field] = {
+      status,
+      message:
+        status === 'taken'
+          ? messages.taken || 'Ya está registrado'
+          : status === 'available'
+            ? messages.available || 'Disponible'
+            : '',
+    };
   }
 
   get passwordMismatch(): boolean {
@@ -269,5 +375,6 @@ export class FormTemplateComponent implements OnInit, OnDestroy {
 
   reset(): void {
     this.formGroup.reset();
+    this.availability = {};
   }
 }
