@@ -420,6 +420,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       isSuperAdmin: [false],
       isTrial: [false],
       company: [''],
+      tenantId: [''],
       modules: [[]],
       roles: [[]],
       permissions: [[]],
@@ -668,8 +669,24 @@ export class Users extends BaseCrud<User> implements OnInit {
       });
   }
 
+  /**
+   * Al elegir una empresa se fija el par canónico: `company = Company.name` y
+   * `tenantId = Company.id`. El backend exige ambos para un SuperAdmin.
+   */
+  onCompanySelect(event: { value?: Companies }): void {
+    const selected = event?.value;
+    if (!selected) return;
+    this.userForm
+      .get('tenantId')
+      ?.setValue(selected.id ?? '', { emitEvent: false });
+    this.userForm
+      .get('company')
+      ?.setValue(selected.name ?? '', { emitEvent: false });
+  }
+
   updateValidatorsBasedOnEditMode(): void {
     const companiesControl = this.userForm.get('company');
+    const tenantControl = this.userForm.get('tenantId');
 
     if (this.isEditForm) {
       companiesControl?.clearValidators();
@@ -677,6 +694,19 @@ export class Users extends BaseCrud<User> implements OnInit {
       companiesControl?.setValidators(Validators.required);
     }
     companiesControl?.updateValueAndValidity();
+
+    // Aislamiento: un admin no-Super solo crea en SU empresa; el par
+    // (company + tenantId) queda fijo y deshabilitado. El SuperAdmin elige la
+    // empresa destino en el autocompletado (onSelect fija el tenantId).
+    if (!this.isEditForm && !this.isSuperAdminUser) {
+      companiesControl?.setValue(this.sessionCompany, { emitEvent: false });
+      tenantControl?.setValue(this.sessionTenantId, { emitEvent: false });
+      companiesControl?.disable({ emitEvent: false });
+      tenantControl?.disable({ emitEvent: false });
+    } else {
+      companiesControl?.enable({ emitEvent: false });
+      tenantControl?.enable({ emitEvent: false });
+    }
 
     // La prueba se define al crear. En edición solo un SuperAdmin puede
     // modificarla; para el resto se deshabilita (un control deshabilitado se
@@ -860,6 +890,7 @@ export class Users extends BaseCrud<User> implements OnInit {
       isAdmin: selectedItem.isAdmin,
       isTrial: selectedItem.isTrial === true,
       company: selectedItem.company,
+      tenantId: selectedItem.tenantId,
       isSuperAdmin: selectedItem.isSuperAdmin,
       permissions: mappedPermissions,
       roles: mappedRoles,
@@ -901,6 +932,8 @@ export class Users extends BaseCrud<User> implements OnInit {
     }
     values.tags = this.parseList(values.tags);
     values.groups = this.parseList(values.groups);
+    if (!values.company) delete values.company;
+    if (!values.tenantId) delete values.tenantId;
     if (this.customFieldDefs.length === 0) {
       delete values.customFields;
     }
