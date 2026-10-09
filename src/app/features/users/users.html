@@ -286,7 +286,8 @@
                 <div class="p-md">
                   <p-floatLabel variant="on">
                     <p-autocomplete inputId="company" [dropdown]="true" [suggestions]="itemsAutocomplete"
-                      (completeMethod)="findByAutoComplete($event)" optionLabel="name" optionValue="name"
+                      (completeMethod)="findByAutoComplete($event)" (onSelect)="onCompanySelect($event)"
+                      optionLabel="name" optionValue="name"
                       formControlName="company" class="w-full" appendTo="body" />
                     <label for="company">Empresa</label>
                   </p-floatLabel>
