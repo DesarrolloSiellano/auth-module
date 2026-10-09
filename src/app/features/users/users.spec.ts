@@ -258,6 +258,34 @@ describe('Users', () => {
     ] as unknown as Companies[]);
   });
 
+  it('fija el par company + tenantId al elegir empresa (SuperAdmin)', () => {
+    component.create();
+    component.onCompanySelect({
+      value: { _id: 'c1', id: '900123', name: 'BPO', isActive: true },
+    } as any);
+
+    expect(component.userForm.get('company')?.value).toBe('BPO');
+    expect(component.userForm.get('tenantId')?.value).toBe('900123');
+    expect(component.getFormattedFormValues().tenantId).toBe('900123');
+  });
+
+  it('bloquea el par del admin no-Super al crear', () => {
+    sessionStoreMock.getClaims.and.returnValue({
+      isSuperAdmin: false,
+      company: 'MIEMP',
+      tenantId: 'MIEMP-ID',
+    });
+    component.create();
+
+    expect(component.userForm.get('company')?.disabled).toBe(true);
+    expect(component.userForm.get('tenantId')?.disabled).toBe(true);
+    expect(component.userForm.get('company')?.value).toBe('MIEMP');
+    expect(component.userForm.get('tenantId')?.value).toBe('MIEMP-ID');
+    // Los controles deshabilitados se omiten: el backend fuerza el par.
+    expect(component.getFormattedFormValues().company).toBeUndefined();
+    expect(component.getFormattedFormValues().tenantId).toBeUndefined();
+  });
+
   it('should map selection data when editing', () => {
     component.create();
     const selected = {
